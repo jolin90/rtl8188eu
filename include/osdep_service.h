@@ -21,6 +21,7 @@
 #define _SUCCESS	1
 #define RTW_RX_HANDLED	2
 
+#include <linux/version.h>
 #include <linux/spinlock.h>
 #include <linux/compiler.h>
 #include <linux/kernel.h>
@@ -99,4 +100,17 @@ u64 rtw_modular64(u64 x, u64 y);
 
 void rtw_buf_free(u8 **buf, u32 *buf_len);
 void rtw_buf_update(u8 **buf, u32 *buf_len, u8 *src, u32 src_len);
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0))
+static inline void ether_addr_copy(u8 * dst, const u8 * src)
+{
+    u16 * a = (u16 *) dst;
+    const u16 *b = (const u16 *)src;
+
+    a[0] = b[0];
+    a[1] = b[1];
+    a[2] = b[2];
+}
+#endif
+
 #endif

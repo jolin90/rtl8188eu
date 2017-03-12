@@ -13,7 +13,10 @@
  *
  ******************************************************************************/
 #define _RTL8188EU_RECV_C_
+#include <linux/version.h>
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0))
 #include <linux/kmemleak.h>
+#endif
 #include <osdep_service.h>
 #include <drv_types.h>
 #include <recv_osdep.h>

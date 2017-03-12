@@ -154,7 +154,9 @@ static void mon_setup(struct net_device *dev)
 	dev->netdev_ops = &mon_netdev_ops;
 	dev->destructor = free_netdev;
 	ether_setup(dev);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0))
 	dev->priv_flags |= IFF_NO_QUEUE;
+#endif
 	dev->type = ARPHRD_IEEE80211;
 	/*
 	 * Use a locally administered address (IEEE 802)
@@ -169,7 +171,11 @@ struct net_device *rtl88eu_mon_init(void)
 	struct net_device *dev;
 	int err;
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0))
 	dev = alloc_netdev(0, "mon%d", NET_NAME_UNKNOWN, mon_setup);
+#else
+	dev = alloc_netdev(0, "mon%d", mon_setup);
+#endif
 	if (!dev)
 		goto fail;
 

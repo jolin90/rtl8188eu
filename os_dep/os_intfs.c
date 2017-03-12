@@ -14,6 +14,7 @@
  ******************************************************************************/
 #define _OS_INTFS_C_
 
+#include <linux/version.h>
 #include <osdep_service.h>
 #include <osdep_intf.h>
 #include <drv_types.h>
@@ -258,7 +259,11 @@ static unsigned int rtw_classify8021d(struct sk_buff *skb)
 }
 
 static u16 rtw_select_queue(struct net_device *dev, struct sk_buff *skb,
-			    void *accel_priv, select_queue_fallback_t fallback)
+			    void *accel_priv
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 13, 9))
+                , select_queue_fallback_t fallback
+#endif
+                )
 {
 	struct adapter	*padapter = rtw_netdev_priv(dev);
 	struct mlme_priv *pmlmepriv = &padapter->mlmepriv;
