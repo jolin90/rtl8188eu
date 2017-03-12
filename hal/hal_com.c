@@ -12,6 +12,8 @@
  * more details.
  *
  ******************************************************************************/
+
+#define pr_fmt(fmt) "R8188EU: " fmt
 #include <osdep_service.h>
 #include <drv_types.h>
 

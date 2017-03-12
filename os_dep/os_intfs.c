@@ -14,6 +14,7 @@
  ******************************************************************************/
 #define _OS_INTFS_C_
 
+#define pr_fmt(fmt) "R8188EU: " fmt
 #include <linux/version.h>
 #include <osdep_service.h>
 #include <osdep_intf.h>
