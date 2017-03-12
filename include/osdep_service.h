@@ -105,7 +105,7 @@ u64 rtw_modular64(u64 x, u64 y);
 void rtw_buf_free(u8 **buf, u32 *buf_len);
 void rtw_buf_update(u8 **buf, u32 *buf_len, u8 *src, u32 src_len);
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0))
+#if (LINUX_VERSION_CODE <= KERNEL_VERSION(3, 13, 9))
 static inline void ether_addr_copy(u8 * dst, const u8 * src)
 {
     u16 * a = (u16 *) dst;
@@ -114,6 +114,30 @@ static inline void ether_addr_copy(u8 * dst, const u8 * src)
     a[0] = b[0];
     a[1] = b[1];
     a[2] = b[2];
+}
+#endif
+
+#if (LINUX_VERSION_CODE <= KERNEL_VERSION(3, 0, 86))
+/**
+ * eth_zero_addr - Assign zero address
+ * @addr: Pointer to a six-byte array containing the Ethernet address
+ *
+ * Assign the zero address to the given address array.
+ */
+static inline void eth_zero_addr(u8 *addr)
+{
+	memset(addr, 0x00, ETH_ALEN);
+}
+
+/**
+ * eth_broadcast_addr - Assign broadcast address
+ * @addr: Pointer to a six-byte array containing the Ethernet address
+ *
+ * Assign the broadcast address to the given address array.
+ */
+static inline void eth_broadcast_addr(u8 *addr)
+{
+	memset(addr, 0xff, ETH_ALEN);
 }
 #endif
 

@@ -184,6 +184,9 @@ do {									\
 	}								\
 } while (0)
 
+/* Page 1167: Figure 11-1—Construction of expanded WEP MPDU
+ * Page 1194: Figure 11-7—Construction of expanded TKIP MPDU
+ * */
 #define SET_ICE_IV_LEN(iv_len, icv_len, encrypt)			\
 do {									\
 	switch (encrypt) {						\
