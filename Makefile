@@ -1,4 +1,4 @@
-r8188eu-y :=				\
+8188eu-y :=				\
 		core/rtw_ap.o		\
 		core/rtw_cmd.o		\
 		core/rtw_debug.o	\
@@ -51,13 +51,25 @@ r8188eu-y :=				\
 		os_dep/usb_ops_linux.o	\
 		os_dep/xmit_linux.o
 
+CONFIG_WLAN_CFG80211 = n
+
+ifeq ($(CONFIG_WLAN_CFG80211), y)
+r8188eu-y += os_dep/wlan_cfg80211.o
+ccflags-y += -DWLAN_CFG80211
+endif
+
 export CONFIG_R8188EU = m
-obj-$(CONFIG_R8188EU)	:= r8188eu.o
+obj-$(CONFIG_R8188EU)	:= 8188eu.o
 
 ccflags-y += -I$(srctree)/$(src)/include
 ccflags-y += -D__CHECK_ENDIAN__ -I$(src)/include
 
+#for debug
+#ccflags-y += -DOS_DEP_IOCTL_LINUX
+
 KSRC ?= "/lib/modules/$(shell uname -r)/build"
+#CROSS_COMPILE := /opt/FriendlyARM/toolschain/4.5.1/bin/arm-linux-
+#KSRC ?= /home/jolin/github/linux-3.0.86/
 
 modules:
 	$(MAKE) -C $(KSRC)  M=$(CURDIR) modules

@@ -134,6 +134,18 @@ static inline struct device *dvobj_to_dev(struct dvobj_priv *dvobj)
 	return &dvobj->pusbintf->dev;
 };
 
+#ifdef WLAN_CFG80211
+struct adapter;
+struct wlan_wdev_priv;
+
+struct wlan_wdev_priv
+{
+	struct wireless_dev *pwdev;
+	struct adapter *padapter;
+	struct cfg80211_scan_request *scan_request;
+};
+#endif
+
 struct adapter {
 	struct dvobj_priv *dvobj;
 	struct	mlme_priv mlmepriv;
@@ -170,6 +182,11 @@ struct adapter {
 	u8 bWritePortCancel;
 
 	struct mutex hw_init_mutex;
+
+#ifdef WLAN_CFG80211
+	struct wireless_dev *wdev;
+	struct wlan_wdev_priv wdev_priv;
+#endif
 };
 
 #define adapter_to_dvobj(adapter) (adapter->dvobj)

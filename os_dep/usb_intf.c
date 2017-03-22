@@ -26,6 +26,9 @@
 
 #include <usb_ops_linux.h>
 #include <rtw_ioctl.h>
+#ifdef WLAN_CFG80211
+#include <wlan_cfg80211.h>
+#endif
 
 #include "rtl8188e_hal.h"
 
@@ -346,6 +349,11 @@ static struct adapter *rtw_usb_if1_init(struct dvobj_priv *dvobj,
 	SET_NETDEV_DEV(pnetdev, dvobj_to_dev(dvobj));
 	padapter = rtw_netdev_priv(pnetdev);
 
+#ifdef WLAN_CFG80211
+	/* Attach and link in the cfg80211 */
+	wlan_cfg80211_attach(padapter, dvobj_to_dev(dvobj));
+#endif
+
 	if (padapter->registrypriv.monitor_enable) {
 		pmondev = rtl88eu_mon_init();
 		if (pmondev == NULL)
@@ -443,6 +451,10 @@ static void rtw_usb_if1_deinit(struct adapter *if1)
 
 	rtl88eu_mon_deinit(if1->pmondev);
 	rtw_cancel_all_timer(if1);
+
+#ifdef WLAN_CFG80211
+	/*wlan_cfg80211_detach(if1->wdev);*/
+#endif
 
 	rtw_dev_unload(if1);
 	pr_debug("+r871xu_dev_remove, hw_init_completed=%d\n",

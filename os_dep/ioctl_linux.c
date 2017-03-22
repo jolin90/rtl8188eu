@@ -14,6 +14,7 @@
  ******************************************************************************/
 #define _IOCTL_LINUX_C_
 
+#define pr_fmt(fmt) "R8188EU:" fmt
 #include <linux/ieee80211.h>
 
 #include <osdep_service.h>
@@ -32,6 +33,24 @@
 #include <linux/etherdevice.h>
 
 #include "osdep_intf.h"
+
+#ifdef OS_DEP_IOCTL_LINUX
+#undef DBG_88E
+#undef RT_TRACE
+
+#define DBG_88E(fmt, args...)                \
+	do{                                      \
+		pr_info("%06d - %s :"fmt,            \
+				__LINE__, __func__, ##args); \
+	} while (0)
+
+#define RT_TRACE(_comp, _level, fmt)         \
+	do {                                     \
+		pr_info("%06d - %s :",               \
+				__LINE__, __func__);         \
+		printk fmt;                          \
+	} while (0)
+#endif
 
 #define RTL_IOCTL_WPA_SUPPLICANT	(SIOCIWFIRSTPRIV + 30)
 

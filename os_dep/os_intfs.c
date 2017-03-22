@@ -345,7 +345,7 @@ struct net_device *rtw_init_netdev(struct adapter *old_padapter)
 	pnetdev->netdev_ops = &rtw_netdev_ops;
 	pnetdev->watchdog_timeo = HZ*3; /* 3 second timeout */
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(3, 0, 86)
+#ifdef CONFIG_WIRELESS_EXT
 	pnetdev->wireless_handlers = (struct iw_handler_def *)&rtw_handlers_def;
 #endif
 
