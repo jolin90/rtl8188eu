@@ -65,7 +65,14 @@ ccflags-y += -I$(srctree)/$(src)/include
 ccflags-y += -D__CHECK_ENDIAN__ -I$(src)/include
 
 #for debug
-#ccflags-y += -DOS_DEP_IOCTL_LINUX
+ccflags-y += -DOS_DEP_IOCTL_LINUX
+ccflags-y += -DOS_DEP_OS_INTFS
+ccflags-y += -DHAL_RTL8188E_CMD
+ccflags-y += -DCORE_RTW_MLME_EXT
+ccflags-y += -DCORE_RTW_MLME
+ccflags-y += -DCORE_RTW_CMD
+ccflags-y += -DCORE_RTW_EFUSE
+
 
 KSRC ?= "/lib/modules/$(shell uname -r)/build"
 #CROSS_COMPILE := /opt/FriendlyARM/toolschain/4.5.1/bin/arm-linux-

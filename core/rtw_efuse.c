@@ -14,12 +14,33 @@
  ******************************************************************************/
 #define _RTW_EFUSE_C_
 
+#define pr_fmt(fmt) "R8188EU: " fmt
+
 #include <osdep_service.h>
 #include <drv_types.h>
 #include <rtw_efuse.h>
 #include <usb_ops_linux.h>
 #include <rtl8188e_hal.h>
 #include <rtw_iol.h>
+
+#ifdef CORE_RTW_EFUSE
+#undef DBG_88E
+#undef RT_TRACE
+
+#define DBG_88E(fmt, args...)                \
+	do{                                      \
+		pr_info("%06d - %s : "fmt,            \
+				__LINE__, __func__, ##args); \
+	} while (0)
+
+#define RT_TRACE(_comp, _level, fmt)         \
+	do {                                     \
+		pr_info("%06d - %s : ",               \
+				__LINE__, __func__);         \
+		printk fmt;                          \
+	} while (0)
+#endif
+
 
 #define REG_EFUSE_CTRL		0x0030
 #define EFUSE_CTRL			REG_EFUSE_CTRL		/*  E-Fuse Control. */

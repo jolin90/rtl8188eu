@@ -346,21 +346,21 @@ struct _cmd_callback {
 };
 
 enum rtw_h2c_cmd {
-	_JoinBss_CMD_,
-	_DisConnect_CMD_,
-	_CreateBss_CMD_,
-	_SetOpMode_CMD_,
-	_SiteSurvey_CMD_,
-	_SetAuth_CMD_,
-	_SetKey_CMD_,
-	_SetStaKey_CMD_,
-	_SetAssocSta_CMD_,
-	_AddBAReq_CMD_,
-	_SetChannel_CMD_,
-	_TX_Beacon_CMD_,
-	_Set_MLME_EVT_CMD_,
-	_Set_Drv_Extra_CMD_,
-	_SetChannelPlan_CMD_,
+/*0x00*/	_JoinBss_CMD_,
+/*0x01*/	_DisConnect_CMD_,
+/*0x02*/	_CreateBss_CMD_,
+/*0x03*/	_SetOpMode_CMD_,
+/*0x04*/	_SiteSurvey_CMD_,
+/*0x05*/	_SetAuth_CMD_,
+/*0x06*/	_SetKey_CMD_,
+/*0x07*/	_SetStaKey_CMD_,
+/*0x08*/	_SetAssocSta_CMD_,
+/*0x09*/	_AddBAReq_CMD_,
+/*0x0a*/	_SetChannel_CMD_,
+/*0x0b*/	_TX_Beacon_CMD_,
+/*0x0c*/	_Set_MLME_EVT_CMD_,
+/*0x0d*/	_Set_Drv_Extra_CMD_,
+/*0x0e*/	_SetChannelPlan_CMD_,
 
 	MAX_H2CCMD
 };

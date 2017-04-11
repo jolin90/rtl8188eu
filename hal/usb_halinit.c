@@ -14,6 +14,8 @@
  ******************************************************************************/
 #define _HCI_HAL_INIT_C_
 
+#define pr_fmt(fmt) "R8188EU: " fmt
+
 #include <osdep_service.h>
 #include <drv_types.h>
 #include <rtw_efuse.h>
@@ -22,6 +24,24 @@
 #include <rtl8188e_led.h>
 #include <rtw_iol.h>
 #include <phy.h>
+
+#ifdef _HCI_HAL_INIT_C_
+#undef DBG_88E
+#undef RT_TRACE
+
+#define DBG_88E(fmt, args...)                \
+	do{                                      \
+		pr_info("%06d - %s : "fmt,            \
+				__LINE__, __func__, ##args); \
+	} while (0)
+
+#define RT_TRACE(_comp, _level, fmt)         \
+	do {                                     \
+		pr_info("%06d - %s : ",               \
+				__LINE__, __func__);         \
+		printk fmt;                          \
+	} while (0)
+#endif
 
 #define		HAL_BB_ENABLE		1
 

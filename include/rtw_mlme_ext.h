@@ -627,22 +627,42 @@ u8 tdls_hdl(struct adapter *padapter, unsigned char *pbuf);
 
 #ifdef _RTW_CMD_C_
 
+#if 0  // zhangjiulin
+enum rtw_h2c_cmd {
+/*0x00*/	_JoinBss_CMD_,
+/*0x01*/	_DisConnect_CMD_,
+/*0x02*/	_CreateBss_CMD_,
+/*0x03*/	_SetOpMode_CMD_,
+/*0x04*/	_SiteSurvey_CMD_,
+/*0x05*/	_SetAuth_CMD_,
+/*0x06*/	_SetKey_CMD_,
+/*0x07*/	_SetStaKey_CMD_,
+/*0x08*/	_SetAssocSta_CMD_,
+/*0x09*/	_AddBAReq_CMD_,
+/*0x0a*/	_SetChannel_CMD_,
+/*0x0b*/	_TX_Beacon_CMD_,
+/*0x0c*/	_Set_MLME_EVT_CMD_,
+/*0x0d*/	_Set_Drv_Extra_CMD_,
+/*0x0e*/	_SetChannelPlan_CMD_,
+};
+#endif
+
 static struct cmd_hdl wlancmds[] = {
-	{sizeof(struct wlan_bssid_ex), join_cmd_hdl},
-	{sizeof(struct disconnect_parm), disconnect_hdl},
-	{sizeof(struct wlan_bssid_ex), createbss_hdl},
-	{sizeof(struct setopmode_parm), setopmode_hdl},
-	{sizeof(struct sitesurvey_parm), sitesurvey_cmd_hdl},
-	{sizeof(struct setauth_parm), setauth_hdl},
-	{sizeof(struct setkey_parm), setkey_hdl},
-	{sizeof(struct set_stakey_parm), set_stakey_hdl},
-	{sizeof(struct set_assocsta_parm), NULL},
-	{sizeof(struct addBaReq_parm), add_ba_hdl},
-	{sizeof(struct set_ch_parm), set_ch_hdl},
-	{sizeof(struct wlan_bssid_ex), tx_beacon_hdl},
-	{0, mlme_evt_hdl},
-	{0, rtw_drvextra_cmd_hdl},
-	{sizeof(struct SetChannelPlan_param), set_chplan_hdl}
+/*0x00*/	{sizeof(struct wlan_bssid_ex), join_cmd_hdl},
+/*0x01*/	{sizeof(struct disconnect_parm), disconnect_hdl},
+/*0x02*/	{sizeof(struct wlan_bssid_ex), createbss_hdl},
+/*0x03*/	{sizeof(struct setopmode_parm), setopmode_hdl},
+/*0x04*/	{sizeof(struct sitesurvey_parm), sitesurvey_cmd_hdl},
+/*0x05*/	{sizeof(struct setauth_parm), setauth_hdl},
+/*0x06*/	{sizeof(struct setkey_parm), setkey_hdl},
+/*0x07*/	{sizeof(struct set_stakey_parm), set_stakey_hdl},
+/*0x08*/	{sizeof(struct set_assocsta_parm), NULL},
+/*0x09*/	{sizeof(struct addBaReq_parm), add_ba_hdl},
+/*0x0a*/	{sizeof(struct set_ch_parm), set_ch_hdl},
+/*0x0b*/	{sizeof(struct wlan_bssid_ex), tx_beacon_hdl},
+/*0x0c*/	{0, mlme_evt_hdl},
+/*0x0d*/	{0, rtw_drvextra_cmd_hdl},
+/*0x0e*/	{sizeof(struct SetChannelPlan_param), set_chplan_hdl}
 };
 
 #endif
@@ -664,65 +684,65 @@ void rtw_dummy_event_callback(struct adapter *adapter, u8 *pbuf);
 void rtw_fwdbg_event_callback(struct adapter *adapter, u8 *pbuf);
 
 enum rtw_c2h_event {
-	_Read_MACREG_EVT_ = 0, /*0*/
-	_Read_BBREG_EVT_,
-	_Read_RFREG_EVT_,
-	_Read_EEPROM_EVT_,
-	_Read_EFUSE_EVT_,
-	_Read_CAM_EVT_,	/*5*/
-	_Get_BasicRate_EVT_,
-	_Get_DataRate_EVT_,
-	_Survey_EVT_,	 /*8*/
-	_SurveyDone_EVT_,	 /*9*/
+/*00*/	_Read_MACREG_EVT_ = 0, /*0*/
+/*01*/	_Read_BBREG_EVT_,
+/*02*/	_Read_RFREG_EVT_,
+/*03*/	_Read_EEPROM_EVT_,
+/*04*/	_Read_EFUSE_EVT_,
+/*05*/	_Read_CAM_EVT_,	/*5*/
+/*06*/	_Get_BasicRate_EVT_,
+/*07*/	_Get_DataRate_EVT_,
+/*08*/	_Survey_EVT_,	 /*8*/
+/*09*/	_SurveyDone_EVT_,	 /*9*/
 
-	_JoinBss_EVT_, /*10*/
-	_AddSTA_EVT_,
-	_DelSTA_EVT_,
-	_AtimDone_EVT_,
-	_TX_Report_EVT_,
-	_CCX_Report_EVT_,		/*15*/
-	_DTM_Report_EVT_,
-	_TX_Rate_Statistics_EVT_,
-	_C2HLBK_EVT_,
-	_FWDBG_EVT_,
-	_C2HFEEDBACK_EVT_,             /*20*/
-	_ADDBA_EVT_,
-	_C2HBCN_EVT_,
-	_ReportPwrState_EVT_,	/* filen: only for PCIE, USB */
-	_CloseRF_EVT_,		/* filen: only for PCIE,
+/*10*/	_JoinBss_EVT_, /*10*/
+/*11*/	_AddSTA_EVT_,
+/*12*/	_DelSTA_EVT_,
+/*13*/	_AtimDone_EVT_,
+/*14*/	_TX_Report_EVT_,
+/*15*/	_CCX_Report_EVT_,		/*15*/
+/*16*/	_DTM_Report_EVT_,
+/*17*/	_TX_Rate_Statistics_EVT_,
+/*18*/	_C2HLBK_EVT_,
+/*19*/	_FWDBG_EVT_,
+/*20*/	_C2HFEEDBACK_EVT_,             /*20*/
+/*21*/	_ADDBA_EVT_,
+/*22*/	_C2HBCN_EVT_,
+/*23*/	_ReportPwrState_EVT_,	/* filen: only for PCIE, USB */
+/*24*/	_CloseRF_EVT_,		/* filen: only for PCIE,
 					 * work around ASPM */
-	MAX_C2HEVT
+			MAX_C2HEVT
 };
 
 
 #ifdef _RTW_MLME_EXT_C_
 
 static struct fwevent wlanevents[] = {
-	{0, rtw_dummy_event_callback},	/*0*/
-	{0, NULL},
-	{0, NULL},
-	{0, NULL},
-	{0, NULL},
-	{0, NULL},
-	{0, NULL},
-	{0, NULL},
-	{0, &rtw_survey_event_callback},		/*8*/
-	{sizeof(struct surveydone_event), &rtw_surveydone_event_callback},/*9*/
-	{0, &rtw_joinbss_event_callback},		/*10*/
-	{sizeof(struct stassoc_event), &rtw_stassoc_event_callback},
-	{sizeof(struct stadel_event), &rtw_stadel_event_callback},
-	{0, &rtw_atimdone_event_callback},
-	{0, rtw_dummy_event_callback},
-	{0, NULL},	/*15*/
-	{0, NULL},
-	{0, NULL},
-	{0, NULL},
-	{0, rtw_fwdbg_event_callback},
-	{0, NULL},	 /*20*/
-	{0, NULL},
-	{0, NULL},
-	{0, &rtw_cpwm_event_callback},
-	{0, NULL},
+/*00*/	{0, rtw_dummy_event_callback},	/*0*/
+/*01*/	{0, NULL},
+/*02*/	{0, NULL},
+/*03*/	{0, NULL},
+/*04*/	{0, NULL},
+/*05*/	{0, NULL},
+/*06*/	{0, NULL},
+/*07*/	{0, NULL},
+/*08*/	{0, &rtw_survey_event_callback},		/*8*/
+/*09*/	{sizeof(struct surveydone_event), &rtw_surveydone_event_callback},/*9*/
+/*10*/	{0, &rtw_joinbss_event_callback},		/*10*/
+/*11*/	{sizeof(struct stassoc_event), &rtw_stassoc_event_callback},
+/*12*/	{sizeof(struct stadel_event), &rtw_stadel_event_callback},
+/*13*/	{0, &rtw_atimdone_event_callback},
+/*14*/	{0, rtw_dummy_event_callback},
+/*15*/	{0, NULL},	/*15*/
+/*16*/	{0, NULL},
+/*17*/	{0, NULL},
+/*18*/	{0, NULL},
+/*19*/	{0, rtw_fwdbg_event_callback},
+/*20*/	{0, NULL},	 /*20*/
+/*21*/	{0, NULL},
+/*22*/	{0, NULL},
+/*23*/	{0, &rtw_cpwm_event_callback},
+/*24*/	{0, NULL},
 };
 
 #endif/* _RTL_MLME_EXT_C_ */

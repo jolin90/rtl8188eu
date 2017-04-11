@@ -14,6 +14,8 @@
  ******************************************************************************/
 #define _RTW_MLME_EXT_C_
 
+#define pr_fmt(fmt) "R8188EU: " fmt
+
 #include <linux/ieee80211.h>
 #include <asm/unaligned.h>
 
@@ -24,6 +26,24 @@
 #include <wlan_bssdef.h>
 #include <mlme_osdep.h>
 #include <recv_osdep.h>
+
+#ifdef CORE_RTW_MLME_EXT
+#undef DBG_88E
+#undef RT_TRACE
+
+#define DBG_88E(fmt, args...)                \
+	do{                                      \
+		pr_info("%06d - %s : "fmt,            \
+				__LINE__, __func__, ##args); \
+	} while (0)
+
+#define RT_TRACE(_comp, _level, fmt)         \
+	do {                                     \
+		pr_info("%06d - %s : ",               \
+				__LINE__, __func__);         \
+		printk fmt;                          \
+	} while (0)
+#endif
 
 static u8 null_addr[ETH_ALEN] = {0, 0, 0, 0, 0, 0};
 
@@ -622,7 +642,8 @@ static int issue_probereq(struct adapter *padapter, struct ndis_802_11_ssid *pss
 	int	bssrate_len = 0;
 	u8	bc_addr[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
-	RT_TRACE(_module_rtl871x_mlme_c_, _drv_notice_, ("+issue_probereq\n"));
+	// zhangjiulin
+	/*RT_TRACE(_module_rtl871x_mlme_c_, _drv_notice_, ("+issue_probereq\n"));*/
 
 	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
 	if (pmgntframe == NULL)
@@ -685,8 +706,8 @@ static int issue_probereq(struct adapter *padapter, struct ndis_802_11_ssid *pss
 
 	pattrib->last_txcmdsz = pattrib->pktlen;
 
-	RT_TRACE(_module_rtl871x_mlme_c_, _drv_notice_,
-		 ("issuing probe_req, tx_len=%d\n", pattrib->last_txcmdsz));
+	/*RT_TRACE(_module_rtl871x_mlme_c_, _drv_notice_,*/
+		 /*("issuing probe_req, tx_len=%d\n", pattrib->last_txcmdsz));*/
 
 	if (wait_ack) {
 		ret = dump_mgntframe_and_wait_ack(padapter, pmgntframe);
@@ -1089,7 +1110,7 @@ static void issue_assocreq(struct adapter *padapter)
 	for (i = 0; i < NDIS_802_11_LENGTH_RATES_EX; i++) {
 		if (pmlmeinfo->network.SupportedRates[i] == 0)
 			break;
-		DBG_88E("network.SupportedRates[%d]=%02X\n", i, pmlmeinfo->network.SupportedRates[i]);
+		/*DBG_88E("network.SupportedRates[%d]=%02X\n", i, pmlmeinfo->network.SupportedRates[i]);*/  //zhangjiulin
 	}
 
 	for (i = 0; i < NDIS_802_11_LENGTH_RATES_EX; i++) {
@@ -4145,6 +4166,7 @@ void mgt_dispatcher(struct adapter *padapter, struct recv_frame *precv_frame)
 	u8 *pframe = precv_frame->pkt->data;
 	struct sta_info *psta = rtw_get_stainfo(&padapter->stapriv, GetAddr2Ptr(pframe));
 
+#if 0  // zhangjiulin
 	RT_TRACE(_module_rtl871x_mlme_c_, _drv_info_,
 		 ("+mgt_dispatcher: type(0x%x) subtype(0x%x)\n",
 		  (unsigned int)GetFrameType(pframe),
@@ -4156,6 +4178,7 @@ void mgt_dispatcher(struct adapter *padapter, struct recv_frame *precv_frame)
 			  (unsigned int)GetFrameType(pframe)));
 		return;
 	}
+#endif
 
 	/* receive the frames that ra(a1) is my address or ra(a1) is bc address. */
 	if (memcmp(GetAddr1Ptr(pframe), myid(&padapter->eeprompriv), ETH_ALEN) &&
@@ -4357,7 +4380,7 @@ void report_join_res(struct adapter *padapter, int res)
 	pjoinbss_evt->network.join_res	= res;
 	pjoinbss_evt->network.aid = res;
 
-	DBG_88E("report_join_res(%d)\n", res);
+	DBG_88E("report_join_res(%d)\n", res);  // zhangjiulin
 
 
 	rtw_joinbss_event_prehandle(padapter, (u8 *)&pjoinbss_evt->network);

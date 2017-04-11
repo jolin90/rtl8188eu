@@ -15,6 +15,7 @@
 #define _OS_INTFS_C_
 
 #define pr_fmt(fmt) "R8188EU: " fmt
+
 #include <linux/version.h>
 #include <osdep_service.h>
 #include <osdep_intf.h>
@@ -24,6 +25,25 @@
 #include <hal_intf.h>
 #include <rtw_ioctl.h>
 #include <rtl8188e_hal.h>
+
+#ifdef OS_DEP_OS_INTFS
+#undef DBG_88E
+#undef RT_TRACE
+
+#define DBG_88E(fmt, args...)                \
+	do{                                      \
+		pr_info("%06d - %s :"fmt,            \
+				__LINE__, __func__, ##args); \
+	} while (0)
+
+#define RT_TRACE(_comp, _level, fmt)         \
+	do {                                     \
+		pr_info("%06d - %s :",               \
+				__LINE__, __func__);         \
+		printk fmt;                          \
+	} while (0)
+#endif
+
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Realtek Wireless Lan Driver");

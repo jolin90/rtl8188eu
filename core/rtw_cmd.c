@@ -14,11 +14,31 @@
  ******************************************************************************/
 #define _RTW_CMD_C_
 
+#define pr_fmt(fmt) "R8188EU: " fmt
+
 #include <osdep_service.h>
 #include <drv_types.h>
 #include <recv_osdep.h>
 #include <mlme_osdep.h>
 #include <rtw_mlme_ext.h>
+
+#ifdef CORE_RTW_CMD
+#undef DBG_88E
+#undef RT_TRACE
+
+#define DBG_88E(fmt, args...)                \
+	do{                                      \
+		pr_info("%06d - %s : "fmt,            \
+				__LINE__, __func__, ##args); \
+	} while (0)
+
+#define RT_TRACE(_comp, _level, fmt)         \
+	do {                                     \
+		pr_info("%06d - %s : ",               \
+				__LINE__, __func__);         \
+		printk fmt;                          \
+	} while (0)
+#endif
 
 /*
 Caller and the rtw_cmd_thread can protect cmd_q by spin_lock.
@@ -150,6 +170,60 @@ void rtw_free_cmd_obj(struct cmd_obj *pcmd)
 
 }
 
+static void dump_wlancmds_function(u16 cmdcode)
+{
+	switch(cmdcode)
+	{
+	case _JoinBss_CMD_:
+		DBG_88E("_JoinBss_CMD_ => join_cmd_hdl\n");
+		break;
+	case _DisConnect_CMD_:
+		DBG_88E("_DisConnect_CMD_ => disconnect_hdl\n");
+		break;
+	case _CreateBss_CMD_:
+		DBG_88E("_CreateBss_CMD_ => createbss_hdl\n");
+		break;
+	case _SetOpMode_CMD_:
+		DBG_88E("_SetOpMode_CMD_ => setopmode_hdl\n");
+		break;
+	case _SiteSurvey_CMD_:
+		DBG_88E("_SiteSurvey_CMD_ => sitesurvey_cmd_hdl\n");
+		break;
+	case _SetAuth_CMD_:
+		DBG_88E("_SetAuth_CMD_ => setauth_hdl\n");
+		break;
+	case _SetKey_CMD_:
+		DBG_88E("_SetKey_CMD_ => setkey_hdl\n");
+		break;
+	case _SetStaKey_CMD_:
+		DBG_88E("_SetStaKey_CMD_ => set_stakey_hdl\n");
+		break;
+	case _SetAssocSta_CMD_:
+		DBG_88E("_SetAssocSta_CMD_ => NULL\n");
+		break;
+	case _AddBAReq_CMD_:
+		DBG_88E("_AddBAReq_CMD_ => add_ba_hdl\n");
+		break;
+	case _SetChannel_CMD_:
+		DBG_88E("_SetChannel_CMD_ => set_ch_hdl\n");
+		break;
+	case _TX_Beacon_CMD_:
+		DBG_88E("_TX_Beacon_CMD_ => tx_beacon_hdl\n");
+		break;
+	case _Set_MLME_EVT_CMD_:
+		DBG_88E("_Set_MLME_EVT_CMD_ => mlme_evt_hdl\n");
+		break;
+	case _Set_Drv_Extra_CMD_:
+		DBG_88E("_Set_Drv_Extra_CMD_ => rtw_drvextra_cmd_hdl\n");
+		break;
+	case _SetChannelPlan_CMD_:
+		DBG_88E("_SetChannelPlan_CMD_ => set_chplan_hdl\n");
+		break;
+	default:
+		break;
+	}
+}
+
 int rtw_cmd_thread(void *context)
 {
 	u8 ret;
@@ -197,6 +271,7 @@ _next:
 				if (cmd_hdl) {
 					ret = cmd_hdl(pcmd->padapter, pcmd->parmbuf);
 					pcmd->res = ret;
+					dump_wlancmds_function(pcmd->cmdcode);
 				}
 			} else {
 				pcmd->res = H2C_PARAMETERS_ERROR;
@@ -209,7 +284,7 @@ _next:
 		if (pcmd->cmdcode < ARRAY_SIZE(rtw_cmd_callback)) {
 			pcmd_callback = rtw_cmd_callback[pcmd->cmdcode].callback;
 			if (pcmd_callback == NULL) {
-				RT_TRACE(_module_rtl871x_cmd_c_, _drv_info_, ("mlme_cmd_hdl(): pcmd_callback = 0x%p, cmdcode = 0x%x\n", pcmd_callback, pcmd->cmdcode));
+				/*RT_TRACE(_module_rtl871x_cmd_c_, _drv_info_, ("mlme_cmd_hdl(): pcmd_callback = 0x%p, cmdcode = 0x%x\n", pcmd_callback, pcmd->cmdcode));*/
 				rtw_free_cmd_obj(pcmd);
 			} else {
 				/* todo: !!! fill rsp_buf to pcmd->rsp if (pcmd->rsp!= NULL) */
@@ -1136,22 +1211,28 @@ u8 rtw_drvextra_cmd_hdl(struct adapter *padapter, unsigned char *pbuf)
 
 	switch (pdrvextra_cmd->ec_id) {
 	case DYNAMIC_CHK_WK_CID:
+		pr_info("DYNAMIC_CHK_WK_CID\n");
 		dynamic_chk_wk_hdl(padapter, pdrvextra_cmd->pbuf, pdrvextra_cmd->type_size);
 		break;
 	case POWER_SAVING_CTRL_WK_CID:
+		pr_info("POWER_SAVING_CTRL_WK_CID\n");
 		rtw_ps_processor(padapter);
 		break;
 	case LPS_CTRL_WK_CID:
+		pr_info("LPS_CTRL_WK_CID\n");
 		lps_ctrl_wk_hdl(padapter, (u8)pdrvextra_cmd->type_size);
 		break;
 	case RTP_TIMER_CFG_WK_CID:
+		pr_info("RTP_TIMER_CFG_WK_CID\n");
 		rpt_timer_setting_wk_hdl(padapter, pdrvextra_cmd->type_size);
 		break;
 	case ANT_SELECT_WK_CID:
+		pr_info("ANT_SELECT_WK_CID\n");
 		antenna_select_wk_hdl(padapter, pdrvextra_cmd->type_size);
 		break;
 #ifdef CONFIG_88EU_AP_MODE
 	case CHECK_HIQ_WK_CID:
+		pr_info("CHECK_HIQ_WK_CID\n");
 		rtw_chk_hi_queue_hdl(padapter);
 		break;
 #endif /* CONFIG_88EU_AP_MODE */

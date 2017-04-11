@@ -14,7 +14,7 @@
  ******************************************************************************/
 #define _IOCTL_LINUX_C_
 
-#define pr_fmt(fmt) "R8188EU:" fmt
+#define pr_fmt(fmt) "R8188EU: " fmt
 #include <linux/ieee80211.h>
 
 #include <osdep_service.h>
@@ -40,13 +40,13 @@
 
 #define DBG_88E(fmt, args...)                \
 	do{                                      \
-		pr_info("%06d - %s :"fmt,            \
+		pr_info("%06d - %s : "fmt,            \
 				__LINE__, __func__, ##args); \
 	} while (0)
 
 #define RT_TRACE(_comp, _level, fmt)         \
 	do {                                     \
-		pr_info("%06d - %s :",               \
+		pr_info("%06d - %s : ",               \
 				__LINE__, __func__);         \
 		printk fmt;                          \
 	} while (0)
@@ -263,8 +263,8 @@ static char *translate_scan(struct adapter *padapter,
 		u8 *p;
 
 		rtw_get_sec_ie(pnetwork->network.IEs, pnetwork->network.IELength, rsn_ie, &rsn_len, wpa_ie, &wpa_len);
-		RT_TRACE(_module_rtl871x_mlme_c_, _drv_info_, ("rtw_wx_get_scan: ssid =%s\n", pnetwork->network.Ssid.Ssid));
-		RT_TRACE(_module_rtl871x_mlme_c_, _drv_info_, ("rtw_wx_get_scan: wpa_len =%d rsn_len =%d\n", wpa_len, rsn_len));
+		/*RT_TRACE(_module_rtl871x_mlme_c_, _drv_info_, (": ssid =%s\n", pnetwork->network.Ssid.Ssid));*/
+		/*RT_TRACE(_module_rtl871x_mlme_c_, _drv_info_, (": wpa_len =%d rsn_len =%d\n", wpa_len, rsn_len));*/
 
 		if (wpa_len > 0) {
 			p = buf;
@@ -782,6 +782,7 @@ static int rtw_wx_get_mode(struct net_device *dev, struct iw_request_info *a,
 	struct adapter *padapter = (struct adapter *)rtw_netdev_priv(dev);
 	struct	mlme_priv	*pmlmepriv = &(padapter->mlmepriv);
 
+	/*dump_stack();*/
 	RT_TRACE(_module_rtl871x_mlme_c_, _drv_info_, (" rtw_wx_get_mode\n"));
 
 	if (check_fwstate(pmlmepriv, WIFI_STATION_STATE))
@@ -885,6 +886,7 @@ static int rtw_wx_get_range(struct net_device *dev,
 	u16 val;
 	int i;
 
+	/*dump_stack();*/
 	RT_TRACE(_module_rtl871x_mlme_c_, _drv_info_, ("rtw_wx_get_range. cmd_code =%x\n", info->cmd));
 
 	wrqu->data.length = sizeof(*range);
@@ -1041,6 +1043,23 @@ exit:
 	return ret;
 }
 
+static void rtw_dump_mac_address(const unsigned char *mac)
+{
+	unsigned char buf[20];
+
+	if (!mac)
+		return;
+
+	memset(buf, 0, sizeof(buf));
+
+	sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X",
+			mac[0], mac[1],
+			mac[2], mac[3],
+			mac[4], mac[5]);
+
+	DBG_88E("%s\n", buf);
+}
+
 static int rtw_wx_get_wap(struct net_device *dev,
 			    struct iw_request_info *info,
 			    union iwreq_data *wrqu, char *extra)
@@ -1061,6 +1080,8 @@ static int rtw_wx_get_wap(struct net_device *dev,
 		memcpy(wrqu->ap_addr.sa_data, pcur_bss->MacAddress, ETH_ALEN);
 	else
 		eth_zero_addr(wrqu->ap_addr.sa_data);
+
+	rtw_dump_mac_address(pcur_bss->MacAddress);
 	return 0;
 }
 
@@ -1106,6 +1127,7 @@ static int rtw_wx_set_scan(struct net_device *dev, struct iw_request_info *a,
 	struct mlme_priv *pmlmepriv = &padapter->mlmepriv;
 	struct ndis_802_11_ssid ssid[RTW_SSID_SCAN_AMOUNT];
 
+	/*dump_stack();*/
 	RT_TRACE(_module_rtl871x_mlme_c_, _drv_info_, ("rtw_wx_set_scan\n"));
 
 	if (_FAIL == rtw_pwr_wakeup(padapter)) {

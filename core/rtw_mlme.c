@@ -14,6 +14,8 @@
  ******************************************************************************/
 #define _RTW_MLME_C_
 
+#define pr_fmt(fmt) "R8188EU: " fmt
+
 #include <linux/ieee80211.h>
 
 #include <osdep_service.h>
@@ -27,6 +29,25 @@
 #include <wlan_bssdef.h>
 #include <rtw_ioctl_set.h>
 #include <linux/vmalloc.h>
+
+#ifdef CORE_RTW_MLME
+#undef DBG_88E
+#undef RT_TRACE
+
+#define DBG_88E(fmt, args...)                \
+	do{                                      \
+		pr_info("%06d - %s : "fmt,            \
+				__LINE__, __func__, ##args); \
+	} while (0)
+
+#define RT_TRACE(_comp, _level, fmt)         \
+	do {                                     \
+		pr_info("%06d - %s : ",               \
+				__LINE__, __func__);         \
+		printk fmt;                          \
+	} while (0)
+#endif
+
 
 extern unsigned char	MCS_rate_2R[16];
 extern unsigned char	MCS_rate_1R[16];
