@@ -14,11 +14,15 @@
  ******************************************************************************/
 #define _RTW_WLAN_UTIL_C_
 
+#define pr_fmt(fmt) "R8188EU: " fmt
+
 #include <linux/ieee80211.h>
 
 #include <osdep_service.h>
 #include <drv_types.h>
 #include <wifi.h>
+
+#include "jolin_debug.h"
 
 static unsigned char ARTHEROS_OUI1[] = {0x00, 0x03, 0x7f};
 static unsigned char ARTHEROS_OUI2[] = {0x00, 0x13, 0x74};

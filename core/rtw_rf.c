@@ -14,10 +14,14 @@
  ******************************************************************************/
 #define _RTW_RF_C_
 
+#define pr_fmt(fmt) "R8188EU: " fmt
+
 #include <osdep_service.h>
 #include <drv_types.h>
 #include <recv_osdep.h>
 #include <xmit_osdep.h>
+
+#include "jolin_debug.h"
 
 struct ch_freq {
 	u32 channel;

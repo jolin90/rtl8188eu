@@ -14,6 +14,8 @@
  ******************************************************************************/
 #define _RTW_RECV_C_
 
+#define pr_fmt(fmt) "R8188EU: " fmt
+
 #include <linux/ieee80211.h>
 
 #include <osdep_service.h>
@@ -23,6 +25,8 @@
 #include <mon.h>
 #include <wifi.h>
 #include <linux/vmalloc.h>
+
+#include "jolin_debug.h"
 
 #define ETHERNET_HEADER_SIZE	14	/*  Ethernet Header Length */
 #define LLC_HEADER_SIZE			6	/*  LLC Header Length */

@@ -23,24 +23,7 @@
 #include <rtl8188e_hal.h>
 #include <rtw_iol.h>
 
-#ifdef CORE_RTW_EFUSE
-#undef DBG_88E
-#undef RT_TRACE
-
-#define DBG_88E(fmt, args...)                \
-	do{                                      \
-		pr_info("%06d - %s : "fmt,            \
-				__LINE__, __func__, ##args); \
-	} while (0)
-
-#define RT_TRACE(_comp, _level, fmt)         \
-	do {                                     \
-		pr_info("%06d - %s : ",               \
-				__LINE__, __func__);         \
-		printk fmt;                          \
-	} while (0)
-#endif
-
+#include "jolin_debug.h"
 
 #define REG_EFUSE_CTRL		0x0030
 #define EFUSE_CTRL			REG_EFUSE_CTRL		/*  E-Fuse Control. */

@@ -68,10 +68,12 @@ ccflags-y += -D__CHECK_ENDIAN__ -I$(src)/include
 ccflags-y += -DOS_DEP_IOCTL_LINUX
 ccflags-y += -DOS_DEP_OS_INTFS
 ccflags-y += -DHAL_RTL8188E_CMD
-ccflags-y += -DCORE_RTW_MLME_EXT
-ccflags-y += -DCORE_RTW_MLME
-ccflags-y += -DCORE_RTW_CMD
-ccflags-y += -DCORE_RTW_EFUSE
+#ccflags-y += -DCORE_RTW_MLME_EXT
+#ccflags-y += -DCORE_RTW_MLME
+#ccflags-y += -DCORE_RTW_CMD
+#ccflags-y += -DCORE_RTW_EFUSE
+#ccflags-y += -DCORE_RTW_IOCTL_SET
+#ccflags-y += -DCORE_RTW_PWRCTRL
 
 
 KSRC ?= "/lib/modules/$(shell uname -r)/build"

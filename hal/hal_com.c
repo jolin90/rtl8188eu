@@ -21,6 +21,8 @@
 #include <hal_com.h>
 #include <rtl8188e_hal.h>
 
+#include "jolin_debug.h"
+
 #define _HAL_INIT_C_
 
 void dump_chip_info(struct HAL_VERSION	chip_vers)
@@ -49,7 +51,7 @@ void dump_chip_info(struct HAL_VERSION	chip_vers)
 	cnt += sprintf((buf+cnt), "1T1R_");
 	cnt += sprintf((buf+cnt), "RomVer(0)\n");
 
-	pr_info("%s", buf);
+	DBG_88E("%s", buf);
 }
 
 #define	CHAN_PLAN_HW	0x80

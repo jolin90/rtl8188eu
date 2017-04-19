@@ -14,12 +14,16 @@
  ******************************************************************************/
 #define _RTW_XMIT_C_
 
+#define pr_fmt(fmt) "R8188EU: " fmt
+
 #include <osdep_service.h>
 #include <drv_types.h>
 #include <mon.h>
 #include <wifi.h>
 #include <osdep_intf.h>
 #include <linux/vmalloc.h>
+
+#include "jolin_debug.h"
 
 static u8 P802_1H_OUI[P80211_OUI_LEN] = { 0x00, 0x00, 0xf8 };
 static u8 RFC1042_OUI[P80211_OUI_LEN] = { 0x00, 0x00, 0x00 };

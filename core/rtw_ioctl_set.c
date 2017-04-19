@@ -14,10 +14,14 @@
  ******************************************************************************/
 #define _RTW_IOCTL_SET_C_
 
+#define pr_fmt(fmt) "R8188EU: " fmt
+
 #include <osdep_service.h>
 #include <drv_types.h>
 #include <rtw_ioctl_set.h>
 #include <hal_intf.h>
+
+#include "jolin_debug.h"
 
 extern void indicate_wx_scan_complete_event(struct adapter *padapter);
 
@@ -418,7 +422,7 @@ u8 rtw_set_802_11_bssid_list_scan(struct adapter *padapter, struct ndis_802_11_s
 	u8	res = true;
 
 
-	RT_TRACE(_module_rtl871x_ioctl_set_c_, _drv_err_, ("+rtw_set_802_11_bssid_list_scan(), fw_state =%x\n", get_fwstate(pmlmepriv)));
+	RT_TRACE(_module_rtl871x_ioctl_set_c_, _drv_err_, ("+(), fw_state =%x\n", get_fwstate(pmlmepriv)));
 
 	if (padapter == NULL) {
 		res = false;
@@ -426,14 +430,14 @@ u8 rtw_set_802_11_bssid_list_scan(struct adapter *padapter, struct ndis_802_11_s
 	}
 	if (!padapter->hw_init_completed) {
 		res = false;
-		RT_TRACE(_module_rtl871x_ioctl_set_c_, _drv_err_, ("\n === rtw_set_802_11_bssid_list_scan:hw_init_completed == false ===\n"));
+		RT_TRACE(_module_rtl871x_ioctl_set_c_, _drv_err_, ("=== :hw_init_completed == false ===\n"));
 		goto exit;
 	}
 
 	if ((check_fwstate(pmlmepriv, _FW_UNDER_SURVEY|_FW_UNDER_LINKING)) ||
 	    (pmlmepriv->LinkDetectInfo.bBusyTraffic)) {
 		/*  Scan or linking is in progress, do nothing. */
-		RT_TRACE(_module_rtl871x_ioctl_set_c_, _drv_err_, ("rtw_set_802_11_bssid_list_scan fail since fw_state = %x\n", get_fwstate(pmlmepriv)));
+		RT_TRACE(_module_rtl871x_ioctl_set_c_, _drv_err_, ("fail since fw_state = %x\n", get_fwstate(pmlmepriv)));
 		res = true;
 
 		if (check_fwstate(pmlmepriv,

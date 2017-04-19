@@ -681,7 +681,7 @@ int  ips_netdrv_open(struct adapter *padapter)
 
 	status = rtw_hal_init(padapter);
 	if (status == _FAIL) {
-		RT_TRACE(_module_os_intfs_c_, _drv_err_, ("ips_netdrv_open(): Can't init h/w!\n"));
+		RT_TRACE(_module_os_intfs_c_, _drv_err_, (" Can't init h/w!\n"));
 		goto netdev_open_error;
 	}
 
@@ -694,7 +694,7 @@ int  ips_netdrv_open(struct adapter *padapter)
 	 return _SUCCESS;
 
 netdev_open_error:
-	DBG_88E("-ips_netdrv_open - drv_open failure, bup =%d\n", padapter->bup);
+	DBG_88E("-drv_open failure, bup =%d\n", padapter->bup);
 
 	return _FAIL;
 }
@@ -705,14 +705,14 @@ int rtw_ips_pwr_up(struct adapter *padapter)
 	int result;
 	unsigned long start_time = jiffies;
 
-	DBG_88E("===>  rtw_ips_pwr_up..............\n");
+	DBG_88E("===>  ..............\n");
 	rtw_reset_drv_sw(padapter);
 
 	result = ips_netdrv_open(padapter);
 
 	LedControl8188eu(padapter, LED_CTL_NO_LINK);
 
-	DBG_88E("<===  rtw_ips_pwr_up.............. in %dms\n",
+	DBG_88E("<===  .............. in %dms\n",
 		jiffies_to_msecs(jiffies - start_time));
 	return result;
 }

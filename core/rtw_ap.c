@@ -14,6 +14,8 @@
  ******************************************************************************/
 #define _RTW_AP_C_
 
+#define pr_fmt(fmt) "R8188EU: " fmt
+
 #include <linux/ieee80211.h>
 
 #include <osdep_service.h>
@@ -21,6 +23,8 @@
 #include <wifi.h>
 #include <ieee80211.h>
 #include <asm/unaligned.h>
+
+#include "jolin_debug.h"
 
 #ifdef CONFIG_88EU_AP_MODE
 

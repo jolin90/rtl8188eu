@@ -27,23 +27,7 @@
 #include <mlme_osdep.h>
 #include <recv_osdep.h>
 
-#ifdef CORE_RTW_MLME_EXT
-#undef DBG_88E
-#undef RT_TRACE
-
-#define DBG_88E(fmt, args...)                \
-	do{                                      \
-		pr_info("%06d - %s : "fmt,            \
-				__LINE__, __func__, ##args); \
-	} while (0)
-
-#define RT_TRACE(_comp, _level, fmt)         \
-	do {                                     \
-		pr_info("%06d - %s : ",               \
-				__LINE__, __func__);         \
-		printk fmt;                          \
-	} while (0)
-#endif
+#include "jolin_debug.h"
 
 static u8 null_addr[ETH_ALEN] = {0, 0, 0, 0, 0, 0};
 
@@ -2613,13 +2597,17 @@ static unsigned int OnProbeReq(struct adapter *padapter,
 static unsigned int OnProbeRsp(struct adapter *padapter,
 			       struct recv_frame *precv_frame)
 {
+	u8 *pframe = precv_frame->pkt->data;
 	struct mlme_ext_priv	*pmlmeext = &padapter->mlmeextpriv;
+
+	DBG_88E("==>\n");
+
+	rtw_dump_mac_address(GetAddr1Ptr(pframe));
 
 	if (pmlmeext->sitesurvey_res.state == SCAN_PROCESS) {
 		report_survey_event(padapter, precv_frame);
-		return _SUCCESS;
 	}
-
+	DBG_88E("<==\n");
 	return _SUCCESS;
 }
 
@@ -2638,8 +2626,11 @@ static unsigned int OnBeacon(struct adapter *padapter,
 	int ret = _SUCCESS;
 	struct wlan_bssid_ex *pnetwork = &(pmlmeinfo->network);
 
+	DBG_88E("==>\n");
+
 	if (pmlmeext->sitesurvey_res.state == SCAN_PROCESS) {
 		report_survey_event(padapter, precv_frame);
+		DBG_88E("<==\n");
 		return _SUCCESS;
 	}
 
@@ -2664,6 +2655,7 @@ static unsigned int OnBeacon(struct adapter *padapter,
 			/* start auth */
 			start_clnt_auth(padapter);
 
+			DBG_88E("<==\n");
 			return _SUCCESS;
 		}
 
@@ -2674,6 +2666,7 @@ static unsigned int OnBeacon(struct adapter *padapter,
 				if (!ret) {
 						DBG_88E_LEVEL(_drv_info_, "ap has changed, disconnect now\n ");
 						receive_disconnect(padapter, pmlmeinfo->network.MacAddress, 65535);
+						DBG_88E("<==\n");
 						return _SUCCESS;
 				}
 				/* update WMM, ERP in the beacon */
@@ -2711,6 +2704,7 @@ static unsigned int OnBeacon(struct adapter *padapter,
 
 _END_ONBEACON_:
 
+	DBG_88E("<==\n");
 	return _SUCCESS;
 }
 
@@ -4270,6 +4264,7 @@ void report_survey_event(struct adapter *padapter,
 	INIT_LIST_HEAD(&pcmd_obj->list);
 
 	pcmd_obj->cmdcode = _Set_MLME_EVT_CMD_;
+	DBG_88E("_Set_MLME_EVT_CMD_\n");
 	pcmd_obj->cmdsz = cmdsz;
 	pcmd_obj->parmbuf = pevtcmd;
 
@@ -4320,6 +4315,7 @@ void report_surveydone_event(struct adapter *padapter)
 	INIT_LIST_HEAD(&pcmd_obj->list);
 
 	pcmd_obj->cmdcode = _Set_MLME_EVT_CMD_;
+	DBG_88E("_Set_MLME_EVT_CMD_\n");
 	pcmd_obj->cmdsz = cmdsz;
 	pcmd_obj->parmbuf = pevtcmd;
 
@@ -4364,6 +4360,7 @@ void report_join_res(struct adapter *padapter, int res)
 	INIT_LIST_HEAD(&pcmd_obj->list);
 
 	pcmd_obj->cmdcode = _Set_MLME_EVT_CMD_;
+	DBG_88E("_Set_MLME_EVT_CMD_\n");
 	pcmd_obj->cmdsz = cmdsz;
 	pcmd_obj->parmbuf = pevtcmd;
 
@@ -4415,6 +4412,7 @@ void report_del_sta_event(struct adapter *padapter, unsigned char *MacAddr, unsi
 	INIT_LIST_HEAD(&pcmd_obj->list);
 
 	pcmd_obj->cmdcode = _Set_MLME_EVT_CMD_;
+	DBG_88E("_Set_MLME_EVT_CMD_\n");
 	pcmd_obj->cmdsz = cmdsz;
 	pcmd_obj->parmbuf = pevtcmd;
 
@@ -4468,6 +4466,7 @@ void report_add_sta_event(struct adapter *padapter, unsigned char *MacAddr, int 
 	INIT_LIST_HEAD(&pcmd_obj->list);
 
 	pcmd_obj->cmdcode = _Set_MLME_EVT_CMD_;
+	DBG_88E("_Set_MLME_EVT_CMD_\n");
 	pcmd_obj->cmdsz = cmdsz;
 	pcmd_obj->parmbuf = pevtcmd;
 

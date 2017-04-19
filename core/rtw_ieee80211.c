@@ -14,6 +14,8 @@
  ******************************************************************************/
 #define _IEEE80211_C
 
+#define pr_fmt(fmt) "R8188EU: " fmt
+
 #include <linux/ieee80211.h>
 
 #include <drv_types.h>
@@ -22,6 +24,8 @@
 #include <wifi.h>
 #include <osdep_service.h>
 #include <wlan_bssdef.h>
+
+#include "jolin_debug.h"
 
 u8 RTW_WPA_OUI_TYPE[] = { 0x00, 0x50, 0xf2, 1 };
 u8 WPA_AUTH_KEY_MGMT_NONE[] = { 0x00, 0x50, 0xf2, 0 };

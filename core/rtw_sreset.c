@@ -13,8 +13,12 @@
  *
  ******************************************************************************/
 
+#define pr_fmt(fmt) "R8188EU: " fmt
+
 #include <rtw_sreset.h>
 #include <usb_ops_linux.h>
+
+#include "jolin_debug.h"
 
 void rtw_hal_sreset_init(struct adapter *padapter)
 {

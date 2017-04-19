@@ -14,11 +14,15 @@
  ******************************************************************************/
 #define _RTW_PWRCTRL_C_
 
+#define pr_fmt(fmt) "R8188EU: " fmt
+
 #include <osdep_service.h>
 #include <drv_types.h>
 #include <osdep_intf.h>
 #include <usb_ops_linux.h>
 #include <linux/usb.h>
+
+#include "jolin_debug.h"
 
 static int rtw_hw_suspend(struct adapter *padapter)
 {

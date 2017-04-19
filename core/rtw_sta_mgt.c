@@ -14,6 +14,8 @@
  ******************************************************************************/
 #define _RTW_STA_MGT_C_
 
+#define pr_fmt(fmt) "R8188EU: " fmt
+
 #include <osdep_service.h>
 #include <drv_types.h>
 #include <recv_osdep.h>
@@ -21,6 +23,8 @@
 #include <mlme_osdep.h>
 #include <sta_info.h>
 #include <linux/vmalloc.h>
+
+#include "jolin_debug.h"
 
 static void _rtw_init_stainfo(struct sta_info *psta)
 {

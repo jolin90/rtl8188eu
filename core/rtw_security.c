@@ -14,10 +14,14 @@
  ******************************************************************************/
 #define  _RTW_SECURITY_C_
 
+#define pr_fmt(fmt) "R8188EU: " fmt
+
 #include <osdep_service.h>
 #include <drv_types.h>
 #include <wifi.h>
 #include <osdep_intf.h>
+
+#include "jolin_debug.h"
 
 /* WEP related ===== */
 
