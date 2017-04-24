@@ -1397,14 +1397,13 @@ static int rtw_wx_set_essid(struct net_device *dev,
 				goto exit;
 			}
 		} else {
-			DBG_88E("can not set essid:%s len:%d\n", extra, wrqu->essid.length);
+			DBG_88E("Set essid failed: len:%d, %s\n", wrqu->essid.length, extra);
 		}
 	}
 
 exit:
 
 	DBG_88E("<=%s, ret %d\n", __func__, ret);
-
 
 	return ret;
 }

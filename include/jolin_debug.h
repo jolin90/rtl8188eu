@@ -10,13 +10,13 @@
 
 #define DBG_88E(fmt, args...)                \
 	do{                                      \
-		pr_info("%06d - %s : "fmt,           \
+		pr_info("%06d - %s :"fmt,            \
 				__LINE__, __func__, ##args); \
 	} while (0)
 
 #define RT_TRACE(_comp, _level, fmt)         \
 	do {                                     \
-		pr_info("%06d - %s : ",              \
+		pr_info("%06d - %s :",               \
 				__LINE__, __func__);         \
 		printk fmt;                          \
 	} while (0)

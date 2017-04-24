@@ -62,7 +62,8 @@ export CONFIG_R8188EU = m
 obj-$(CONFIG_R8188EU)	:= 8188eu.o
 
 ccflags-y += -I$(srctree)/$(src)/include
-ccflags-y += -D__CHECK_ENDIAN__ -I$(src)/include
+ccflags-y += -D__CHECK_ENDIAN__
+ccflags-y += -I$(src)/include
 
 #for debug
 ccflags-y += -DOS_DEP_IOCTL_LINUX

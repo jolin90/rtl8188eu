@@ -482,6 +482,7 @@ static void issue_probersp(struct adapter *padapter, unsigned char *da)
 	struct wlan_bssid_ex		*cur_network = &(pmlmeinfo->network);
 	unsigned int	rate_len;
 
+	DBG_88E("====>\n");
 	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
 	if (pmgntframe == NULL) {
 		DBG_88E("%s, alloc mgnt frame fail\n", __func__);
@@ -608,6 +609,8 @@ static void issue_probersp(struct adapter *padapter, unsigned char *da)
 	pattrib->last_txcmdsz = pattrib->pktlen;
 
 	dump_mgntframe(padapter, pmgntframe);
+
+	DBG_88E("<====\n");
 }
 
 static int issue_probereq(struct adapter *padapter, struct ndis_802_11_ssid *pssid, u8 *da, bool wait_ack)
@@ -626,8 +629,9 @@ static int issue_probereq(struct adapter *padapter, struct ndis_802_11_ssid *pss
 	int	bssrate_len = 0;
 	u8	bc_addr[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
-	// zhangjiulin
 	/*RT_TRACE(_module_rtl871x_mlme_c_, _drv_notice_, ("+issue_probereq\n"));*/
+
+	DBG_88E("====>\n");
 
 	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
 	if (pmgntframe == NULL)
@@ -701,6 +705,7 @@ static int issue_probereq(struct adapter *padapter, struct ndis_802_11_ssid *pss
 	}
 
 exit:
+	DBG_88E("<====\n");
 	return ret;
 }
 
@@ -711,6 +716,8 @@ static int issue_probereq_ex(struct adapter *padapter,
 	int ret;
 	int i = 0;
 	unsigned long start = jiffies;
+
+	DBG_88E("====>\n");
 
 	do {
 		ret = issue_probereq(padapter, pssid, da, wait_ms > 0 ? true : false);
@@ -743,6 +750,7 @@ static int issue_probereq_ex(struct adapter *padapter,
 				jiffies_to_msecs(jiffies - start));
 	}
 exit:
+	DBG_88E("<====\n");
 	return ret;
 }
 
@@ -765,6 +773,8 @@ static void issue_auth(struct adapter *padapter, struct sta_info *psta,
 	struct mlme_ext_priv	*pmlmeext = &(padapter->mlmeextpriv);
 	struct mlme_ext_info	*pmlmeinfo = &(pmlmeext->mlmext_info);
 	struct wlan_bssid_ex    *pnetwork = &(pmlmeinfo->network);
+
+	DBG_88E("====>\n");
 
 	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
 	if (pmgntframe == NULL)
@@ -892,6 +902,8 @@ static void issue_auth(struct adapter *padapter, struct sta_info *psta,
 	rtw_wep_encrypt(padapter, (u8 *)pmgntframe);
 	DBG_88E("%s\n", __func__);
 	dump_mgntframe(padapter, pmgntframe);
+
+	DBG_88E("<====\n");
 }
 
 
@@ -1042,6 +1054,7 @@ static void issue_assocreq(struct adapter *padapter)
 	int	bssrate_len = 0, sta_bssrate_len = 0;
 	struct wlan_bssid_ex    *pnetwork = &(pmlmeinfo->network);
 
+	DBG_88E("====>\n");
 	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
 	if (pmgntframe == NULL)
 		goto exit;
@@ -1215,6 +1228,8 @@ exit:
 		rtw_buf_update(&pmlmepriv->assoc_req, &pmlmepriv->assoc_req_len, (u8 *)pwlanhdr, pattrib->pktlen);
 	else
 		rtw_buf_free(&pmlmepriv->assoc_req, &pmlmepriv->assoc_req_len);
+
+	DBG_88E("<====\n");
 }
 
 /* when wait_ack is true, this function should be called at process context */
@@ -1300,6 +1315,9 @@ int issue_nulldata(struct adapter *padapter, unsigned char *da, unsigned int pow
 	struct mlme_ext_info	*pmlmeinfo = &(pmlmeext->mlmext_info);
 	struct wlan_bssid_ex    *pnetwork = &(pmlmeinfo->network);
 
+
+	DBG_88E("====>\n");
+
 	/* da == NULL, assume it's null data for sta to ap*/
 	if (da == NULL)
 		da = pnetwork->MacAddress;
@@ -1334,6 +1352,7 @@ int issue_nulldata(struct adapter *padapter, unsigned char *da, unsigned int pow
 				jiffies_to_msecs(jiffies - start));
 	}
 exit:
+	DBG_88E("<====\n");
 	return ret;
 }
 
@@ -1427,6 +1446,8 @@ int issue_qos_nulldata(struct adapter *padapter, unsigned char *da, u16 tid, int
 	struct mlme_ext_info	*pmlmeinfo = &(pmlmeext->mlmext_info);
 	struct wlan_bssid_ex    *pnetwork = &(pmlmeinfo->network);
 
+	DBG_88E("====>\n");
+
 	/* da == NULL, assume it's null data for sta to ap*/
 	if (da == NULL)
 		da = pnetwork->MacAddress;
@@ -1461,6 +1482,8 @@ int issue_qos_nulldata(struct adapter *padapter, unsigned char *da, u16 tid, int
 				jiffies_to_msecs(jiffies - start));
 	}
 exit:
+
+	DBG_88E("<====\n");
 	return ret;
 }
 
@@ -1538,6 +1561,8 @@ static int issue_deauth_ex(struct adapter *padapter, u8 *da,
 	int i = 0;
 	unsigned long start = jiffies;
 
+	DBG_88E("====>\n");
+
 	do {
 		ret = _issue_deauth(padapter, da, reason, wait_ms > 0 ? true : false);
 
@@ -1568,6 +1593,8 @@ static int issue_deauth_ex(struct adapter *padapter, u8 *da,
 				jiffies_to_msecs(jiffies - start));
 	}
 exit:
+
+	DBG_88E("<====\n");
 	return ret;
 }
 
@@ -1595,7 +1622,7 @@ static void issue_action_BA(struct adapter *padapter, unsigned char *raddr,
 	struct registry_priv *pregpriv = &padapter->registrypriv;
 	struct wlan_bssid_ex    *pnetwork = &(pmlmeinfo->network);
 
-	DBG_88E("%s, category=%d, action=%d, status=%d\n", __func__, category, action, status);
+	DBG_88E("category=%d, action=%d, status=%d\n", category, action, status);
 
 	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
 	if (pmgntframe == NULL)
@@ -2626,8 +2653,6 @@ static unsigned int OnBeacon(struct adapter *padapter,
 	int ret = _SUCCESS;
 	struct wlan_bssid_ex *pnetwork = &(pmlmeinfo->network);
 
-	DBG_88E("==>\n");
-
 	if (pmlmeext->sitesurvey_res.state == SCAN_PROCESS) {
 		report_survey_event(padapter, precv_frame);
 		DBG_88E("<==\n");
@@ -2703,8 +2728,6 @@ static unsigned int OnBeacon(struct adapter *padapter,
 	}
 
 _END_ONBEACON_:
-
-	DBG_88E("<==\n");
 	return _SUCCESS;
 }
 
