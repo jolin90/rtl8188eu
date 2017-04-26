@@ -633,6 +633,9 @@ static int issue_probereq(struct adapter *padapter, struct ndis_802_11_ssid *pss
 
 	DBG_88E("====>\n");
 
+	if (pssid && pssid->SsidLength > 0)
+		DBG_88E("ssid is :%s\n", pssid->Ssid);
+
 	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
 	if (pmgntframe == NULL)
 		goto exit;
@@ -663,6 +666,10 @@ static int issue_probereq(struct adapter *padapter, struct ndis_802_11_ssid *pss
 	}
 
 	ether_addr_copy(pwlanhdr->addr2, mac);
+
+	/*rtw_dump_mac_address(pwlanhdr->addr1);*/
+	/*rtw_dump_mac_address(pwlanhdr->addr2);*/
+	/*rtw_dump_mac_address(pwlanhdr->addr3);*/
 
 	SetSeqNum(pwlanhdr, pmlmeext->mgnt_seq);
 	pmlmeext->mgnt_seq++;
@@ -1776,9 +1783,7 @@ static void issue_action_BSSCoexistPacket(struct adapter *padapter)
 	if (pmlmeinfo->bwmode_updated)
 		return;
 
-
 	DBG_88E("%s\n", __func__);
-
 
 	category = RTW_WLAN_CATEGORY_PUBLIC;
 	action = ACT_PUBLIC_BSSCOEXIST;
@@ -2040,11 +2045,14 @@ static void site_survey(struct adapter *padapter)
 			return;
 		}
 
+		DBG_88E("SCAN_COMPLETE\n");
 		pmlmeext->sitesurvey_res.state = SCAN_COMPLETE;
 
 		/* switch back to the original channel */
 
+		DBG_88E("pmlmeext->cur_channel:%d\n", pmlmeext->cur_channel);
 		set_channel_bwmode(padapter, pmlmeext->cur_channel, pmlmeext->cur_ch_offset, pmlmeext->cur_bwmode);
+		DBG_88E("pmlmeext->cur_channel:%d\n", pmlmeext->cur_channel);
 
 		/* flush 4-AC Queue after site_survey */
 		/* val8 = 0; */
@@ -2068,6 +2076,7 @@ static void site_survey(struct adapter *padapter)
 		report_surveydone_event(padapter);
 
 		pmlmeext->chan_scan_time = SURVEY_TO;
+		DBG_88E("SCAN_DISABLE\n");
 		pmlmeext->sitesurvey_res.state = SCAN_DISABLE;
 
 		issue_action_BSSCoexistPacket(padapter);
@@ -3986,6 +3995,7 @@ static void init_mlme_ext_priv_value(struct adapter *padapter)
 
 	pmlmeext->tx_rate = IEEE80211_CCK_RATE_1MB;
 
+	DBG_88E("SCAN_DISABLE\n");
 	pmlmeext->sitesurvey_res.state = SCAN_DISABLE;
 	pmlmeext->sitesurvey_res.channel_idx = 0;
 	pmlmeext->sitesurvey_res.bss_cnt = 0;
@@ -5240,6 +5250,7 @@ u8 sitesurvey_cmd_hdl(struct adapter *padapter, u8 *pbuf)
 		/* for first time sitesurvey_cmd */
 		rtw_hal_set_hwreg(padapter, HW_VAR_CHECK_TXBUF, NULL);
 
+		DBG_88E("SCAN_START\n");
 		pmlmeext->sitesurvey_res.state = SCAN_START;
 		pmlmeext->sitesurvey_res.bss_cnt = 0;
 		pmlmeext->sitesurvey_res.channel_idx = 0;
@@ -5253,15 +5264,15 @@ u8 sitesurvey_cmd_hdl(struct adapter *padapter, u8 *pbuf)
 			}
 		}
 
-		pmlmeext->sitesurvey_res.ch_num = rtw_scan_ch_decision(padapter
-			, pmlmeext->sitesurvey_res.ch, RTW_CHANNEL_SCAN_AMOUNT
-			, pparm->ch, pparm->ch_num
-	);
+		pmlmeext->sitesurvey_res.ch_num = rtw_scan_ch_decision(padapter,
+				pmlmeext->sitesurvey_res.ch, RTW_CHANNEL_SCAN_AMOUNT,
+				pparm->ch, pparm->ch_num);
 
 		pmlmeext->sitesurvey_res.scan_mode = pparm->scan_mode;
 
 		/* issue null data if associating to the AP */
 		if (is_client_associated_to_ap(padapter)) {
+			DBG_88E("SCAN_TXNULL\n");
 			pmlmeext->sitesurvey_res.state = SCAN_TXNULL;
 
 			issue_nulldata(padapter, NULL, 1, 3, 500);
@@ -5271,11 +5282,13 @@ u8 sitesurvey_cmd_hdl(struct adapter *padapter, u8 *pbuf)
 		if (bdelayscan) {
 			/* delay 50ms to protect nulldata(1). */
 			set_survey_timer(pmlmeext, 50);
+			DBG_88E("<==\n");
 			return H2C_SUCCESS;
 		}
 	}
 
 	if ((pmlmeext->sitesurvey_res.state == SCAN_START) || (pmlmeext->sitesurvey_res.state == SCAN_TXNULL)) {
+		DBG_88E("==>\n");
 		/* disable dynamic functions, such as high power, DIG */
 		Save_DM_Func_Flag(padapter);
 		Switch_DM_Func(padapter, DYNAMIC_FUNC_DISABLE, false);
@@ -5291,11 +5304,13 @@ u8 sitesurvey_cmd_hdl(struct adapter *padapter, u8 *pbuf)
 		val8 = 1; /* under site survey */
 		rtw_hal_set_hwreg(padapter, HW_VAR_MLME_SITESURVEY, (u8 *)(&val8));
 
+		DBG_88E("SCAN_PROCESS\n");
 		pmlmeext->sitesurvey_res.state = SCAN_PROCESS;
 	}
 
 	site_survey(padapter);
 
+	DBG_88E("<==\n");
 	return H2C_SUCCESS;
 }
 

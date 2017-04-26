@@ -14,12 +14,15 @@
  ******************************************************************************/
 #define _RTL8188E_PHYCFG_C_
 
+#define pr_fmt(fmt) "R8188EU: " fmt
 #include <osdep_service.h>
 #include <drv_types.h>
 #include <rtw_iol.h>
 #include <rtl8188e_hal.h>
 #include <rf.h>
 #include <phy.h>
+
+#include "jolin_debug.h"
 
 #define MAX_PRECMD_CNT 16
 #define MAX_RFDEPENDCMD_CNT 16
@@ -298,6 +301,7 @@ void rtw_hal_set_chan(struct adapter *adapt, u8 channel)
 		channel = 1;
 
 	hal_data->CurrentChannel = channel;
+	DBG_88E("==> channel:%d\n", channel);
 
 	if ((!adapt->bDriverStopped) && (!adapt->bSurpriseRemoved))
 		phy_sw_chnl_callback(adapt, channel);

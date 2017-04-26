@@ -451,6 +451,7 @@ u8 rtw_reset_drv_sw(struct adapter *padapter)
 	pwrctrlpriv->pwr_state_check_cnts = 0;
 
 	/* mlmeextpriv */
+	DBG_88E("SCAN_DISABLE\n");
 	padapter->mlmeextpriv.sitesurvey_res.state = SCAN_DISABLE;
 
 	rtw_set_signal_stat_timer(&padapter->recvpriv);

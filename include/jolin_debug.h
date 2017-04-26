@@ -25,53 +25,62 @@
 #endif
 #endif
 
-static inline void dump_wlancmds_function(u16 cmdcode)
+static inline void dump_wlancmds_function(u16 cmdcode, bool start)
 {
+	char *p;
+	static u8 print_start[] = "==>";
+	static u8 print_end[] = "<==";
+
+	if (start)
+		p = print_start;
+	else
+		p = print_end;
+
 	switch (cmdcode) {
 	case _JoinBss_CMD_:
-		DBG_88E("_JoinBss_CMD_ => join_cmd_hdl\n");
+		DBG_88E("_JoinBss_CMD_ %s join_cmd_hdl\n", p);
 		break;
 	case _DisConnect_CMD_:
-		DBG_88E("_DisConnect_CMD_ => disconnect_hdl\n");
+		DBG_88E("_DisConnect_CMD_ %s disconnect_hdl\n", p);
 		break;
 	case _CreateBss_CMD_:
-		DBG_88E("_CreateBss_CMD_ => createbss_hdl\n");
+		DBG_88E("_CreateBss_CMD_ %s createbss_hdl\n", p);
 		break;
 	case _SetOpMode_CMD_:
-		DBG_88E("_SetOpMode_CMD_ => setopmode_hdl\n");
+		DBG_88E("_SetOpMode_CMD_ %s setopmode_hdl\n", p);
 		break;
 	case _SiteSurvey_CMD_:
-		DBG_88E("_SiteSurvey_CMD_ => sitesurvey_cmd_hdl\n");
+		DBG_88E("_SiteSurvey_CMD_ %s sitesurvey_cmd_hdl\n", p);
 		break;
 	case _SetAuth_CMD_:
-		DBG_88E("_SetAuth_CMD_ => setauth_hdl\n");
+		DBG_88E("_SetAuth_CMD_ %s setauth_hdl\n", p);
 		break;
 	case _SetKey_CMD_:
-		DBG_88E("_SetKey_CMD_ => setkey_hdl\n");
+		DBG_88E("_SetKey_CMD_ %s setkey_hdl\n", p);
 		break;
 	case _SetStaKey_CMD_:
-		DBG_88E("_SetStaKey_CMD_ => set_stakey_hdl\n");
+		DBG_88E("_SetStaKey_CMD_ %s set_stakey_hdl\n", p);
 		break;
 	case _SetAssocSta_CMD_:
-		DBG_88E("_SetAssocSta_CMD_ => NULL\n");
+		DBG_88E("_SetAssocSta_CMD_ %s NULL\n", p);
 		break;
 	case _AddBAReq_CMD_:
-		DBG_88E("_AddBAReq_CMD_ => add_ba_hdl\n");
+		DBG_88E("_AddBAReq_CMD_ %s add_ba_hdl\n", p);
 		break;
 	case _SetChannel_CMD_:
-		DBG_88E("_SetChannel_CMD_ => set_ch_hdl\n");
+		DBG_88E("_SetChannel_CMD_ %s set_ch_hdl\n", p);
 		break;
 	case _TX_Beacon_CMD_:
-		DBG_88E("_TX_Beacon_CMD_ => tx_beacon_hdl\n");
+		DBG_88E("_TX_Beacon_CMD_ %s tx_beacon_hdl\n", p);
 		break;
 	case _Set_MLME_EVT_CMD_:
-		DBG_88E("_Set_MLME_EVT_CMD_ => mlme_evt_hdl\n");
+		DBG_88E("_Set_MLME_EVT_CMD_ %s mlme_evt_hdl\n", p);
 		break;
 	case _Set_Drv_Extra_CMD_:
-		DBG_88E("_Set_Drv_Extra_CMD_ => rtw_drvextra_cmd_hdl\n");
+		DBG_88E("_Set_Drv_Extra_CMD_ %s rtw_drvextra_cmd_hdl\n", p);
 		break;
 	case _SetChannelPlan_CMD_:
-		DBG_88E("_SetChannelPlan_CMD_ => set_chplan_hdl\n");
+		DBG_88E("_SetChannelPlan_CMD_ %s set_chplan_hdl\n", p);
 		break;
 	default:
 		break;

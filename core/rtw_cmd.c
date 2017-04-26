@@ -199,9 +199,10 @@ _next:
 			    cmd_hdl = wlancmds[pcmd->cmdcode].h2cfuns;
 
 				if (cmd_hdl) {
+					dump_wlancmds_function(pcmd->cmdcode, true);
 					ret = cmd_hdl(pcmd->padapter, pcmd->parmbuf);
+					dump_wlancmds_function(pcmd->cmdcode, false);
 					pcmd->res = ret;
-					dump_wlancmds_function(pcmd->cmdcode);
 				}
 			} else {
 				pcmd->res = H2C_PARAMETERS_ERROR;
@@ -274,7 +275,7 @@ u8 rtw_sitesurvey_cmd(struct adapter  *padapter, struct ndis_802_11_ssid *ssid, 
 
 	rtw_free_network_queue(padapter, false);
 
-	RT_TRACE(_module_rtl871x_cmd_c_, _drv_info_, ("%s: flush network queue\n", __func__));
+	RT_TRACE(_module_rtl871x_cmd_c_, _drv_info_, ("flush network queue\n"));
 
 	init_h2fwcmd_w_parm_no_rsp(ph2c, psurveyPara, _SiteSurvey_CMD_);
 
