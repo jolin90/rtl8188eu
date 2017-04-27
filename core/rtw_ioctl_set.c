@@ -38,7 +38,7 @@ u8 rtw_do_join(struct adapter *padapter)
 	phead = get_list_head(queue);
 	plist = phead->next;
 
-	RT_TRACE(_module_rtl871x_ioctl_set_c_, _drv_info_, ("\n rtw_do_join: phead = %p; plist = %p\n\n\n", phead, plist));
+	RT_TRACE(_module_rtl871x_ioctl_set_c_, _drv_info_, (" phead = %p; plist = %p\n", phead, plist));
 
 	pmlmepriv->cur_network.join_res = -2;
 
@@ -57,12 +57,12 @@ u8 rtw_do_join(struct adapter *padapter)
 
 		if (!pmlmepriv->LinkDetectInfo.bBusyTraffic ||
 		    pmlmepriv->to_roaming > 0) {
-			RT_TRACE(_module_rtl871x_ioctl_set_c_, _drv_info_, ("rtw_do_join(): site survey if scanned_queue is empty\n."));
+			RT_TRACE(_module_rtl871x_ioctl_set_c_, _drv_info_, (" site survey if scanned_queue is empty\n."));
 			/*  submit site_survey_cmd */
 			ret = rtw_sitesurvey_cmd(padapter, &pmlmepriv->assoc_ssid, 1, NULL, 0);
 			if (_SUCCESS != ret) {
 				pmlmepriv->to_join = false;
-				RT_TRACE(_module_rtl871x_ioctl_set_c_, _drv_err_, ("rtw_do_join(): site survey return error\n."));
+				RT_TRACE(_module_rtl871x_ioctl_set_c_, _drv_err_, (" site survey return error\n."));
 			}
 		} else {
 			pmlmepriv->to_join = false;
@@ -320,7 +320,7 @@ release_mlme_lock:
 
 exit:
 	RT_TRACE(_module_rtl871x_ioctl_set_c_, _drv_err_,
-		 ("-rtw_set_802_11_ssid: status =%d\n", status));
+		 (" status =%d\n", status));
 	return status;
 }
 
@@ -442,9 +442,9 @@ u8 rtw_set_802_11_bssid_list_scan(struct adapter *padapter, struct ndis_802_11_s
 
 		if (check_fwstate(pmlmepriv,
 				(_FW_UNDER_SURVEY|_FW_UNDER_LINKING)) == true)
-			RT_TRACE(_module_rtl871x_ioctl_set_c_, _drv_err_, ("\n###_FW_UNDER_SURVEY|_FW_UNDER_LINKING\n\n"));
+			RT_TRACE(_module_rtl871x_ioctl_set_c_, _drv_err_, ("###_FW_UNDER_SURVEY|_FW_UNDER_LINKING\n"));
 		else
-			RT_TRACE(_module_rtl871x_ioctl_set_c_, _drv_err_, ("\n###pmlmepriv->sitesurveyctrl.traffic_busy == true\n\n"));
+			RT_TRACE(_module_rtl871x_ioctl_set_c_, _drv_err_, ("###pmlmepriv->sitesurveyctrl.traffic_busy == true\n"));
 
 	} else {
 		if (rtw_is_scan_deny(padapter)) {

@@ -1386,8 +1386,10 @@ static int rtw_wx_set_essid(struct net_device *dev,
 		}
 		spin_unlock_bh(&queue->lock);
 
+#if 0
 		if (match_status)
 		{
+#endif
 			DBG_88E("match_status:%d ssid:%s\n", match_status, extra);
 			RT_TRACE(_module_rtl871x_ioctl_os_c, _drv_info_,
 					("set ssid: set_802_11_auth. mode =%d\n", authmode));
@@ -1396,9 +1398,11 @@ static int rtw_wx_set_essid(struct net_device *dev,
 				ret = -1;
 				goto exit;
 			}
+#if 0
 		} else {
 			DBG_88E("Set essid failed: len:%d, %s\n", wrqu->essid.length, extra);
 		}
+#endif
 	}
 
 exit:
