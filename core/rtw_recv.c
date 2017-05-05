@@ -999,15 +999,12 @@ static int validate_recv_ctrl_frame(struct adapter *padapter,
 	return _FAIL;
 }
 
-struct recv_frame *recvframe_chk_defrag(struct adapter *padapter,
-					struct recv_frame *precv_frame);
-
 static int validate_recv_mgnt_frame(struct adapter *padapter,
 				    struct recv_frame *precv_frame)
 {
 	struct sta_info *psta;
 
-	RT_TRACE(_module_rtl871x_recv_c_, _drv_info_, ("+validate_recv_mgnt_frame\n"));
+	RT_TRACE(_module_rtl871x_recv_c_, _drv_info_, ("+\n"));
 
 	precv_frame = recvframe_chk_defrag(padapter, precv_frame);
 	if (precv_frame == NULL) {

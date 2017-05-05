@@ -89,7 +89,7 @@ static inline void dump_wlancmds_function(u16 cmdcode, bool start)
 
 static inline void rtw_dump_mac_address(const unsigned char *mac)
 {
-	unsigned char buf[20];
+	u8	buf[20];
 
 	if (!mac)
 		return;

@@ -2633,12 +2633,12 @@ static unsigned int OnProbeReq(struct adapter *padapter,
 static unsigned int OnProbeRsp(struct adapter *padapter,
 			       struct recv_frame *precv_frame)
 {
-	u8 *pframe = precv_frame->pkt->data;
+	/*u8 *pframe = precv_frame->pkt->data;*/
 	struct mlme_ext_priv	*pmlmeext = &padapter->mlmeextpriv;
 
 	DBG_88E("==>\n");
 
-	rtw_dump_mac_address(GetAddr1Ptr(pframe));
+	/*rtw_dump_mac_address(GetAddr1Ptr(pframe));*/
 
 	if (pmlmeext->sitesurvey_res.state == SCAN_PROCESS) {
 		report_survey_event(padapter, precv_frame);
@@ -2661,6 +2661,8 @@ static unsigned int OnBeacon(struct adapter *padapter,
 	struct wlan_bssid_ex *pbss;
 	int ret = _SUCCESS;
 	struct wlan_bssid_ex *pnetwork = &(pmlmeinfo->network);
+
+	DBG_88E("==>\n");
 
 	if (pmlmeext->sitesurvey_res.state == SCAN_PROCESS) {
 		report_survey_event(padapter, precv_frame);
@@ -2737,6 +2739,7 @@ static unsigned int OnBeacon(struct adapter *padapter,
 	}
 
 _END_ONBEACON_:
+	DBG_88E("<==\n");
 	return _SUCCESS;
 }
 
@@ -4195,13 +4198,13 @@ void mgt_dispatcher(struct adapter *padapter, struct recv_frame *precv_frame)
 
 #if 0  // zhangjiulin
 	RT_TRACE(_module_rtl871x_mlme_c_, _drv_info_,
-		 ("+mgt_dispatcher: type(0x%x) subtype(0x%x)\n",
+		 ("+: type(0x%x) subtype(0x%x)\n",
 		  (unsigned int)GetFrameType(pframe),
 		  (unsigned int)GetFrameSubType(pframe)));
 
 	if (GetFrameType(pframe) != WIFI_MGT_TYPE) {
 		RT_TRACE(_module_rtl871x_mlme_c_, _drv_err_,
-			 ("mgt_dispatcher: type(0x%x) error!\n",
+			 (": type(0x%x) error!\n",
 			  (unsigned int)GetFrameType(pframe)));
 		return;
 	}

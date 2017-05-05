@@ -239,7 +239,7 @@ void rtw_init_recvframe(struct recv_frame *precvframe,
 			struct recv_priv *precvpriv);
 int  rtw_free_recvframe(struct recv_frame *precvframe,
 			struct __queue *pfree_recv_queue);
-#define rtw_dequeue_recvframe(queue) rtw_alloc_recvframe(queue)
+//#define rtw_dequeue_recvframe(queue) rtw_alloc_recvframe(queue)
 int _rtw_enqueue_recvframe(struct recv_frame *precvframe,
 			   struct __queue *queue);
 int rtw_enqueue_recvframe(struct recv_frame *precvframe, struct __queue *queue);
@@ -248,6 +248,9 @@ void rtw_free_recvframe_queue(struct __queue *pframequeue,
 u32 rtw_free_uc_swdec_pending_queue(struct adapter *adapter);
 
 void rtw_reordering_ctrl_timeout_handler(unsigned long data);
+
+struct recv_frame *recvframe_chk_defrag(struct adapter *padapter,
+					struct recv_frame *precv_frame);
 
 static inline s32 translate_percentage_to_dbm(u32 sig_stren_index)
 {

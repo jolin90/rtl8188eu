@@ -86,3 +86,5 @@ modules:
 
 clean:
 	$(MAKE) -C $(KSRC)  M=$(CURDIR) clean
+
+# insmod /lib/modules/3.13.0-24-generic/kernel/net/wireless/cfg80211.ko
