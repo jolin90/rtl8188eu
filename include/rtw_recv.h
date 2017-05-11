@@ -235,14 +235,14 @@ struct recv_frame {
 
 struct recv_frame *_rtw_alloc_recvframe(struct __queue *pfree_recv_queue);
 struct recv_frame *rtw_alloc_recvframe(struct __queue *pfree_recv_queue);
-void rtw_init_recvframe(struct recv_frame *precvframe,
+void rtw_init_recvframe(struct recv_frame *recv_frame,
 			struct recv_priv *precvpriv);
-int  rtw_free_recvframe(struct recv_frame *precvframe,
+int  rtw_free_recvframe(struct recv_frame *recv_frame,
 			struct __queue *pfree_recv_queue);
 //#define rtw_dequeue_recvframe(queue) rtw_alloc_recvframe(queue)
-int _rtw_enqueue_recvframe(struct recv_frame *precvframe,
+int _rtw_enqueue_recvframe(struct recv_frame *recv_frame,
 			   struct __queue *queue);
-int rtw_enqueue_recvframe(struct recv_frame *precvframe, struct __queue *queue);
+int rtw_enqueue_recvframe(struct recv_frame *recv_frame, struct __queue *queue);
 void rtw_free_recvframe_queue(struct __queue *pframequeue,
 			      struct __queue *pfree_recv_queue);
 u32 rtw_free_uc_swdec_pending_queue(struct adapter *adapter);

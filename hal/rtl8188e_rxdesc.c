@@ -58,15 +58,15 @@ static void process_link_qual(struct adapter *padapter,
 }
 
 void rtl8188e_process_phy_info(struct adapter *padapter,
-		               struct recv_frame *precvframe)
+		               struct recv_frame *recv_frame)
 {
 	/*  Check RSSI */
-	process_rssi(padapter, precvframe);
+	process_rssi(padapter, recv_frame);
 	/*  Check EVM */
-	process_link_qual(padapter,  precvframe);
+	process_link_qual(padapter,  recv_frame);
 }
 
-void update_recvframe_attrib_88e(struct recv_frame *precvframe,
+void update_recvframe_attrib_88e(struct recv_frame *recv_frame,
 				 struct recv_stat *prxstat)
 {
 	struct rx_pkt_attrib	*pattrib;
@@ -79,7 +79,7 @@ void update_recvframe_attrib_88e(struct recv_frame *precvframe,
 	report.rxdw4 = prxstat->rxdw4;
 	report.rxdw5 = prxstat->rxdw5;
 
-	pattrib = &precvframe->attrib;
+	pattrib = &recv_frame->attrib;
 	memset(pattrib, 0, sizeof(struct rx_pkt_attrib));
 
 	pattrib->crc_err = (u8)((le32_to_cpu(report.rxdw0) >> 14) & 0x1);/* u8)prxreport->crc32; */
@@ -132,13 +132,13 @@ void update_recvframe_attrib_88e(struct recv_frame *precvframe,
 /*
  * Notice:
  *	Before calling this function,
- *	precvframe->rx_data should be ready!
+ *	recv_frame->rx_data should be ready!
  */
-void update_recvframe_phyinfo_88e(struct recv_frame *precvframe,
+void update_recvframe_phyinfo_88e(struct recv_frame *recv_frame,
 				  struct phy_stat *pphy_status)
 {
-	struct adapter *padapter = precvframe->adapter;
-	struct rx_pkt_attrib *pattrib = &precvframe->attrib;
+	struct adapter *padapter = recv_frame->adapter;
+	struct rx_pkt_attrib *pattrib = &recv_frame->attrib;
 	struct odm_phy_status_info *pPHYInfo  = (struct odm_phy_status_info *)(&pattrib->phy_info);
 	u8 *wlanhdr;
 	struct odm_per_pkt_info	pkt_info;
@@ -150,7 +150,7 @@ void update_recvframe_phyinfo_88e(struct recv_frame *precvframe,
 	pkt_info.bPacketToSelf = false;
 	pkt_info.bPacketBeacon = false;
 
-	wlanhdr = precvframe->pkt->data;
+	wlanhdr = recv_frame->pkt->data;
 
 	pkt_info.bPacketMatchBSSID = ((!IsFrameTypeCtrl(wlanhdr)) &&
 		!pattrib->icv_err && !pattrib->crc_err &&
@@ -182,18 +182,18 @@ void update_recvframe_phyinfo_88e(struct recv_frame *precvframe,
 	ODM_PhyStatusQuery(&padapter->HalData->odmpriv, pPHYInfo,
 			   (u8 *)pphy_status, &(pkt_info));
 
-	precvframe->psta = NULL;
+	recv_frame->psta = NULL;
 	if (pkt_info.bPacketMatchBSSID &&
 	    (check_fwstate(&padapter->mlmepriv, WIFI_AP_STATE))) {
 		if (psta) {
-			precvframe->psta = psta;
-			rtl8188e_process_phy_info(padapter, precvframe);
+			recv_frame->psta = psta;
+			rtl8188e_process_phy_info(padapter, recv_frame);
 		}
 	} else if (pkt_info.bPacketToSelf || pkt_info.bPacketBeacon) {
 		if (check_fwstate(&padapter->mlmepriv, WIFI_ADHOC_STATE|WIFI_ADHOC_MASTER_STATE)) {
 			if (psta)
-				precvframe->psta = psta;
+				recv_frame->psta = psta;
 		}
-		rtl8188e_process_phy_info(padapter, precvframe);
+		rtl8188e_process_phy_info(padapter, recv_frame);
 	}
 }
