@@ -59,35 +59,35 @@ uint _rtw_pktfile_read(struct pkt_file *pfile, u8 *rmem, uint rlen)
 	return len;
 }
 
-int rtw_os_xmit_resource_alloc(struct adapter *padapter, struct xmit_buf *pxmitbuf, u32 alloc_sz)
+int rtw_os_xmit_resource_alloc(struct adapter *padapter, struct xmit_buf *xmit_buf, u32 alloc_sz)
 {
 	int i;
 
-	pxmitbuf->pallocated_buf = kzalloc(alloc_sz, GFP_KERNEL);
-	if (pxmitbuf->pallocated_buf == NULL)
+	xmit_buf->pallocated_buf = kzalloc(alloc_sz, GFP_KERNEL);
+	if (xmit_buf->pallocated_buf == NULL)
 		return _FAIL;
 
-	pxmitbuf->pbuf = PTR_ALIGN(pxmitbuf->pallocated_buf, XMITBUF_ALIGN_SZ);
-	pxmitbuf->dma_transfer_addr = 0;
+	xmit_buf->pbuf = PTR_ALIGN(xmit_buf->pallocated_buf, XMITBUF_ALIGN_SZ);
+	xmit_buf->dma_transfer_addr = 0;
 
 	for (i = 0; i < 8; i++) {
-		pxmitbuf->pxmit_urb[i] = usb_alloc_urb(0, GFP_KERNEL);
-		if (pxmitbuf->pxmit_urb[i] == NULL) {
-			DBG_88E("pxmitbuf->pxmit_urb[i]==NULL");
+		xmit_buf->pxmit_urb[i] = usb_alloc_urb(0, GFP_KERNEL);
+		if (xmit_buf->pxmit_urb[i] == NULL) {
+			DBG_88E("xmit_buf->pxmit_urb[i]==NULL");
 			return _FAIL;
 		}
 	}
 	return _SUCCESS;
 }
 
-void rtw_os_xmit_resource_free(struct xmit_buf *pxmitbuf)
+void rtw_os_xmit_resource_free(struct xmit_buf *xmit_buf)
 {
 	int i;
 
 	for (i = 0; i < 8; i++)
-		usb_free_urb(pxmitbuf->pxmit_urb[i]);
+		usb_free_urb(xmit_buf->pxmit_urb[i]);
 
-	kfree(pxmitbuf->pallocated_buf);
+	kfree(xmit_buf->pallocated_buf);
 }
 
 #define WMM_XMIT_THRESHOLD	(NR_XMITFRAME*2/5)

@@ -165,7 +165,7 @@ int rtw_ch_set_search_ch(struct rt_channel_info *ch_set, const u32 ch)
 struct xmit_frame *alloc_mgtxmitframe(struct xmit_priv *pxmitpriv)
 {
 	struct xmit_frame			*pmgntframe;
-	struct xmit_buf				*pxmitbuf;
+	struct xmit_buf				*xmit_buf;
 
 	pmgntframe = rtw_alloc_xmitframe(pxmitpriv);
 	if (pmgntframe == NULL) {
@@ -173,16 +173,16 @@ struct xmit_frame *alloc_mgtxmitframe(struct xmit_priv *pxmitpriv)
 		return NULL;
 	}
 
-	pxmitbuf = rtw_alloc_xmitbuf_ext(pxmitpriv);
-	if (pxmitbuf == NULL) {
+	xmit_buf = rtw_alloc_xmitbuf_ext(pxmitpriv);
+	if (xmit_buf == NULL) {
 		DBG_88E("%s, alloc xmitbuf fail\n", __func__);
 		rtw_free_xmitframe(pxmitpriv, pmgntframe);
 		return NULL;
 	}
 	pmgntframe->frame_tag = MGNT_FRAMETAG;
-	pmgntframe->pxmitbuf = pxmitbuf;
-	pmgntframe->buf_addr = pxmitbuf->pbuf;
-	pxmitbuf->priv_data = pmgntframe;
+	pmgntframe->xmit_buf = xmit_buf;
+	pmgntframe->buf_addr = xmit_buf->pbuf;
+	xmit_buf->priv_data = pmgntframe;
 	return pmgntframe;
 }
 
@@ -247,14 +247,14 @@ static s32 dump_mgntframe_and_wait(struct adapter *padapter,
 				   int timeout_ms)
 {
 	s32 ret = _FAIL;
-	struct xmit_buf *pxmitbuf = pmgntframe->pxmitbuf;
+	struct xmit_buf *xmit_buf = pmgntframe->xmit_buf;
 	struct submit_ctx sctx;
 
 	if (padapter->bSurpriseRemoved || padapter->bDriverStopped)
 		return ret;
 
 	rtw_sctx_init(&sctx, timeout_ms);
-	pxmitbuf->sctx = &sctx;
+	xmit_buf->sctx = &sctx;
 
 	ret = rtw_hal_mgnt_xmit(padapter, pmgntframe);
 
@@ -1142,7 +1142,7 @@ static void issue_assocreq(struct adapter *padapter)
 	DBG_88E("bssrate_len=%d\n", bssrate_len);
 
 	if (bssrate_len == 0) {
-		rtw_free_xmitbuf(pxmitpriv, pmgntframe->pxmitbuf);
+		rtw_free_xmitbuf(pxmitpriv, pmgntframe->xmit_buf);
 		rtw_free_xmitframe(pxmitpriv, pmgntframe);
 		goto exit; /* don't connect to AP if no joint supported rate */
 	}

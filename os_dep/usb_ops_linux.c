@@ -581,11 +581,11 @@ int usb_write32(struct adapter *adapter, u32 addr, u32 val)
 
 static void usb_write_port_complete(struct urb *purb, struct pt_regs *regs)
 {
-	struct xmit_buf *pxmitbuf = (struct xmit_buf *)purb->context;
-	struct adapter	*padapter = pxmitbuf->padapter;
+	struct xmit_buf *xmit_buf = (struct xmit_buf *)purb->context;
+	struct adapter	*padapter = xmit_buf->padapter;
 	struct xmit_priv	*pxmitpriv = &padapter->xmitpriv;
 
-	switch (pxmitbuf->flags) {
+	switch (xmit_buf->flags) {
 	case VO_QUEUE_INX:
 		pxmitpriv->voq_cnt--;
 		break;
@@ -612,10 +612,10 @@ static void usb_write_port_complete(struct urb *purb, struct pt_regs *regs)
 		RT_TRACE(_module_hci_ops_os_c_, _drv_err_,
 			 ("usb_write_port_complete:bDriverStopped(%d) OR bSurpriseRemoved(%d)",
 			 padapter->bDriverStopped, padapter->bSurpriseRemoved));
-		DBG_88E("%s(): TX Warning! bDriverStopped(%d) OR bSurpriseRemoved(%d) bWritePortCancel(%d) pxmitbuf->ext_tag(%x)\n",
+		DBG_88E("%s(): TX Warning! bDriverStopped(%d) OR bSurpriseRemoved(%d) bWritePortCancel(%d) xmit_buf->ext_tag(%x)\n",
 			__func__, padapter->bDriverStopped,
 			padapter->bSurpriseRemoved, padapter->bReadPortCancel,
-			pxmitbuf->ext_tag);
+			xmit_buf->ext_tag);
 
 		goto check_completion;
 	}
@@ -649,11 +649,11 @@ static void usb_write_port_complete(struct urb *purb, struct pt_regs *regs)
 	}
 
 check_completion:
-	rtw_sctx_done_err(&pxmitbuf->sctx,
+	rtw_sctx_done_err(&xmit_buf->sctx,
 			  purb->status ? RTW_SCTX_DONE_WRITE_PORT_ERR :
 			  RTW_SCTX_DONE_SUCCESS);
 
-	rtw_free_xmitbuf(pxmitpriv, pxmitbuf);
+	rtw_free_xmitbuf(pxmitpriv, xmit_buf);
 
 	tasklet_hi_schedule(&pxmitpriv->xmit_tasklet);
 }
@@ -752,7 +752,7 @@ exit:
 void usb_write_port_cancel(struct adapter *padapter)
 {
 	int i, j;
-	struct xmit_buf *pxmitbuf = (struct xmit_buf *)padapter->xmitpriv.pxmitbuf;
+	struct xmit_buf *xmit_buf = (struct xmit_buf *)padapter->xmitpriv.xmit_buf;
 
 	DBG_88E("%s\n", __func__);
 
@@ -760,19 +760,19 @@ void usb_write_port_cancel(struct adapter *padapter)
 
 	for (i = 0; i < NR_XMITBUFF; i++) {
 		for (j = 0; j < 8; j++) {
-			if (pxmitbuf->pxmit_urb[j])
-				usb_kill_urb(pxmitbuf->pxmit_urb[j]);
+			if (xmit_buf->pxmit_urb[j])
+				usb_kill_urb(xmit_buf->pxmit_urb[j]);
 		}
-		pxmitbuf++;
+		xmit_buf++;
 	}
 
-	pxmitbuf = (struct xmit_buf *)padapter->xmitpriv.pxmit_extbuf;
+	xmit_buf = (struct xmit_buf *)padapter->xmitpriv.pxmit_extbuf;
 	for (i = 0; i < NR_XMIT_EXTBUFF; i++) {
 		for (j = 0; j < 8; j++) {
-			if (pxmitbuf->pxmit_urb[j])
-				usb_kill_urb(pxmitbuf->pxmit_urb[j]);
+			if (xmit_buf->pxmit_urb[j])
+				usb_kill_urb(xmit_buf->pxmit_urb[j]);
 		}
-		pxmitbuf++;
+		xmit_buf++;
 	}
 }
 

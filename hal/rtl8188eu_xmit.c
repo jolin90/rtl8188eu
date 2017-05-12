@@ -343,7 +343,7 @@ static s32 rtw_dump_xframe(struct adapter *adapt, struct xmit_frame *pxmitframe)
 	int t, sz, w_sz, pull = 0;
 	u8 *mem_addr;
 	u32 ff_hwaddr;
-	struct xmit_buf *pxmitbuf = pxmitframe->pxmitbuf;
+	struct xmit_buf *xmit_buf = pxmitframe->xmit_buf;
 	struct pkt_attrib *pattrib = &pxmitframe->attrib;
 	struct xmit_priv *pxmitpriv = &adapt->xmitpriv;
 	struct security_priv *psecuritypriv = &adapt->securitypriv;
@@ -382,7 +382,7 @@ static s32 rtw_dump_xframe(struct adapter *adapt, struct xmit_frame *pxmitframe)
 		}
 		ff_hwaddr = rtw_get_ff_hwaddr(pxmitframe);
 
-		inner_ret = usb_write_port(adapt, ff_hwaddr, w_sz, pxmitbuf);
+		inner_ret = usb_write_port(adapt, ff_hwaddr, w_sz, xmit_buf);
 
 		rtw_count_tx_stats(adapt, pxmitframe, sz);
 
@@ -396,7 +396,7 @@ static s32 rtw_dump_xframe(struct adapter *adapt, struct xmit_frame *pxmitframe)
 	rtw_free_xmitframe(pxmitpriv, pxmitframe);
 
 	if  (ret != _SUCCESS)
-		rtw_sctx_done_err(&pxmitbuf->sctx, RTW_SCTX_DONE_UNKNOWN);
+		rtw_sctx_done_err(&xmit_buf->sctx, RTW_SCTX_DONE_UNKNOWN);
 
 	return ret;
 }
@@ -423,7 +423,7 @@ s32 rtl8188eu_xmitframe_complete(struct adapter *adapt, struct xmit_priv *pxmitp
 {
 	struct xmit_frame *pxmitframe = NULL;
 	struct xmit_frame *pfirstframe = NULL;
-	struct xmit_buf *pxmitbuf;
+	struct xmit_buf *xmit_buf;
 
 	/*  aggregate variable */
 	struct hw_xmit *phwxmit;
@@ -445,8 +445,8 @@ s32 rtl8188eu_xmitframe_complete(struct adapter *adapt, struct xmit_priv *pxmitp
 
 	RT_TRACE(_module_rtl8192c_xmit_c_, _drv_info_, ("+xmitframe_complete\n"));
 
-	pxmitbuf = rtw_alloc_xmitbuf(pxmitpriv);
-	if (pxmitbuf == NULL)
+	xmit_buf = rtw_alloc_xmitbuf(pxmitpriv);
+	if (xmit_buf == NULL)
 		return false;
 
 	/* 3 1. pick up first frame */
@@ -455,13 +455,13 @@ s32 rtl8188eu_xmitframe_complete(struct adapter *adapt, struct xmit_priv *pxmitp
 	pxmitframe = rtw_dequeue_xframe(pxmitpriv, pxmitpriv->hwxmits, pxmitpriv->hwxmit_entry);
 	if (pxmitframe == NULL) {
 		/*  no more xmit frame, release xmit buffer */
-		rtw_free_xmitbuf(pxmitpriv, pxmitbuf);
+		rtw_free_xmitbuf(pxmitpriv, xmit_buf);
 		return false;
 	}
 
-	pxmitframe->pxmitbuf = pxmitbuf;
-	pxmitframe->buf_addr = pxmitbuf->pbuf;
-	pxmitbuf->priv_data = pxmitframe;
+	pxmitframe->xmit_buf = xmit_buf;
+	pxmitframe->buf_addr = xmit_buf->pbuf;
+	xmit_buf->priv_data = pxmitframe;
 
 	pxmitframe->agg_num = 1; /*  alloc xmitframe should assign to 1. */
 	pxmitframe->pkt_offset = 1; /*  first frame of aggregation, reserve offset */
@@ -535,7 +535,7 @@ s32 rtl8188eu_xmitframe_complete(struct adapter *adapt, struct xmit_priv *pxmitp
 		ptxservq->qcnt--;
 		phwxmit->accnt--;
 
-		pxmitframe->buf_addr = pxmitbuf->pbuf + pbuf;
+		pxmitframe->buf_addr = xmit_buf->pbuf + pbuf;
 
 		rtw_xmitframe_coalesce(adapt, pxmitframe->pkt, pxmitframe);
 		/*  always return ndis_packet after rtw_xmitframe_coalesce */
@@ -586,7 +586,7 @@ s32 rtl8188eu_xmitframe_complete(struct adapter *adapt, struct xmit_priv *pxmitp
 
 	/* 3 4. write xmit buffer to USB FIFO */
 	ff_hwaddr = rtw_get_ff_hwaddr(pfirstframe);
-	usb_write_port(adapt, ff_hwaddr, pbuf_tail, pxmitbuf);
+	usb_write_port(adapt, ff_hwaddr, pbuf_tail, xmit_buf);
 
 	/* 3 5. update statisitc */
 	pbuf_tail -= (pfirstframe->agg_num * TXDESC_SIZE);
@@ -607,7 +607,7 @@ s32 rtl8188eu_xmitframe_complete(struct adapter *adapt, struct xmit_priv *pxmitp
 s32 rtw_hal_xmit(struct adapter *adapt, struct xmit_frame *pxmitframe)
 {
 	s32 res;
-	struct xmit_buf *pxmitbuf = NULL;
+	struct xmit_buf *xmit_buf = NULL;
 	struct xmit_priv *pxmitpriv = &adapt->xmitpriv;
 	struct pkt_attrib *pattrib = &pxmitframe->attrib;
 	struct mlme_priv *pmlmepriv = &adapt->mlmepriv;
@@ -620,15 +620,15 @@ s32 rtw_hal_xmit(struct adapter *adapt, struct xmit_frame *pxmitframe)
 	if (check_fwstate(pmlmepriv, _FW_UNDER_SURVEY|_FW_UNDER_LINKING) == true)
 		goto enqueue;
 
-	pxmitbuf = rtw_alloc_xmitbuf(pxmitpriv);
-	if (!pxmitbuf)
+	xmit_buf = rtw_alloc_xmitbuf(pxmitpriv);
+	if (!xmit_buf)
 		goto enqueue;
 
 	spin_unlock_bh(&pxmitpriv->lock);
 
-	pxmitframe->pxmitbuf = pxmitbuf;
-	pxmitframe->buf_addr = pxmitbuf->pbuf;
-	pxmitbuf->priv_data = pxmitframe;
+	pxmitframe->xmit_buf = xmit_buf;
+	pxmitframe->buf_addr = xmit_buf->pbuf;
+	xmit_buf->priv_data = pxmitframe;
 
 	res = rtw_xmitframe_coalesce(adapt, pxmitframe->pkt, pxmitframe);
 
@@ -636,7 +636,7 @@ s32 rtw_hal_xmit(struct adapter *adapt, struct xmit_frame *pxmitframe)
 		rtw_dump_xframe(adapt, pxmitframe);
 	} else {
 		DBG_88E("==> %s xmitframe_coalesce failed\n", __func__);
-		rtw_free_xmitbuf(pxmitpriv, pxmitbuf);
+		rtw_free_xmitbuf(pxmitpriv, xmit_buf);
 		rtw_free_xmitframe(pxmitpriv, pxmitframe);
 	}
 

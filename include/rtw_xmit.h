@@ -217,7 +217,7 @@ struct xmit_frame {
 	int	frame_tag;
 	struct adapter *padapter;
 	u8	*buf_addr;
-	struct xmit_buf *pxmitbuf;
+	struct xmit_buf *xmit_buf;
 
 	u8	agg_num;
 	s8	pkt_offset;
@@ -291,7 +291,7 @@ struct	xmit_priv {
 	struct __queue free_xmitbuf_queue;
 	struct __queue pending_xmitbuf_queue;
 	u8 *pallocated_xmitbuf;
-	u8 *pxmitbuf;
+	u8 *xmit_buf;
 	uint free_xmitbuf_cnt;
 	struct __queue free_xmit_extbuf_queue;
 	u8 *pallocated_xmit_extbuf;
@@ -305,10 +305,10 @@ struct	xmit_priv {
 
 struct xmit_buf *rtw_alloc_xmitbuf_ext(struct xmit_priv *pxmitpriv);
 s32 rtw_free_xmitbuf_ext(struct xmit_priv *pxmitpriv,
-			 struct xmit_buf *pxmitbuf);
+			 struct xmit_buf *xmit_buf);
 struct xmit_buf *rtw_alloc_xmitbuf(struct xmit_priv *pxmitpriv);
 s32 rtw_free_xmitbuf(struct xmit_priv *pxmitpriv,
-		     struct xmit_buf *pxmitbuf);
+		     struct xmit_buf *xmit_buf);
 void rtw_count_tx_stats(struct adapter *padapter,
 			struct xmit_frame *pxmitframe, int sz);
 void rtw_update_protection(struct adapter *padapter, u8 *ie, uint ie_len);
