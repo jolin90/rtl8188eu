@@ -19,7 +19,7 @@
 #include <drv_types.h>
 
 
-int _rtw_init_recv_priv(struct recv_priv *precvpriv, struct adapter *padapter);
+int _rtw_init_recv_priv(struct recv_priv *precvpriv, struct adapter *adapter);
 void _rtw_free_recv_priv(struct recv_priv *precvpriv);
 
 
@@ -27,7 +27,7 @@ s32  rtw_recv_entry(struct recv_frame *precv_frame);
 int rtw_recv_indicatepkt(struct adapter *adapter,
 			 struct recv_frame *recv_frame);
 
-void rtw_handle_tkip_mic_err(struct adapter *padapter, u8 bgroup);
+void rtw_handle_tkip_mic_err(struct adapter *adapter, u8 bgroup);
 
 int rtw_os_recvbuf_resource_alloc(struct adapter *adapt, struct recv_buf *buf);
 

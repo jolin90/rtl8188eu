@@ -20,16 +20,16 @@
 #include <drv_types.h>
 #include <mlme_osdep.h>
 
-void rtw_init_mlme_timer(struct adapter *padapter)
+void rtw_init_mlme_timer(struct adapter *adapter)
 {
-	struct	mlme_priv *pmlmepriv = &padapter->mlmepriv;
+	struct	mlme_priv *pmlmepriv = &adapter->mlmepriv;
 
 	setup_timer(&pmlmepriv->assoc_timer, _rtw_join_timeout_handler,
-		    (unsigned long)padapter);
+		    (unsigned long)adapter);
 	setup_timer(&pmlmepriv->scan_to_timer, rtw_scan_timeout_handler,
-		    (unsigned long)padapter);
+		    (unsigned long)adapter);
 	setup_timer(&pmlmepriv->dynamic_chk_timer,
-		    rtw_dynamic_check_timer_handlder, (unsigned long)padapter);
+		    rtw_dynamic_check_timer_handlder, (unsigned long)adapter);
 }
 
 void rtw_os_indicate_connect(struct adapter *adapter)
@@ -38,9 +38,9 @@ void rtw_os_indicate_connect(struct adapter *adapter)
 	netif_carrier_on(adapter->pnetdev);
 }
 
-void rtw_os_indicate_scan_done(struct adapter *padapter, bool aborted)
+void rtw_os_indicate_scan_done(struct adapter *adapter, bool aborted)
 {
-	indicate_wx_scan_complete_event(padapter);
+	indicate_wx_scan_complete_event(adapter);
 }
 
 static struct rt_pmkid_list backup_pmkid[NUM_PMKID_CACHE];
@@ -123,28 +123,28 @@ void rtw_report_sec_ie(struct adapter *adapter, u8 authmode, u8 *sec_ie)
 	}
 }
 
-void init_addba_retry_timer(struct adapter *padapter, struct sta_info *psta)
+void init_addba_retry_timer(struct adapter *adapter, struct sta_info *psta)
 {
 	setup_timer(&psta->addba_retry_timer, addba_timer_hdl,
 		    (unsigned long)psta);
 }
 
-void init_mlme_ext_timer(struct adapter *padapter)
+void init_mlme_ext_timer(struct adapter *adapter)
 {
-	struct	mlme_ext_priv *pmlmeext = &padapter->mlmeextpriv;
+	struct	mlme_ext_priv *pmlmeext = &adapter->mlmeextpriv;
 
 	setup_timer(&pmlmeext->survey_timer, survey_timer_hdl,
-		    (unsigned long)padapter);
+		    (unsigned long)adapter);
 	setup_timer(&pmlmeext->link_timer, link_timer_hdl,
-		    (unsigned long)padapter);
+		    (unsigned long)adapter);
 }
 
 #ifdef CONFIG_88EU_AP_MODE
 
-void rtw_indicate_sta_assoc_event(struct adapter *padapter, struct sta_info *psta)
+void rtw_indicate_sta_assoc_event(struct adapter *adapter, struct sta_info *psta)
 {
 	union iwreq_data wrqu;
-	struct sta_priv *pstapriv = &padapter->stapriv;
+	struct sta_priv *pstapriv = &adapter->stapriv;
 
 	if (!psta)
 		return;
@@ -162,13 +162,13 @@ void rtw_indicate_sta_assoc_event(struct adapter *padapter, struct sta_info *pst
 
 	DBG_88E("+rtw_indicate_sta_assoc_event\n");
 
-	wireless_send_event(padapter->pnetdev, IWEVREGISTERED, &wrqu, NULL);
+	wireless_send_event(adapter->pnetdev, IWEVREGISTERED, &wrqu, NULL);
 }
 
-void rtw_indicate_sta_disassoc_event(struct adapter *padapter, struct sta_info *psta)
+void rtw_indicate_sta_disassoc_event(struct adapter *adapter, struct sta_info *psta)
 {
 	union iwreq_data wrqu;
-	struct sta_priv *pstapriv = &padapter->stapriv;
+	struct sta_priv *pstapriv = &adapter->stapriv;
 
 	if (!psta)
 		return;
@@ -186,7 +186,7 @@ void rtw_indicate_sta_disassoc_event(struct adapter *padapter, struct sta_info *
 
 	DBG_88E("+rtw_indicate_sta_disassoc_event\n");
 
-	wireless_send_event(padapter->pnetdev, IWEVEXPIRED, &wrqu, NULL);
+	wireless_send_event(adapter->pnetdev, IWEVEXPIRED, &wrqu, NULL);
 }
 
 #endif

@@ -27,15 +27,15 @@
 
 #include <rtl8188e_hal.h>
 
-int	rtw_hal_init_recv_priv(struct adapter *padapter)
+int	rtw_hal_init_recv_priv(struct adapter *adapter)
 {
-	struct recv_priv	*precvpriv = &padapter->recvpriv;
+	struct recv_priv	*precvpriv = &adapter->recvpriv;
 	int	i, res = _SUCCESS;
 	struct recv_buf *precvbuf;
 
 	tasklet_init(&precvpriv->recv_tasklet,
 		     (void(*)(unsigned long))rtl8188eu_recv_tasklet,
-		     (unsigned long)padapter);
+		     (unsigned long)adapter);
 
 	/* init recv_buf */
 	_rtw_init_queue(&precvpriv->free_recv_buf_queue);
@@ -51,10 +51,10 @@ int	rtw_hal_init_recv_priv(struct adapter *padapter)
 	precvbuf = precvpriv->precv_buf;
 
 	for (i = 0; i < NR_RECVBUFF; i++) {
-		res = rtw_os_recvbuf_resource_alloc(padapter, precvbuf);
+		res = rtw_os_recvbuf_resource_alloc(adapter, precvbuf);
 		if (res == _FAIL)
 			break;
-		precvbuf->adapter = padapter;
+		precvbuf->adapter = adapter;
 		precvbuf++;
 	}
 	skb_queue_head_init(&precvpriv->rx_skb_queue);
@@ -65,7 +65,7 @@ int	rtw_hal_init_recv_priv(struct adapter *padapter)
 		skb_queue_head_init(&precvpriv->free_recv_skb_queue);
 
 		for (i = 0; i < NR_PREALLOC_RECV_SKB; i++) {
-			pskb = __netdev_alloc_skb(padapter->pnetdev,
+			pskb = __netdev_alloc_skb(adapter->pnetdev,
 					MAX_RECVBUF_SZ, GFP_KERNEL);
 			if (pskb) {
 				kmemleak_not_leak(pskb);
@@ -79,11 +79,11 @@ exit:
 	return res;
 }
 
-void rtw_hal_free_recv_priv(struct adapter *padapter)
+void rtw_hal_free_recv_priv(struct adapter *adapter)
 {
 	int	i;
 	struct recv_buf	*precvbuf;
-	struct recv_priv	*precvpriv = &padapter->recvpriv;
+	struct recv_priv	*precvpriv = &adapter->recvpriv;
 
 	precvbuf = precvpriv->precv_buf;
 

@@ -492,16 +492,16 @@ u32 usb_read_port(struct adapter *adapter, u32 addr, struct recv_buf *precvbuf)
 	return ret;
 }
 
-void rtw_hal_inirp_deinit(struct adapter *padapter)
+void rtw_hal_inirp_deinit(struct adapter *adapter)
 {
 	int i;
 	struct recv_buf *precvbuf;
 
-	precvbuf = padapter->recvpriv.precv_buf;
+	precvbuf = adapter->recvpriv.precv_buf;
 
 	DBG_88E("%s\n", __func__);
 
-	padapter->bReadPortCancel = true;
+	adapter->bReadPortCancel = true;
 
 	for (i = 0; i < NR_RECVBUFF; i++) {
 		precvbuf->reuse = true;
@@ -582,8 +582,8 @@ int usb_write32(struct adapter *adapter, u32 addr, u32 val)
 static void usb_write_port_complete(struct urb *purb, struct pt_regs *regs)
 {
 	struct xmit_buf *xmit_buf = (struct xmit_buf *)purb->context;
-	struct adapter	*padapter = xmit_buf->padapter;
-	struct xmit_priv	*pxmitpriv = &padapter->xmitpriv;
+	struct adapter	*adapter = xmit_buf->adapter;
+	struct xmit_priv	*pxmitpriv = &adapter->xmitpriv;
 
 	switch (xmit_buf->flags) {
 	case VO_QUEUE_INX:
@@ -600,21 +600,21 @@ static void usb_write_port_complete(struct urb *purb, struct pt_regs *regs)
 		break;
 	case HIGH_QUEUE_INX:
 #ifdef CONFIG_88EU_AP_MODE
-		rtw_chk_hi_queue_cmd(padapter);
+		rtw_chk_hi_queue_cmd(adapter);
 #endif
 		break;
 	default:
 		break;
 	}
 
-	if (padapter->bSurpriseRemoved || padapter->bDriverStopped ||
-	    padapter->bWritePortCancel) {
+	if (adapter->bSurpriseRemoved || adapter->bDriverStopped ||
+	    adapter->bWritePortCancel) {
 		RT_TRACE(_module_hci_ops_os_c_, _drv_err_,
 			 ("usb_write_port_complete:bDriverStopped(%d) OR bSurpriseRemoved(%d)",
-			 padapter->bDriverStopped, padapter->bSurpriseRemoved));
+			 adapter->bDriverStopped, adapter->bSurpriseRemoved));
 		DBG_88E("%s(): TX Warning! bDriverStopped(%d) OR bSurpriseRemoved(%d) bWritePortCancel(%d) xmit_buf->ext_tag(%x)\n",
-			__func__, padapter->bDriverStopped,
-			padapter->bSurpriseRemoved, padapter->bReadPortCancel,
+			__func__, adapter->bDriverStopped,
+			adapter->bSurpriseRemoved, adapter->bReadPortCancel,
 			xmit_buf->ext_tag);
 
 		goto check_completion;
@@ -624,7 +624,7 @@ static void usb_write_port_complete(struct urb *purb, struct pt_regs *regs)
 		RT_TRACE(_module_hci_ops_os_c_, _drv_err_, ("usb_write_port_complete : purb->status(%d) != 0\n", purb->status));
 		DBG_88E("###=> urb_write_port_complete status(%d)\n", purb->status);
 		if ((purb->status == -EPIPE) || (purb->status == -EPROTO)) {
-			sreset_set_wifi_error_status(padapter, USB_WRITE_PORT_FAIL);
+			sreset_set_wifi_error_status(adapter, USB_WRITE_PORT_FAIL);
 		} else if (purb->status == -EINPROGRESS) {
 			RT_TRACE(_module_hci_ops_os_c_, _drv_err_, ("usb_write_port_complete: EINPROGESS\n"));
 			goto check_completion;
@@ -636,11 +636,11 @@ static void usb_write_port_complete(struct urb *purb, struct pt_regs *regs)
 			goto check_completion;
 		} else if (purb->status == -ESHUTDOWN) {
 			RT_TRACE(_module_hci_ops_os_c_, _drv_err_, ("usb_write_port_complete: ESHUTDOWN\n"));
-			padapter->bDriverStopped = true;
+			adapter->bDriverStopped = true;
 			RT_TRACE(_module_hci_ops_os_c_, _drv_err_, ("usb_write_port_complete:bDriverStopped = true\n"));
 			goto check_completion;
 		} else {
-			padapter->bSurpriseRemoved = true;
+			adapter->bSurpriseRemoved = true;
 			DBG_88E("bSurpriseRemoved = true\n");
 			RT_TRACE(_module_hci_ops_os_c_, _drv_err_, ("usb_write_port_complete:bSurpriseRemoved = true\n"));
 
@@ -658,25 +658,25 @@ check_completion:
 	tasklet_hi_schedule(&pxmitpriv->xmit_tasklet);
 }
 
-u32 usb_write_port(struct adapter *padapter, u32 addr, u32 cnt, struct xmit_buf *xmitbuf)
+u32 usb_write_port(struct adapter *adapter, u32 addr, u32 cnt, struct xmit_buf *xmitbuf)
 {
 	unsigned long irqL;
 	unsigned int pipe;
 	int status;
 	u32 ret = _FAIL;
 	struct urb *purb = NULL;
-	struct dvobj_priv	*pdvobj = adapter_to_dvobj(padapter);
-	struct xmit_priv	*pxmitpriv = &padapter->xmitpriv;
+	struct dvobj_priv	*pdvobj = adapter_to_dvobj(adapter);
+	struct xmit_priv	*pxmitpriv = &adapter->xmitpriv;
 	struct xmit_frame *pxmitframe = (struct xmit_frame *)xmitbuf->priv_data;
 	struct usb_device *pusbd = pdvobj->pusbdev;
 
 
 	RT_TRACE(_module_hci_ops_os_c_, _drv_err_, ("+usb_write_port\n"));
 
-	if ((padapter->bDriverStopped) || (padapter->bSurpriseRemoved) ||
-	    (padapter->pwrctrlpriv.pnp_bstop_trx)) {
+	if ((adapter->bDriverStopped) || (adapter->bSurpriseRemoved) ||
+	    (adapter->pwrctrlpriv.pnp_bstop_trx)) {
 		RT_TRACE(_module_hci_ops_os_c_, _drv_err_,
-			 ("usb_write_port:( padapter->bDriverStopped ||padapter->bSurpriseRemoved ||adapter->pwrctrlpriv.pnp_bstop_trx)!!!\n"));
+			 ("usb_write_port:( adapter->bDriverStopped ||adapter->bSurpriseRemoved ||adapter->pwrctrlpriv.pnp_bstop_trx)!!!\n"));
 		rtw_sctx_done_err(&xmitbuf->sctx, RTW_SCTX_DONE_TX_DENY);
 		goto exit;
 	}
@@ -729,7 +729,7 @@ u32 usb_write_port(struct adapter *padapter, u32 addr, u32 cnt, struct xmit_buf 
 
 		switch (status) {
 		case -ENODEV:
-			padapter->bDriverStopped = true;
+			adapter->bDriverStopped = true;
 			break;
 		default:
 			break;
@@ -749,14 +749,14 @@ exit:
 	return ret;
 }
 
-void usb_write_port_cancel(struct adapter *padapter)
+void usb_write_port_cancel(struct adapter *adapter)
 {
 	int i, j;
-	struct xmit_buf *xmit_buf = (struct xmit_buf *)padapter->xmitpriv.xmit_buf;
+	struct xmit_buf *xmit_buf = (struct xmit_buf *)adapter->xmitpriv.xmit_buf;
 
 	DBG_88E("%s\n", __func__);
 
-	padapter->bWritePortCancel = true;
+	adapter->bWritePortCancel = true;
 
 	for (i = 0; i < NR_XMITBUFF; i++) {
 		for (j = 0; j < 8; j++) {
@@ -766,7 +766,7 @@ void usb_write_port_cancel(struct adapter *padapter)
 		xmit_buf++;
 	}
 
-	xmit_buf = (struct xmit_buf *)padapter->xmitpriv.pxmit_extbuf;
+	xmit_buf = (struct xmit_buf *)adapter->xmitpriv.pxmit_extbuf;
 	for (i = 0; i < NR_XMIT_EXTBUFF; i++) {
 		for (j = 0; j < 8; j++) {
 			if (xmit_buf->pxmit_urb[j])

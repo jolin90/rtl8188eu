@@ -33,7 +33,7 @@ struct sreset_priv {
 #define	WIFI_RX_HANG			BIT(5)
 #define		WIFI_IF_NOT_EXIST	BIT(6)
 
-u8 sreset_get_wifi_status(struct adapter *padapter);
-void sreset_set_wifi_error_status(struct adapter *padapter, u32 status);
+u8 sreset_get_wifi_status(struct adapter *adapter);
+void sreset_set_wifi_error_status(struct adapter *adapter, u32 status);
 
 #endif

@@ -169,7 +169,7 @@ static s32 update_txdesc(struct xmit_frame *pxmitframe, u8 *pmem, s32 sz, u8 bag
 	int	pull = 0;
 	uint	qsel;
 	u8 data_rate, pwr_status, offset;
-	struct adapter		*adapt = pxmitframe->padapter;
+	struct adapter		*adapt = pxmitframe->adapter;
 	struct pkt_attrib	*pattrib = &pxmitframe->attrib;
 	struct odm_dm_struct *odmpriv = &adapt->HalData->odmpriv;
 	struct tx_desc	*ptxdesc = (struct tx_desc *)pmem;

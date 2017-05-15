@@ -147,7 +147,7 @@ void dump_chip_info(struct HAL_VERSION	ChipVersion);
 
 
 /* return the final channel plan decision */
-u8 hal_com_get_channel_plan(struct adapter *padapter,
+u8 hal_com_get_channel_plan(struct adapter *adapter,
 			    u8 hw_channel_plan,
 			    u8 sw_channel_plan,
 			    u8 def_channel_plan,
@@ -158,7 +158,7 @@ u8 MRateToHwRate(u8 rate);
 
 void HalSetBrateCfg(struct adapter *Adapter, u8 *mBratesOS, u16 *pBrateCfg);
 
-bool Hal_MappingOutPipe(struct adapter *pAdapter, u8 NumOutPipe);
+bool Hal_MappingOutPipe(struct adapter *adapter, u8 NumOutPipe);
 
 void hal_init_macaddr(struct adapter *adapter);
 #endif /* __HAL_COMMON_H__ */

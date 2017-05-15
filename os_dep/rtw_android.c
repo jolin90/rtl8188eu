@@ -84,8 +84,8 @@ int rtw_android_cmdstr_to_num(char *cmdstr)
 static int rtw_android_get_rssi(struct net_device *net, char *command,
 				int total_len)
 {
-	struct adapter *padapter = (struct adapter *)rtw_netdev_priv(net);
-	struct	mlme_priv	*pmlmepriv = &(padapter->mlmepriv);
+	struct adapter *adapter = (struct adapter *)rtw_netdev_priv(net);
+	struct	mlme_priv	*pmlmepriv = &(adapter->mlmepriv);
 	struct	wlan_network	*pcur_network = &pmlmepriv->cur_network;
 	int bytes_written = 0;
 
@@ -93,7 +93,7 @@ static int rtw_android_get_rssi(struct net_device *net, char *command,
 		bytes_written += snprintf(&command[bytes_written], total_len,
 					  "%s rssi %d",
 					  pcur_network->network.Ssid.Ssid,
-					  padapter->recvpriv.rssi);
+					  adapter->recvpriv.rssi);
 	}
 	return bytes_written;
 }
@@ -101,10 +101,10 @@ static int rtw_android_get_rssi(struct net_device *net, char *command,
 static int rtw_android_get_link_speed(struct net_device *net, char *command,
 				      int total_len)
 {
-	struct adapter *padapter = (struct adapter *)rtw_netdev_priv(net);
+	struct adapter *adapter = (struct adapter *)rtw_netdev_priv(net);
 	u16 link_speed;
 
-	link_speed = rtw_get_cur_max_rate(padapter) / 10;
+	link_speed = rtw_get_cur_max_rate(adapter) / 10;
 	return snprintf(command, total_len, "LinkSpeed %d",
 				 link_speed);
 }

@@ -397,10 +397,10 @@ static int wlan_setup_wiphy(struct wireless_dev *wdev, struct device *dev)
 	return err;
 }
 
-int wlan_cfg80211_attach(struct adapter *padapter, struct device *dev)
+int wlan_cfg80211_attach(struct adapter *adapter, struct device *dev)
 {
 	int err = 0;
-	struct net_device *pnetdev = padapter->pnetdev;
+	struct net_device *pnetdev = adapter->pnetdev;
 	struct wireless_dev *wdev;
 	struct wlan_wdev_priv *pwdev_priv;
 
@@ -419,15 +419,15 @@ int wlan_cfg80211_attach(struct adapter *padapter, struct device *dev)
 		return -ENOMEM;
 	}
 
-	*((struct adapter **)wiphy_priv(wdev->wiphy)) = padapter;
+	*((struct adapter **)wiphy_priv(wdev->wiphy)) = adapter;
 	wdev->netdev = pnetdev;
 	wdev->iftype = NL80211_IFTYPE_STATION;
 	pnetdev->ieee80211_ptr = wdev;
-	padapter->wdev = wdev;
+	adapter->wdev = wdev;
 
-	pwdev_priv = &padapter->wdev_priv;
+	pwdev_priv = &adapter->wdev_priv;
 	pwdev_priv->pwdev = wdev;
-	pwdev_priv->padapter = padapter;
+	pwdev_priv->adapter = adapter;
 	pwdev_priv->scan_request = NULL;
 
 	pr_info("%s %d\n", __func__, __LINE__);

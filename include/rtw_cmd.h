@@ -28,7 +28,7 @@
 #define CMDBUFF_ALIGN_SZ 512
 
 struct cmd_obj {
-	struct adapter *padapter;
+	struct adapter *adapter;
 	u16	cmdcode;
 	u8	res;
 	u8	*parmbuf;
@@ -43,7 +43,7 @@ struct cmd_priv {
 	struct completion terminate_cmdthread_comp;
 	struct __queue cmd_queue;
 	u8 cmdthd_running;
-	struct adapter *padapter;
+	struct adapter *adapter;
 };
 
 #define init_h2fwcmd_w_parm_no_rsp(pcmd, pparm, code) \
@@ -301,38 +301,38 @@ Result:
 #define H2C_PARAMETERS_ERROR	0x04
 #define H2C_REJECTED		0x05
 
-u8 rtw_sitesurvey_cmd(struct adapter *padapter, struct ndis_802_11_ssid *ssid,
+u8 rtw_sitesurvey_cmd(struct adapter *adapter, struct ndis_802_11_ssid *ssid,
 		      int ssid_num, struct rtw_ieee80211_channel *ch,
 		      int ch_num);
-u8 rtw_createbss_cmd(struct adapter *padapter);
-u8 rtw_setstakey_cmd(struct adapter *padapter, u8 *psta, u8 unicast_key);
-u8 rtw_clearstakey_cmd(struct adapter *padapter, u8 *psta, u8 entry,
+u8 rtw_createbss_cmd(struct adapter *adapter);
+u8 rtw_setstakey_cmd(struct adapter *adapter, u8 *psta, u8 unicast_key);
+u8 rtw_clearstakey_cmd(struct adapter *adapter, u8 *psta, u8 entry,
 		       u8 enqueue);
-u8 rtw_joinbss_cmd(struct adapter *padapter, struct wlan_network *pnetwork);
-u8 rtw_disassoc_cmd(struct adapter *padapter, u32 deauth_timeout_ms,
+u8 rtw_joinbss_cmd(struct adapter *adapter, struct wlan_network *pnetwork);
+u8 rtw_disassoc_cmd(struct adapter *adapter, u32 deauth_timeout_ms,
 		    bool enqueue);
-u8 rtw_setopmode_cmd(struct adapter *padapter,
+u8 rtw_setopmode_cmd(struct adapter *adapter,
 		     enum ndis_802_11_network_infra networktype);
-u8 rtw_addbareq_cmd(struct adapter *padapter, u8 tid, u8 *addr);
+u8 rtw_addbareq_cmd(struct adapter *adapter, u8 tid, u8 *addr);
 
 u8 rtw_dynamic_chk_wk_cmd(struct adapter *adapter);
 
-u8 rtw_lps_ctrl_wk_cmd(struct adapter *padapter, u8 lps_ctrl_type, u8 enqueue);
-u8 rtw_rpt_timer_cfg_cmd(struct adapter *padapter, u16 minRptTime);
+u8 rtw_lps_ctrl_wk_cmd(struct adapter *adapter, u8 lps_ctrl_type, u8 enqueue);
+u8 rtw_rpt_timer_cfg_cmd(struct adapter *adapter, u16 minRptTime);
 
-u8 rtw_antenna_select_cmd(struct adapter *padapter, u8 antenna, u8 enqueue);
-u8 rtw_ps_cmd(struct adapter *padapter);
+u8 rtw_antenna_select_cmd(struct adapter *adapter, u8 antenna, u8 enqueue);
+u8 rtw_ps_cmd(struct adapter *adapter);
 
 #ifdef CONFIG_88EU_AP_MODE
-u8 rtw_chk_hi_queue_cmd(struct adapter *padapter);
+u8 rtw_chk_hi_queue_cmd(struct adapter *adapter);
 #endif
 
-u8 rtw_set_chplan_cmd(struct adapter *padapter, u8 chplan, u8 enqueue);
-u8 rtw_drvextra_cmd_hdl(struct adapter *padapter, unsigned char *pbuf);
+u8 rtw_set_chplan_cmd(struct adapter *adapter, u8 chplan, u8 enqueue);
+u8 rtw_drvextra_cmd_hdl(struct adapter *adapter, unsigned char *pbuf);
 
-void rtw_survey_cmd_callback(struct adapter *padapter, struct cmd_obj *pcmd);
-void rtw_disassoc_cmd_callback(struct adapter *padapter, struct cmd_obj *pcmd);
-void rtw_joinbss_cmd_callback(struct adapter *padapter, struct cmd_obj *pcmd);
+void rtw_survey_cmd_callback(struct adapter *adapter, struct cmd_obj *pcmd);
+void rtw_disassoc_cmd_callback(struct adapter *adapter, struct cmd_obj *pcmd);
+void rtw_joinbss_cmd_callback(struct adapter *adapter, struct cmd_obj *pcmd);
 void rtw_createbss_cmd_callback(struct adapter *adapt, struct cmd_obj *pcmd);
 void rtw_readtssi_cmdrsp_callback(struct adapter *adapt, struct cmd_obj *cmd);
 
@@ -342,7 +342,7 @@ void rtw_getrttbl_cmdrsp_callback(struct adapter *adapt, struct cmd_obj *cmd);
 
 struct _cmd_callback {
 	u32	cmd_code;
-	void (*callback)(struct adapter  *padapter, struct cmd_obj *cmd);
+	void (*callback)(struct adapter  *adapter, struct cmd_obj *cmd);
 };
 
 enum rtw_h2c_cmd {

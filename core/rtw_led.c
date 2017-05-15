@@ -25,9 +25,9 @@
 void BlinkTimerCallback(unsigned long data)
 {
 	struct LED_871x *pLed = (struct LED_871x *)data;
-	struct adapter *padapter = pLed->padapter;
+	struct adapter *adapter = pLed->adapter;
 
-	if ((padapter->bSurpriseRemoved) || (padapter->bDriverStopped))
+	if ((adapter->bSurpriseRemoved) || (adapter->bDriverStopped))
 		return;
 
 	schedule_work(&pLed->BlinkWorkItem);
@@ -67,9 +67,9 @@ void ResetLedStatus(struct LED_871x *pLed)
 
 /*Description: */
 /*		Initialize an LED_871x object. */
-void InitLed871x(struct adapter *padapter, struct LED_871x *pLed)
+void InitLed871x(struct adapter *adapter, struct LED_871x *pLed)
 {
-	pLed->padapter = padapter;
+	pLed->adapter = adapter;
 
 	ResetLedStatus(pLed);
 
@@ -99,21 +99,21 @@ void DeInitLed871x(struct LED_871x *pLed)
 
 static void SwLedBlink1(struct LED_871x *pLed)
 {
-	struct adapter *padapter = pLed->padapter;
-	struct mlme_priv *pmlmepriv = &padapter->mlmepriv;
+	struct adapter *adapter = pLed->adapter;
+	struct mlme_priv *pmlmepriv = &adapter->mlmepriv;
 	u8 bStopBlinking = false;
 
 	/*  Change LED according to BlinkingLedState specified. */
 	if (pLed->BlinkingLedState == RTW_LED_ON) {
-		SwLedOn(padapter, pLed);
+		SwLedOn(adapter, pLed);
 		RT_TRACE(_module_rtl8712_led_c_, _drv_info_, ("Blinktimes (%d): turn on\n", pLed->BlinkTimes));
 	} else {
-		SwLedOff(padapter, pLed);
+		SwLedOff(adapter, pLed);
 		RT_TRACE(_module_rtl8712_led_c_, _drv_info_, ("Blinktimes (%d): turn off\n", pLed->BlinkTimes));
 	}
 
-	if (padapter->pwrctrlpriv.rf_pwrstate != rf_on) {
-		SwLedOff(padapter, pLed);
+	if (adapter->pwrctrlpriv.rf_pwrstate != rf_on) {
+		SwLedOff(adapter, pLed);
 		ResetLedStatus(pLed);
 		return;
 	}
@@ -246,11 +246,11 @@ static void SwLedBlink1(struct LED_871x *pLed)
 }
 
  /* ALPHA, added by chiyoko, 20090106 */
-static void SwLedControlMode1(struct adapter *padapter, enum LED_CTL_MODE LedAction)
+static void SwLedControlMode1(struct adapter *adapter, enum LED_CTL_MODE LedAction)
 {
-	struct led_priv *ledpriv = &padapter->ledpriv;
+	struct led_priv *ledpriv = &adapter->ledpriv;
 	struct LED_871x *pLed = &ledpriv->SwLed0;
-	struct mlme_priv *pmlmepriv = &padapter->mlmepriv;
+	struct mlme_priv *pmlmepriv = &adapter->mlmepriv;
 
 	switch (LedAction) {
 	case LED_CTL_POWER_ON:
@@ -451,7 +451,7 @@ static void SwLedControlMode1(struct adapter *padapter, enum LED_CTL_MODE LedAct
 			del_timer_sync(&pLed->BlinkTimer);
 			pLed->bLedScanBlinkInProgress = false;
 		}
-		SwLedOff(padapter, pLed);
+		SwLedOff(adapter, pLed);
 		break;
 	default:
 		break;
@@ -466,22 +466,22 @@ static void SwLedControlMode1(struct adapter *padapter, enum LED_CTL_MODE LedAct
 /*  */
 void BlinkHandler(struct LED_871x *pLed)
 {
-	struct adapter *padapter = pLed->padapter;
+	struct adapter *adapter = pLed->adapter;
 
-	if ((padapter->bSurpriseRemoved) || (padapter->bDriverStopped))
+	if ((adapter->bSurpriseRemoved) || (adapter->bDriverStopped))
 		return;
 
 	SwLedBlink1(pLed);
 }
 
-void LedControl8188eu(struct adapter *padapter, enum LED_CTL_MODE LedAction)
+void LedControl8188eu(struct adapter *adapter, enum LED_CTL_MODE LedAction)
 {
-	if ((padapter->bSurpriseRemoved) || (padapter->bDriverStopped) ||
-	   (!padapter->hw_init_completed))
+	if ((adapter->bSurpriseRemoved) || (adapter->bDriverStopped) ||
+	   (!adapter->hw_init_completed))
 		return;
 
-	if ((padapter->pwrctrlpriv.rf_pwrstate != rf_on &&
-	     padapter->pwrctrlpriv.rfoff_reason > RF_CHANGE_BY_PS) &&
+	if ((adapter->pwrctrlpriv.rf_pwrstate != rf_on &&
+	     adapter->pwrctrlpriv.rfoff_reason > RF_CHANGE_BY_PS) &&
 	    (LedAction == LED_CTL_TX || LedAction == LED_CTL_RX ||
 	     LedAction == LED_CTL_SITE_SURVEY ||
 	     LedAction == LED_CTL_LINK ||
@@ -489,5 +489,5 @@ void LedControl8188eu(struct adapter *padapter, enum LED_CTL_MODE LedAction)
 	     LedAction == LED_CTL_POWER_ON))
 		return;
 
-	SwLedControlMode1(padapter, LedAction);
+	SwLedControlMode1(adapter, LedAction);
 }

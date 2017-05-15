@@ -194,7 +194,7 @@ void rtw_sctx_done_err(struct submit_ctx **sctx, int status);
 
 struct xmit_buf {
 	struct list_head list;
-	struct adapter *padapter;
+	struct adapter *adapter;
 	u8 *pallocated_buf;
 	u8 *pbuf;
 	void *priv_data;
@@ -215,7 +215,7 @@ struct xmit_frame {
 	struct pkt_attrib attrib;
 	struct sk_buff *pkt;
 	int	frame_tag;
-	struct adapter *padapter;
+	struct adapter *adapter;
 	u8	*buf_addr;
 	struct xmit_buf *xmit_buf;
 
@@ -309,10 +309,10 @@ s32 rtw_free_xmitbuf_ext(struct xmit_priv *pxmitpriv,
 struct xmit_buf *rtw_alloc_xmitbuf(struct xmit_priv *pxmitpriv);
 s32 rtw_free_xmitbuf(struct xmit_priv *pxmitpriv,
 		     struct xmit_buf *xmit_buf);
-void rtw_count_tx_stats(struct adapter *padapter,
+void rtw_count_tx_stats(struct adapter *adapter,
 			struct xmit_frame *pxmitframe, int sz);
-void rtw_update_protection(struct adapter *padapter, u8 *ie, uint ie_len);
-s32 rtw_make_wlanhdr(struct adapter *padapter, u8 *hdr,
+void rtw_update_protection(struct adapter *adapter, u8 *ie, uint ie_len);
+s32 rtw_make_wlanhdr(struct adapter *adapter, u8 *hdr,
 		     struct pkt_attrib *pattrib);
 s32 rtw_put_snap(u8 *data, u16 h_proto);
 
@@ -321,36 +321,36 @@ s32 rtw_free_xmitframe(struct xmit_priv *pxmitpriv,
 		       struct xmit_frame *pxmitframe);
 void rtw_free_xmitframe_queue(struct xmit_priv *pxmitpriv,
 			      struct __queue *pframequeue);
-struct tx_servq *rtw_get_sta_pending(struct adapter *padapter,
+struct tx_servq *rtw_get_sta_pending(struct adapter *adapter,
 				     struct sta_info *psta, int up, u8 *ac);
-s32 rtw_xmitframe_enqueue(struct adapter *padapter,
+s32 rtw_xmitframe_enqueue(struct adapter *adapter,
 			  struct xmit_frame *pxmitframe);
 struct xmit_frame *rtw_dequeue_xframe(struct xmit_priv *pxmitpriv,
 				      struct hw_xmit *phwxmit_i, int entry);
 
-s32 rtw_xmit_classifier(struct adapter *padapter,
+s32 rtw_xmit_classifier(struct adapter *adapter,
 			struct xmit_frame *pxmitframe);
 u32 rtw_calculate_wlan_pkt_size_by_attribue(struct pkt_attrib *pattrib);
 #define rtw_wlan_pkt_size(f) rtw_calculate_wlan_pkt_size_by_attribue(&f->attrib)
-s32 rtw_xmitframe_coalesce(struct adapter *padapter, struct sk_buff *pkt,
+s32 rtw_xmitframe_coalesce(struct adapter *adapter, struct sk_buff *pkt,
 			   struct xmit_frame *pxmitframe);
 s32 _rtw_init_hw_txqueue(struct hw_txqueue *phw_txqueue, u8 ac_tag);
 void _rtw_init_sta_xmit_priv(struct sta_xmit_priv *psta_xmitpriv);
-s32 rtw_txframes_pending(struct adapter *padapter);
-s32 rtw_txframes_sta_ac_pending(struct adapter *padapter,
+s32 rtw_txframes_pending(struct adapter *adapter);
+s32 rtw_txframes_sta_ac_pending(struct adapter *adapter,
 				struct pkt_attrib *pattrib);
 void rtw_init_hwxmits(struct hw_xmit *phwxmit, int entry);
-s32 _rtw_init_xmit_priv(struct xmit_priv *pxmitpriv, struct adapter *padapter);
+s32 _rtw_init_xmit_priv(struct xmit_priv *pxmitpriv, struct adapter *adapter);
 void _rtw_free_xmit_priv(struct xmit_priv *pxmitpriv);
-void rtw_alloc_hwxmits(struct adapter *padapter);
-void rtw_free_hwxmits(struct adapter *padapter);
-s32 rtw_xmit(struct adapter *padapter, struct sk_buff **pkt);
+void rtw_alloc_hwxmits(struct adapter *adapter);
+void rtw_free_hwxmits(struct adapter *adapter);
+s32 rtw_xmit(struct adapter *adapter, struct sk_buff **pkt);
 
 #if defined(CONFIG_88EU_AP_MODE)
-int xmitframe_enqueue_for_sleeping_sta(struct adapter *padapter, struct xmit_frame *pxmitframe);
-void stop_sta_xmit(struct adapter *padapter, struct sta_info *psta);
-void wakeup_sta_to_xmit(struct adapter *padapter, struct sta_info *psta);
-void xmit_delivery_enabled_frames(struct adapter *padapter, struct sta_info *psta);
+int xmitframe_enqueue_for_sleeping_sta(struct adapter *adapter, struct xmit_frame *pxmitframe);
+void stop_sta_xmit(struct adapter *adapter, struct sta_info *psta);
+void wakeup_sta_to_xmit(struct adapter *adapter, struct sta_info *psta);
+void xmit_delivery_enabled_frames(struct adapter *adapter, struct sta_info *psta);
 #endif
 
 u8	qos_acm(u8 acm_mask, u8 priority);

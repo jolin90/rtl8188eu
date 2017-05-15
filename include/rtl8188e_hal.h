@@ -331,43 +331,43 @@ struct hal_data_8188e {
 };
 
 /*  rtl8188e_hal_init.c */
-void _8051Reset88E(struct adapter *padapter);
-void rtl8188e_InitializeFirmwareVars(struct adapter *padapter);
+void _8051Reset88E(struct adapter *adapter);
+void rtl8188e_InitializeFirmwareVars(struct adapter *adapter);
 
 
-s32 InitLLTTable(struct adapter *padapter, u8 txpktbuf_bndy);
+s32 InitLLTTable(struct adapter *adapter, u8 txpktbuf_bndy);
 
 /*  EFuse */
-void Hal_InitPGData88E(struct adapter *padapter);
-void Hal_EfuseParseIDCode88E(struct adapter *padapter, u8 *hwinfo);
-void Hal_ReadTxPowerInfo88E(struct adapter *padapter, u8 *hwinfo,
+void Hal_InitPGData88E(struct adapter *adapter);
+void Hal_EfuseParseIDCode88E(struct adapter *adapter, u8 *hwinfo);
+void Hal_ReadTxPowerInfo88E(struct adapter *adapter, u8 *hwinfo,
 			    bool AutoLoadFail);
 
-void Hal_EfuseParseEEPROMVer88E(struct adapter *padapter, u8 *hwinfo,
+void Hal_EfuseParseEEPROMVer88E(struct adapter *adapter, u8 *hwinfo,
 				bool AutoLoadFail);
-void rtl8188e_EfuseParseChnlPlan(struct adapter *padapter, u8 *hwinfo,
+void rtl8188e_EfuseParseChnlPlan(struct adapter *adapter, u8 *hwinfo,
 				 bool AutoLoadFail);
-void Hal_EfuseParseCustomerID88E(struct adapter *padapter, u8 *hwinfo,
+void Hal_EfuseParseCustomerID88E(struct adapter *adapter, u8 *hwinfo,
 				 bool AutoLoadFail);
-void Hal_ReadAntennaDiversity88E(struct adapter *pAdapter, u8 *PROMContent,
+void Hal_ReadAntennaDiversity88E(struct adapter *adapter, u8 *PROMContent,
 				 bool AutoLoadFail);
 void Hal_ReadThermalMeter_88E(struct adapter *dapter, u8 *PROMContent,
 			      bool AutoloadFail);
-void Hal_EfuseParseXtal_8188E(struct adapter *pAdapter, u8 *hwinfo,
+void Hal_EfuseParseXtal_8188E(struct adapter *adapter, u8 *hwinfo,
 			      bool AutoLoadFail);
-void Hal_EfuseParseBoardType88E(struct adapter *pAdapter, u8 *hwinfo,
+void Hal_EfuseParseBoardType88E(struct adapter *adapter, u8 *hwinfo,
 				bool AutoLoadFail);
-void Hal_ReadPowerSavingMode88E(struct adapter *pAdapter, u8 *hwinfo,
+void Hal_ReadPowerSavingMode88E(struct adapter *adapter, u8 *hwinfo,
 				bool AutoLoadFail);
 
 /*  register */
 
-void rtl8188e_start_thread(struct adapter *padapter);
-void rtl8188e_stop_thread(struct adapter *padapter);
+void rtl8188e_start_thread(struct adapter *adapter);
+void rtl8188e_stop_thread(struct adapter *adapter);
 
-s32 iol_execute(struct adapter *padapter, u8 control);
-void iol_mode_enable(struct adapter *padapter, u8 enable);
-s32 rtl8188e_iol_efuse_patch(struct adapter *padapter);
-void rtw_cancel_all_timer(struct adapter *padapter);
+s32 iol_execute(struct adapter *adapter, u8 control);
+void iol_mode_enable(struct adapter *adapter, u8 enable);
+s32 rtl8188e_iol_efuse_patch(struct adapter *adapter);
+void rtw_cancel_all_timer(struct adapter *adapter);
 
 #endif /* __RTL8188E_HAL_H__ */

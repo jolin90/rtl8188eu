@@ -51,6 +51,6 @@
 #define WL_CHANNEL_SYNC_RETRY   5
 #define WL_INVALID              -1
 
-int wlan_cfg80211_attach(struct adapter *padapter, struct device *dev);
+int wlan_cfg80211_attach(struct adapter *adapter, struct device *dev);
 void wlan_cfg80211_detach(struct wireless_dev *wdev);
 #endif

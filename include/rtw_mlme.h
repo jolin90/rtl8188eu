@@ -206,11 +206,11 @@ struct mlme_priv {
 #ifdef CONFIG_88EU_AP_MODE
 
 struct hostapd_priv {
-	struct adapter *padapter;
+	struct adapter *adapter;
 };
 
-int hostapd_mode_init(struct adapter *padapter);
-void hostapd_mode_unload(struct adapter *padapter);
+int hostapd_mode_init(struct adapter *adapter);
+void hostapd_mode_unload(struct adapter *adapter);
 #endif
 
 extern unsigned char WPA_TKIP_CIPHER[4];
@@ -227,9 +227,9 @@ void rtw_stassoc_event_callback(struct adapter *adapter, u8 *pbuf);
 void rtw_stadel_event_callback(struct adapter *adapter, u8 *pbuf);
 void rtw_atimdone_event_callback(struct adapter *adapter, u8 *pbuf);
 void rtw_cpwm_event_callback(struct adapter *adapter, u8 *pbuf);
-void indicate_wx_scan_complete_event(struct adapter *padapter);
-void rtw_indicate_wx_assoc_event(struct adapter *padapter);
-void rtw_indicate_wx_disassoc_event(struct adapter *padapter);
+void indicate_wx_scan_complete_event(struct adapter *adapter);
+void rtw_indicate_wx_assoc_event(struct adapter *adapter);
+void rtw_indicate_wx_disassoc_event(struct adapter *adapter);
 int event_thread(void *context);
 void rtw_free_network_queue(struct adapter *adapter, u8 isfreeall);
 int rtw_init_mlme_priv(struct adapter *adapter);
@@ -313,7 +313,7 @@ void rtw_free_assoc_resources(struct adapter *adapter);
 void rtw_free_assoc_resources_locked(struct adapter *adapter);
 void rtw_indicate_disconnect(struct adapter *adapter);
 void rtw_indicate_connect(struct adapter *adapter);
-void rtw_indicate_scan_done(struct adapter *padapter, bool aborted);
+void rtw_indicate_scan_done(struct adapter *adapter, bool aborted);
 void rtw_scan_abort(struct adapter *adapter);
 
 int rtw_restruct_sec_ie(struct adapter *adapter, u8 *in_ie, u8 *out_ie,
@@ -342,24 +342,24 @@ struct wlan_network *_rtw_alloc_network(struct mlme_priv *pmlmepriv);
 void _rtw_free_network_nolock(struct mlme_priv *pmlmepriv,
 			      struct wlan_network *pnetwork);
 
-int rtw_if_up(struct adapter *padapter);
+int rtw_if_up(struct adapter *adapter);
 
 u8 *rtw_get_capability_from_ie(u8 *ie);
 u8 *rtw_get_beacon_interval_from_ie(u8 *ie);
 
-void rtw_joinbss_reset(struct adapter *padapter);
+void rtw_joinbss_reset(struct adapter *adapter);
 
-unsigned int rtw_restructure_ht_ie(struct adapter *padapter, u8 *in_ie,
+unsigned int rtw_restructure_ht_ie(struct adapter *adapter, u8 *in_ie,
 				   u8 *out_ie, uint in_len, uint *pout_len);
-void rtw_update_ht_cap(struct adapter *padapter, u8 *pie, uint ie_len);
-void rtw_issue_addbareq_cmd(struct adapter *padapter,
+void rtw_update_ht_cap(struct adapter *adapter, u8 *pie, uint ie_len);
+void rtw_issue_addbareq_cmd(struct adapter *adapter,
 			    struct xmit_frame *pxmitframe);
 
 int rtw_is_same_ibss(struct adapter *adapter, struct wlan_network *pnetwork);
 int is_same_network(struct wlan_bssid_ex *src, struct wlan_bssid_ex *dst);
 
-void rtw_roaming(struct adapter *padapter, struct wlan_network *tgt_network);
-void _rtw_roaming(struct adapter *padapter, struct wlan_network *tgt_network);
+void rtw_roaming(struct adapter *adapter, struct wlan_network *tgt_network);
+void _rtw_roaming(struct adapter *adapter, struct wlan_network *tgt_network);
 
 void rtw_stassoc_hw_rpt(struct adapter *adapter, struct sta_info *psta);
 

@@ -226,10 +226,10 @@ void rtw_set_ps_mode(struct adapter *adapter, u8 ps_mode, u8 smart_ps,
 		     u8 bcn_ant_mode);
 void rtw_set_rpwm(struct adapter *adapter, u8 val8);
 void LeaveAllPowerSaveMode(struct adapter *adapter);
-void ips_enter(struct adapter *padapter);
-int ips_leave(struct adapter *padapter);
+void ips_enter(struct adapter *adapter);
+int ips_leave(struct adapter *adapter);
 
-void rtw_ps_processor(struct adapter *padapter);
+void rtw_ps_processor(struct adapter *adapter);
 
 enum rt_rf_power_state RfOnOffDetect(struct adapter *iadapter);
 

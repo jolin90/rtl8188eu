@@ -55,7 +55,7 @@ struct wl_pwr_cfg {
 #define GET_PWR_CFG_MASK(__PWR_CMD)		__PWR_CMD.msk
 #define GET_PWR_CFG_VALUE(__PWR_CMD)		__PWR_CMD.value
 
-u8 rtl88eu_pwrseqcmdparsing(struct adapter *padapter, u8 cut_vers,
+u8 rtl88eu_pwrseqcmdparsing(struct adapter *adapter, u8 cut_vers,
 			    struct wl_pwr_cfg pwrcfgCmd[]);
 
 #endif

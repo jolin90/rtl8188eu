@@ -70,8 +70,8 @@ struct rsvdpage_loc {
 };
 
 /*  host message to firmware cmd */
-void rtl8188e_set_FwPwrMode_cmd(struct adapter *padapter, u8 Mode);
-void rtl8188e_set_FwJoinBssReport_cmd(struct adapter *padapter, u8 mstatus);
+void rtl8188e_set_FwPwrMode_cmd(struct adapter *adapter, u8 Mode);
+void rtl8188e_set_FwJoinBssReport_cmd(struct adapter *adapter, u8 mstatus);
 
 void rtl8188e_set_FwMediaStatus_cmd(struct adapter *adapt, __le16 mstatus_rpt);
 

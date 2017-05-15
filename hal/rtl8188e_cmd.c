@@ -131,9 +131,9 @@ exit:
 /* bitmap[28:31]= Rate Adaptive id */
 /* arg[0:4] = macid */
 /* arg[5] = Short GI */
-void rtw_hal_add_ra_tid(struct adapter *pAdapter, u32 bitmap, u8 arg, u8 rssi_level)
+void rtw_hal_add_ra_tid(struct adapter *adapter, u32 bitmap, u8 arg, u8 rssi_level)
 {
-	struct odm_dm_struct *odmpriv = &pAdapter->HalData->odmpriv;
+	struct odm_dm_struct *odmpriv = &adapter->HalData->odmpriv;
 
 	u8 macid, init_rate, raid, shortGIrate = false;
 

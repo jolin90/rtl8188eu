@@ -226,13 +226,13 @@ struct sta_info *rtw_alloc_stainfo(struct sta_priv *pstapriv, u8 *hwaddr)
 			 ("alloc number_%d stainfo  with hwaddr = %pM\n",
 			 pstapriv->asoc_sta_count, hwaddr));
 
-		init_addba_retry_timer(pstapriv->padapter, psta);
+		init_addba_retry_timer(pstapriv->adapter, psta);
 
 		/* for A-MPDU Rx reordering buffer control */
 		for (i = 0; i < 16; i++) {
 			preorder_ctrl = &psta->recvreorder_ctrl[i];
 
-			preorder_ctrl->padapter = pstapriv->padapter;
+			preorder_ctrl->adapter = pstapriv->adapter;
 
 			preorder_ctrl->enable = false;
 
@@ -258,14 +258,14 @@ exit:
 }
 
 /*  using pstapriv->sta_hash_lock to protect */
-u32	rtw_free_stainfo(struct adapter *padapter, struct sta_info *psta)
+u32	rtw_free_stainfo(struct adapter *adapter, struct sta_info *psta)
 {
 	int i;
 	struct __queue *pfree_sta_queue;
 	struct recv_reorder_ctrl *preorder_ctrl;
 	struct	sta_xmit_priv	*pstaxmitpriv;
-	struct	xmit_priv	*pxmitpriv = &padapter->xmitpriv;
-	struct	sta_priv *pstapriv = &padapter->stapriv;
+	struct	xmit_priv	*pxmitpriv = &adapter->xmitpriv;
+	struct	sta_priv *pstapriv = &adapter->stapriv;
 
 
 	if (!psta)
@@ -317,7 +317,7 @@ u32	rtw_free_stainfo(struct adapter *padapter, struct sta_info *psta)
 		struct list_head *phead, *plist;
 		struct recv_frame *prframe;
 		struct __queue *ppending_recvframe_queue;
-		struct __queue *pfree_recv_queue = &padapter->recvpriv.free_recv_queue;
+		struct __queue *pfree_recv_queue = &adapter->recvpriv.free_recv_queue;
 
 		preorder_ctrl = &psta->recvreorder_ctrl[i];
 
@@ -344,7 +344,7 @@ u32	rtw_free_stainfo(struct adapter *padapter, struct sta_info *psta)
 	}
 
 	if (!(psta->state & WIFI_AP_STATE))
-		rtw_hal_set_odm_var(padapter, HAL_ODM_STA_INFO, psta, false);
+		rtw_hal_set_odm_var(adapter, HAL_ODM_STA_INFO, psta, false);
 
 #ifdef CONFIG_88EU_AP_MODE
 
@@ -390,13 +390,13 @@ exit:
 }
 
 /*  free all stainfo which in sta_hash[all] */
-void rtw_free_all_stainfo(struct adapter *padapter)
+void rtw_free_all_stainfo(struct adapter *adapter)
 {
 	struct list_head *plist, *phead;
 	s32	index;
 	struct sta_info *psta = NULL;
-	struct	sta_priv *pstapriv = &padapter->stapriv;
-	struct sta_info *pbcmc_stainfo = rtw_get_bcmc_stainfo(padapter);
+	struct	sta_priv *pstapriv = &adapter->stapriv;
+	struct sta_info *pbcmc_stainfo = rtw_get_bcmc_stainfo(adapter);
 
 
 	if (pstapriv->asoc_sta_count == 1)
@@ -414,7 +414,7 @@ void rtw_free_all_stainfo(struct adapter *padapter)
 			plist = plist->next;
 
 			if (pbcmc_stainfo != psta)
-				rtw_free_stainfo(padapter, psta);
+				rtw_free_stainfo(adapter, psta);
 		}
 	}
 	spin_unlock_bh(&pstapriv->sta_hash_lock);
@@ -460,12 +460,12 @@ struct sta_info *rtw_get_stainfo(struct sta_priv *pstapriv, u8 *hwaddr)
 	return psta;
 }
 
-u32 rtw_init_bcmc_stainfo(struct adapter *padapter)
+u32 rtw_init_bcmc_stainfo(struct adapter *adapter)
 {
 	struct sta_info		*psta;
 	u32 res = _SUCCESS;
 	unsigned char bcast_addr[ETH_ALEN] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-	struct	sta_priv *pstapriv = &padapter->stapriv;
+	struct	sta_priv *pstapriv = &adapter->stapriv;
 
 
 	psta = rtw_alloc_stainfo(pstapriv, bcast_addr);
@@ -483,21 +483,21 @@ exit:
 	return res;
 }
 
-struct sta_info *rtw_get_bcmc_stainfo(struct adapter *padapter)
+struct sta_info *rtw_get_bcmc_stainfo(struct adapter *adapter)
 {
-	struct sta_priv		*pstapriv = &padapter->stapriv;
+	struct sta_priv		*pstapriv = &adapter->stapriv;
 	u8 bc_addr[ETH_ALEN] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 	 return rtw_get_stainfo(pstapriv, bc_addr);
 }
 
-u8 rtw_access_ctrl(struct adapter *padapter, u8 *mac_addr)
+u8 rtw_access_ctrl(struct adapter *adapter, u8 *mac_addr)
 {
 	u8 res = true;
 #ifdef CONFIG_88EU_AP_MODE
 	struct list_head *plist, *phead;
 	struct rtw_wlan_acl_node *paclnode;
 	u8 match = false;
-	struct sta_priv *pstapriv = &padapter->stapriv;
+	struct sta_priv *pstapriv = &adapter->stapriv;
 	struct wlan_acl_pool *pacl_list = &pstapriv->acl_list;
 	struct __queue *pacl_node_q = &pacl_list->acl_node_q;
 

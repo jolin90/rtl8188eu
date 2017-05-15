@@ -20,21 +20,21 @@
 
 #include "jolin_debug.h"
 
-void rtw_hal_sreset_init(struct adapter *padapter)
+void rtw_hal_sreset_init(struct adapter *adapter)
 {
-	struct sreset_priv *psrtpriv = &padapter->HalData->srestpriv;
+	struct sreset_priv *psrtpriv = &adapter->HalData->srestpriv;
 
 	psrtpriv->Wifi_Error_Status = WIFI_STATUS_SUCCESS;
 }
 
-u8 sreset_get_wifi_status(struct adapter *padapter)
+u8 sreset_get_wifi_status(struct adapter *adapter)
 {
-	struct sreset_priv *psrtpriv = &padapter->HalData->srestpriv;
+	struct sreset_priv *psrtpriv = &adapter->HalData->srestpriv;
 
 	u8 status = WIFI_STATUS_SUCCESS;
 	u32 val32 = 0;
 
-	val32 = usb_read32(padapter, REG_TXDMA_STATUS);
+	val32 = usb_read32(adapter, REG_TXDMA_STATUS);
 	if (val32 == 0xeaeaeaea) {
 		psrtpriv->Wifi_Error_Status = WIFI_IF_NOT_EXIST;
 	} else if (val32 != 0) {
@@ -54,7 +54,7 @@ u8 sreset_get_wifi_status(struct adapter *padapter)
 	return status;
 }
 
-void sreset_set_wifi_error_status(struct adapter *padapter, u32 status)
+void sreset_set_wifi_error_status(struct adapter *adapter, u32 status)
 {
-	padapter->HalData->srestpriv.Wifi_Error_Status = status;
+	adapter->HalData->srestpriv.Wifi_Error_Status = status;
 }

@@ -151,19 +151,19 @@ struct txrpt_ccx_88e {
 #define txrpt_ccx_qtime_88e(txrpt_ccx)			\
 	((txrpt_ccx)->ccx_qtime0+((txrpt_ccx)->ccx_qtime1<<8))
 
-void rtl8188e_fill_fake_txdesc(struct adapter *padapter, u8 *pDesc,
+void rtl8188e_fill_fake_txdesc(struct adapter *adapter, u8 *pDesc,
 			       u32 BufferLen, u8 IsPsPoll, u8 IsBTQosNull);
-s32 rtl8188eu_init_xmit_priv(struct adapter *padapter);
-s32 rtl8188eu_xmit_buf_handler(struct adapter *padapter);
+s32 rtl8188eu_init_xmit_priv(struct adapter *adapter);
+s32 rtl8188eu_xmit_buf_handler(struct adapter *adapter);
 #define hal_xmit_handler rtl8188eu_xmit_buf_handler
 void rtl8188eu_xmit_tasklet(void *priv);
-s32 rtl8188eu_xmitframe_complete(struct adapter *padapter,
+s32 rtl8188eu_xmitframe_complete(struct adapter *adapter,
 				 struct xmit_priv *pxmitpriv);
 
 void dump_txrpt_ccx_88e(void *buf);
 void handle_txrpt_ccx_88e(struct adapter *adapter, u8 *buf);
 
-void _dbg_dump_tx_info(struct adapter *padapter, int frame_tag,
+void _dbg_dump_tx_info(struct adapter *adapter, int frame_tag,
 		       struct tx_desc *ptxdesc);
 
 #endif /* __RTL8188E_XMIT_H__ */

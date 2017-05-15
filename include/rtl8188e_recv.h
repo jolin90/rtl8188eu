@@ -52,7 +52,7 @@ enum rx_packet_type {
 
 #define INTERRUPT_MSG_FORMAT_LEN 60
 void rtl8188eu_recv_tasklet(void *priv);
-void rtl8188e_process_phy_info(struct adapter *padapter,
+void rtl8188e_process_phy_info(struct adapter *adapter,
 			       struct recv_frame *prframe);
 void update_recvframe_phyinfo_88e(struct recv_frame *fra, struct phy_stat *phy);
 void update_recvframe_attrib_88e(struct recv_frame *fra,

@@ -22,7 +22,7 @@
 /*  */
 /*  Interface to manipulate LED objects. */
 /*  */
-void SwLedOn(struct adapter *padapter, struct LED_871x *pLed);
-void SwLedOff(struct adapter *padapter, struct LED_871x *pLed);
+void SwLedOn(struct adapter *adapter, struct LED_871x *pLed);
+void SwLedOff(struct adapter *adapter, struct LED_871x *pLed);
 
 #endif

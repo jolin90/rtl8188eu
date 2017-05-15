@@ -23,111 +23,111 @@
 
 #include <rtw_iol.h>
 
-void iol_mode_enable(struct adapter *padapter, u8 enable)
+void iol_mode_enable(struct adapter *adapter, u8 enable)
 {
 	u8 reg_0xf0 = 0;
 
 	if (enable) {
 		/* Enable initial offload */
-		reg_0xf0 = usb_read8(padapter, REG_SYS_CFG);
-		usb_write8(padapter, REG_SYS_CFG, reg_0xf0|SW_OFFLOAD_EN);
+		reg_0xf0 = usb_read8(adapter, REG_SYS_CFG);
+		usb_write8(adapter, REG_SYS_CFG, reg_0xf0|SW_OFFLOAD_EN);
 
-		if (!padapter->bFWReady) {
+		if (!adapter->bFWReady) {
 			DBG_88E("bFWReady == false call reset 8051...\n");
-			_8051Reset88E(padapter);
+			_8051Reset88E(adapter);
 		}
 
 	} else {
 		/* disable initial offload */
-		reg_0xf0 = usb_read8(padapter, REG_SYS_CFG);
-		usb_write8(padapter, REG_SYS_CFG, reg_0xf0 & ~SW_OFFLOAD_EN);
+		reg_0xf0 = usb_read8(adapter, REG_SYS_CFG);
+		usb_write8(adapter, REG_SYS_CFG, reg_0xf0 & ~SW_OFFLOAD_EN);
 	}
 }
 
-s32 iol_execute(struct adapter *padapter, u8 control)
+s32 iol_execute(struct adapter *adapter, u8 control)
 {
 	s32 status = _FAIL;
 	u8 reg_0x88 = 0;
 	unsigned long start = 0;
 
 	control = control&0x0f;
-	reg_0x88 = usb_read8(padapter, REG_HMEBOX_E0);
-	usb_write8(padapter, REG_HMEBOX_E0,  reg_0x88|control);
+	reg_0x88 = usb_read8(adapter, REG_HMEBOX_E0);
+	usb_write8(adapter, REG_HMEBOX_E0,  reg_0x88|control);
 
 	start = jiffies;
-	while ((reg_0x88 = usb_read8(padapter, REG_HMEBOX_E0)) & control &&
+	while ((reg_0x88 = usb_read8(adapter, REG_HMEBOX_E0)) & control &&
 	       jiffies_to_msecs(jiffies - start) < 1000) {
 		udelay(5);
 	}
 
-	reg_0x88 = usb_read8(padapter, REG_HMEBOX_E0);
+	reg_0x88 = usb_read8(adapter, REG_HMEBOX_E0);
 	status = (reg_0x88 & control) ? _FAIL : _SUCCESS;
 	if (reg_0x88 & control<<4)
 		status = _FAIL;
 	return status;
 }
 
-static s32 iol_InitLLTTable(struct adapter *padapter, u8 txpktbuf_bndy)
+static s32 iol_InitLLTTable(struct adapter *adapter, u8 txpktbuf_bndy)
 {
 	s32 rst = _SUCCESS;
-	iol_mode_enable(padapter, 1);
-	usb_write8(padapter, REG_TDECTRL+1, txpktbuf_bndy);
-	rst = iol_execute(padapter, CMD_INIT_LLT);
-	iol_mode_enable(padapter, 0);
+	iol_mode_enable(adapter, 1);
+	usb_write8(adapter, REG_TDECTRL+1, txpktbuf_bndy);
+	rst = iol_execute(adapter, CMD_INIT_LLT);
+	iol_mode_enable(adapter, 0);
 	return rst;
 }
 
 
-s32 rtl8188e_iol_efuse_patch(struct adapter *padapter)
+s32 rtl8188e_iol_efuse_patch(struct adapter *adapter)
 {
 	s32	result = _SUCCESS;
 
 	DBG_88E("==> %s\n", __func__);
-	if (rtw_IOL_applied(padapter)) {
-		iol_mode_enable(padapter, 1);
-		result = iol_execute(padapter, CMD_READ_EFUSE_MAP);
+	if (rtw_IOL_applied(adapter)) {
+		iol_mode_enable(adapter, 1);
+		result = iol_execute(adapter, CMD_READ_EFUSE_MAP);
 		if (result == _SUCCESS)
-			result = iol_execute(padapter, CMD_EFUSE_PATCH);
+			result = iol_execute(adapter, CMD_EFUSE_PATCH);
 
-		iol_mode_enable(padapter, 0);
+		iol_mode_enable(adapter, 0);
 	}
 	return result;
 }
 
 #define MAX_REG_BOLCK_SIZE	196
 
-void _8051Reset88E(struct adapter *padapter)
+void _8051Reset88E(struct adapter *adapter)
 {
 	u8 u1bTmp;
 
-	u1bTmp = usb_read8(padapter, REG_SYS_FUNC_EN+1);
-	usb_write8(padapter, REG_SYS_FUNC_EN+1, u1bTmp&(~BIT(2)));
-	usb_write8(padapter, REG_SYS_FUNC_EN+1, u1bTmp|(BIT(2)));
+	u1bTmp = usb_read8(adapter, REG_SYS_FUNC_EN+1);
+	usb_write8(adapter, REG_SYS_FUNC_EN+1, u1bTmp&(~BIT(2)));
+	usb_write8(adapter, REG_SYS_FUNC_EN+1, u1bTmp|(BIT(2)));
 	DBG_88E("=====> _8051Reset88E(): 8051 reset success .\n");
 }
 
-void rtl8188e_InitializeFirmwareVars(struct adapter *padapter)
+void rtl8188e_InitializeFirmwareVars(struct adapter *adapter)
 {
 	/*  Init Fw LPS related. */
-	padapter->pwrctrlpriv.bFwCurrentInPSMode = false;
+	adapter->pwrctrlpriv.bFwCurrentInPSMode = false;
 
 	/*  Init H2C counter. by tynli. 2009.12.09. */
-	padapter->HalData->LastHMEBoxNum = 0;
+	adapter->HalData->LastHMEBoxNum = 0;
 }
 
-void rtw_hal_free_data(struct adapter *padapter)
+void rtw_hal_free_data(struct adapter *adapter)
 {
-	kfree(padapter->HalData);
-	padapter->HalData = NULL;
+	kfree(adapter->HalData);
+	adapter->HalData = NULL;
 }
 
-void rtw_hal_read_chip_version(struct adapter *padapter)
+void rtw_hal_read_chip_version(struct adapter *adapter)
 {
 	u32				value32;
 	struct HAL_VERSION		ChipVersion;
-	struct hal_data_8188e *pHalData = padapter->HalData;
+	struct hal_data_8188e *pHalData = adapter->HalData;
 
-	value32 = usb_read32(padapter, REG_SYS_CFG);
+	value32 = usb_read32(adapter, REG_SYS_CFG);
 	ChipVersion.ChipType = ((value32 & RTL_ID) ? TEST_CHIP : NORMAL_CHIP);
 	ChipVersion.VendorType = ((value32 & VENDOR_ID) ? CHIP_VENDOR_UMC : CHIP_VENDOR_TSMC);
 	ChipVersion.CUTVersion = (value32 & CHIP_VER_RTL_MASK)>>CHIP_VER_RTL_SHIFT; /*  IC version (CUT) */
@@ -183,18 +183,18 @@ void rtw_hal_notch_filter(struct adapter *adapter, bool enable)
 /*  LLT R/W/Init function */
 /*  */
 /*  */
-static s32 _LLTWrite(struct adapter *padapter, u32 address, u32 data)
+static s32 _LLTWrite(struct adapter *adapter, u32 address, u32 data)
 {
 	s32	status = _SUCCESS;
 	s32	count = 0;
 	u32	value = _LLT_INIT_ADDR(address) | _LLT_INIT_DATA(data) | _LLT_OP(_LLT_WRITE_ACCESS);
 	u16	LLTReg = REG_LLT_INIT;
 
-	usb_write32(padapter, LLTReg, value);
+	usb_write32(adapter, LLTReg, value);
 
 	/* polling */
 	do {
-		value = usb_read32(padapter, LLTReg);
+		value = usb_read32(adapter, LLTReg);
 		if (_LLT_NO_ACTIVE == _LLT_OP_VALUE(value))
 			break;
 
@@ -209,23 +209,23 @@ static s32 _LLTWrite(struct adapter *padapter, u32 address, u32 data)
 	return status;
 }
 
-s32 InitLLTTable(struct adapter *padapter, u8 txpktbuf_bndy)
+s32 InitLLTTable(struct adapter *adapter, u8 txpktbuf_bndy)
 {
 	s32	status = _FAIL;
 	u32	i;
 	u32	Last_Entry_Of_TxPktBuf = LAST_ENTRY_OF_TX_PKT_BUFFER;/*  176, 22k */
 
-	if (rtw_IOL_applied(padapter)) {
-		status = iol_InitLLTTable(padapter, txpktbuf_bndy);
+	if (rtw_IOL_applied(adapter)) {
+		status = iol_InitLLTTable(adapter, txpktbuf_bndy);
 	} else {
 		for (i = 0; i < (txpktbuf_bndy - 1); i++) {
-			status = _LLTWrite(padapter, i, i + 1);
+			status = _LLTWrite(adapter, i, i + 1);
 			if (_SUCCESS != status)
 				return status;
 		}
 
 		/*  end of list */
-		status = _LLTWrite(padapter, (txpktbuf_bndy - 1), 0xFF);
+		status = _LLTWrite(adapter, (txpktbuf_bndy - 1), 0xFF);
 		if (_SUCCESS != status)
 			return status;
 
@@ -233,13 +233,13 @@ s32 InitLLTTable(struct adapter *padapter, u8 txpktbuf_bndy)
 		/*  This ring buffer is used as beacon buffer if we config this MAC as two MAC transfer. */
 		/*  Otherwise used as local loopback buffer. */
 		for (i = txpktbuf_bndy; i < Last_Entry_Of_TxPktBuf; i++) {
-			status = _LLTWrite(padapter, i, (i + 1));
+			status = _LLTWrite(adapter, i, (i + 1));
 			if (_SUCCESS != status)
 				return status;
 		}
 
 		/*  Let last entry point to the start entry of ring buffer */
-		status = _LLTWrite(padapter, Last_Entry_Of_TxPktBuf, txpktbuf_bndy);
+		status = _LLTWrite(adapter, Last_Entry_Of_TxPktBuf, txpktbuf_bndy);
 		if (_SUCCESS != status) {
 			return status;
 		}
@@ -249,30 +249,30 @@ s32 InitLLTTable(struct adapter *padapter, u8 txpktbuf_bndy)
 }
 
 void
-Hal_InitPGData88E(struct adapter *padapter)
+Hal_InitPGData88E(struct adapter *adapter)
 {
-	struct eeprom_priv *pEEPROM = GET_EEPROM_EFUSE_PRIV(padapter);
+	struct eeprom_priv *pEEPROM = GET_EEPROM_EFUSE_PRIV(adapter);
 
 	if (!pEEPROM->bautoload_fail_flag) { /*  autoload OK. */
-		if (!is_boot_from_eeprom(padapter)) {
+		if (!is_boot_from_eeprom(adapter)) {
 			/*  Read EFUSE real map to shadow. */
-			EFUSE_ShadowMapUpdate(padapter, EFUSE_WIFI);
+			EFUSE_ShadowMapUpdate(adapter, EFUSE_WIFI);
 		}
 	} else {/* autoload fail */
 		RT_TRACE(_module_hci_hal_init_c_, _drv_notice_, ("AutoLoad Fail reported from CR9346!!\n"));
 		/* update to default value 0xFF */
-		if (!is_boot_from_eeprom(padapter))
-			EFUSE_ShadowMapUpdate(padapter, EFUSE_WIFI);
+		if (!is_boot_from_eeprom(adapter))
+			EFUSE_ShadowMapUpdate(adapter, EFUSE_WIFI);
 	}
 }
 
 void
 Hal_EfuseParseIDCode88E(
-		struct adapter *padapter,
+		struct adapter *adapter,
 		u8 *hwinfo
 	)
 {
-	struct eeprom_priv *pEEPROM = GET_EEPROM_EFUSE_PRIV(padapter);
+	struct eeprom_priv *pEEPROM = GET_EEPROM_EFUSE_PRIV(adapter);
 	u16			EEPROMId;
 
 	/*  Checl 0x8129 again for making sure autoload status!! */
@@ -441,33 +441,33 @@ static u8 Hal_GetChnlGroup88E(u8 chnl, u8 *pGroup)
 	return bIn24G;
 }
 
-void Hal_ReadPowerSavingMode88E(struct adapter *padapter, u8 *hwinfo, bool AutoLoadFail)
+void Hal_ReadPowerSavingMode88E(struct adapter *adapter, u8 *hwinfo, bool AutoLoadFail)
 {
 	if (AutoLoadFail) {
-		padapter->pwrctrlpriv.bHWPowerdown = false;
-		padapter->pwrctrlpriv.bSupportRemoteWakeup = false;
+		adapter->pwrctrlpriv.bHWPowerdown = false;
+		adapter->pwrctrlpriv.bSupportRemoteWakeup = false;
 	} else {
 		/* hw power down mode selection , 0:rf-off / 1:power down */
 
-		if (padapter->registrypriv.hwpdn_mode == 2)
-			padapter->pwrctrlpriv.bHWPowerdown = (hwinfo[EEPROM_RF_FEATURE_OPTION_88E] & BIT(4));
+		if (adapter->registrypriv.hwpdn_mode == 2)
+			adapter->pwrctrlpriv.bHWPowerdown = (hwinfo[EEPROM_RF_FEATURE_OPTION_88E] & BIT(4));
 		else
-			padapter->pwrctrlpriv.bHWPowerdown = padapter->registrypriv.hwpdn_mode;
+			adapter->pwrctrlpriv.bHWPowerdown = adapter->registrypriv.hwpdn_mode;
 
 		/*  decide hw if support remote wakeup function */
 		/*  if hw supported, 8051 (SIE) will generate WeakUP signal(D+/D- toggle) when autoresume */
-		padapter->pwrctrlpriv.bSupportRemoteWakeup = (hwinfo[EEPROM_USB_OPTIONAL_FUNCTION0] & BIT(1)) ? true : false;
+		adapter->pwrctrlpriv.bSupportRemoteWakeup = (hwinfo[EEPROM_USB_OPTIONAL_FUNCTION0] & BIT(1)) ? true : false;
 
 		DBG_88E("%s...bHWPwrPindetect(%x)-bHWPowerdown(%x) , bSupportRemoteWakeup(%x)\n", __func__,
-		padapter->pwrctrlpriv.bHWPwrPindetect, padapter->pwrctrlpriv.bHWPowerdown , padapter->pwrctrlpriv.bSupportRemoteWakeup);
+		adapter->pwrctrlpriv.bHWPwrPindetect, adapter->pwrctrlpriv.bHWPowerdown , adapter->pwrctrlpriv.bSupportRemoteWakeup);
 
-		DBG_88E("### PS params =>  power_mgnt(%x), usbss_enable(%x) ###\n", padapter->registrypriv.power_mgnt, padapter->registrypriv.usbss_enable);
+		DBG_88E("### PS params =>  power_mgnt(%x), usbss_enable(%x) ###\n", adapter->registrypriv.power_mgnt, adapter->registrypriv.usbss_enable);
 	}
 }
 
-void Hal_ReadTxPowerInfo88E(struct adapter *padapter, u8 *PROMContent, bool AutoLoadFail)
+void Hal_ReadTxPowerInfo88E(struct adapter *adapter, u8 *PROMContent, bool AutoLoadFail)
 {
-	struct hal_data_8188e *pHalData = padapter->HalData;
+	struct hal_data_8188e *pHalData = adapter->HalData;
 	struct txpowerinfo24g pwrInfo24G;
 	u8 ch, group;
 	u8 bIn24G, TxCount;
@@ -515,9 +515,9 @@ void Hal_ReadTxPowerInfo88E(struct adapter *padapter, u8 *PROMContent, bool Auto
 	DBG_88E("EEPROMRegulatory = 0x%x\n", pHalData->EEPROMRegulatory);
 }
 
-void Hal_EfuseParseXtal_8188E(struct adapter *pAdapter, u8 *hwinfo, bool AutoLoadFail)
+void Hal_EfuseParseXtal_8188E(struct adapter *adapter, u8 *hwinfo, bool AutoLoadFail)
 {
-	struct hal_data_8188e *pHalData = pAdapter->HalData;
+	struct hal_data_8188e *pHalData = adapter->HalData;
 
 	if (!AutoLoadFail) {
 		pHalData->CrystalCap = hwinfo[EEPROM_XTAL_88E];
@@ -529,9 +529,9 @@ void Hal_EfuseParseXtal_8188E(struct adapter *pAdapter, u8 *hwinfo, bool AutoLoa
 	DBG_88E("CrystalCap: 0x%2x\n", pHalData->CrystalCap);
 }
 
-void Hal_EfuseParseBoardType88E(struct adapter *pAdapter, u8 *hwinfo, bool AutoLoadFail)
+void Hal_EfuseParseBoardType88E(struct adapter *adapter, u8 *hwinfo, bool AutoLoadFail)
 {
-	struct hal_data_8188e *pHalData = pAdapter->HalData;
+	struct hal_data_8188e *pHalData = adapter->HalData;
 
 	if (!AutoLoadFail)
 		pHalData->BoardType = (hwinfo[EEPROM_RF_BOARD_OPTION_88E]
@@ -541,9 +541,9 @@ void Hal_EfuseParseBoardType88E(struct adapter *pAdapter, u8 *hwinfo, bool AutoL
 	DBG_88E("Board Type: 0x%2x\n", pHalData->BoardType);
 }
 
-void Hal_EfuseParseEEPROMVer88E(struct adapter *padapter, u8 *hwinfo, bool AutoLoadFail)
+void Hal_EfuseParseEEPROMVer88E(struct adapter *adapter, u8 *hwinfo, bool AutoLoadFail)
 {
-	struct hal_data_8188e *pHalData = padapter->HalData;
+	struct hal_data_8188e *pHalData = adapter->HalData;
 
 	if (!AutoLoadFail) {
 		pHalData->EEPROMVersion = hwinfo[EEPROM_VERSION_88E];
@@ -557,20 +557,20 @@ void Hal_EfuseParseEEPROMVer88E(struct adapter *padapter, u8 *hwinfo, bool AutoL
 		 pHalData->EEPROMVersion));
 }
 
-void rtl8188e_EfuseParseChnlPlan(struct adapter *padapter, u8 *hwinfo, bool AutoLoadFail)
+void rtl8188e_EfuseParseChnlPlan(struct adapter *adapter, u8 *hwinfo, bool AutoLoadFail)
 {
-	padapter->mlmepriv.ChannelPlan =
-		 hal_com_get_channel_plan(padapter,
+	adapter->mlmepriv.ChannelPlan =
+		 hal_com_get_channel_plan(adapter,
 					  hwinfo ? hwinfo[EEPROM_ChannelPlan_88E] : 0xFF,
-					  padapter->registrypriv.channel_plan,
+					  adapter->registrypriv.channel_plan,
 					  RT_CHANNEL_DOMAIN_WORLD_WIDE_13, AutoLoadFail);
 
-	DBG_88E("mlmepriv.ChannelPlan = 0x%02x\n", padapter->mlmepriv.ChannelPlan);
+	DBG_88E("mlmepriv.ChannelPlan = 0x%02x\n", adapter->mlmepriv.ChannelPlan);
 }
 
-void Hal_EfuseParseCustomerID88E(struct adapter *padapter, u8 *hwinfo, bool AutoLoadFail)
+void Hal_EfuseParseCustomerID88E(struct adapter *adapter, u8 *hwinfo, bool AutoLoadFail)
 {
-	struct hal_data_8188e	*pHalData = padapter->HalData;
+	struct hal_data_8188e	*pHalData = adapter->HalData;
 
 	if (!AutoLoadFail) {
 		pHalData->EEPROMCustomerID = hwinfo[EEPROM_CUSTOMERID_88E];
@@ -581,10 +581,10 @@ void Hal_EfuseParseCustomerID88E(struct adapter *padapter, u8 *hwinfo, bool Auto
 	DBG_88E("EEPROM Customer ID: 0x%2x\n", pHalData->EEPROMCustomerID);
 }
 
-void Hal_ReadAntennaDiversity88E(struct adapter *pAdapter, u8 *PROMContent, bool AutoLoadFail)
+void Hal_ReadAntennaDiversity88E(struct adapter *adapter, u8 *PROMContent, bool AutoLoadFail)
 {
-	struct hal_data_8188e *pHalData = pAdapter->HalData;
-	struct registry_priv	*registry_par = &pAdapter->registrypriv;
+	struct hal_data_8188e *pHalData = adapter->HalData;
+	struct registry_priv	*registry_par = &adapter->registrypriv;
 
 	if (!AutoLoadFail) {
 		/*  Antenna Diversity setting. */

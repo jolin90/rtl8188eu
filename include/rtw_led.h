@@ -54,7 +54,7 @@ enum LED_STATE_871x {
 };
 
 struct LED_871x {
-	struct adapter *padapter;
+	struct adapter *adapter;
 
 	enum LED_STATE_871x	CurrLedState; /*  Current LED state. */
 	enum LED_STATE_871x	BlinkingLedState; /*  Next state for blinking,
@@ -83,7 +83,7 @@ struct LED_871x {
 	((struct LED_871x *)_LED_871x)->CurrLedState == LED_BLINK_WPS_STOP || \
 	((struct LED_871x *)_LED_871x)->bLedWPSBlinkInProgress)
 
-void LedControl8188eu(struct adapter *padapter, enum LED_CTL_MODE	LedAction);
+void LedControl8188eu(struct adapter *adapter, enum LED_CTL_MODE	LedAction);
 
 struct led_priv {
 	/* add for led control */
@@ -96,13 +96,13 @@ void BlinkWorkItemCallback(struct work_struct *work);
 
 void ResetLedStatus(struct LED_871x *pLed);
 
-void InitLed871x(struct adapter *padapter, struct LED_871x *pLed);
+void InitLed871x(struct adapter *adapter, struct LED_871x *pLed);
 
 void DeInitLed871x(struct LED_871x *pLed);
 
 /* hal... */
 void BlinkHandler(struct LED_871x *pLed);
-void SwLedOn(struct adapter *padapter, struct LED_871x *pLed);
-void SwLedOff(struct adapter *padapter, struct LED_871x *pLed);
+void SwLedOn(struct adapter *adapter, struct LED_871x *pLed);
+void SwLedOff(struct adapter *adapter, struct LED_871x *pLed);
 
 #endif /* __RTW_LED_H_ */

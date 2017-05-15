@@ -22,7 +22,7 @@
 #include <usb_ops_linux.h>
 
 /* alloc os related resource in struct recv_buf */
-int rtw_os_recvbuf_resource_alloc(struct adapter *padapter,
+int rtw_os_recvbuf_resource_alloc(struct adapter *adapter,
 				  struct recv_buf *precvbuf)
 {
 	precvbuf->pskb = NULL;
@@ -33,12 +33,12 @@ int rtw_os_recvbuf_resource_alloc(struct adapter *padapter,
 	return _SUCCESS;
 }
 
-void rtw_handle_tkip_mic_err(struct adapter *padapter, u8 bgroup)
+void rtw_handle_tkip_mic_err(struct adapter *adapter, u8 bgroup)
 {
 	union iwreq_data wrqu;
 	struct iw_michaelmicfailure    ev;
-	struct mlme_priv *pmlmepriv  = &padapter->mlmepriv;
-	struct security_priv	*psecuritypriv = &padapter->securitypriv;
+	struct mlme_priv *pmlmepriv  = &adapter->mlmepriv;
+	struct security_priv	*psecuritypriv = &adapter->securitypriv;
 	u32 cur_time = 0;
 
 	if (psecuritypriv->last_mic_err_time == 0) {
@@ -65,20 +65,20 @@ void rtw_handle_tkip_mic_err(struct adapter *padapter, u8 bgroup)
 	memcpy(ev.src_addr.sa_data, &pmlmepriv->assoc_bssid[0], ETH_ALEN);
 	memset(&wrqu, 0x00, sizeof(wrqu));
 	wrqu.data.length = sizeof(ev);
-	wireless_send_event(padapter->pnetdev, IWEVMICHAELMICFAILURE,
+	wireless_send_event(adapter->pnetdev, IWEVMICHAELMICFAILURE,
 			    &wrqu, (char *)&ev);
 }
 
-int rtw_recv_indicatepkt(struct adapter *padapter,
+int rtw_recv_indicatepkt(struct adapter *adapter,
 			 struct recv_frame *precv_frame)
 {
 	struct recv_priv *precvpriv;
 	struct __queue *pfree_recv_queue;
 	struct sk_buff *skb;
-	struct mlme_priv *pmlmepriv = &padapter->mlmepriv;
+	struct mlme_priv *pmlmepriv = &adapter->mlmepriv;
 
 
-	precvpriv = &(padapter->recvpriv);
+	precvpriv = &(adapter->recvpriv);
 	pfree_recv_queue = &(precvpriv->free_recv_queue);
 
 	skb = precv_frame->pkt;
@@ -91,14 +91,14 @@ int rtw_recv_indicatepkt(struct adapter *padapter,
 	if (check_fwstate(pmlmepriv, WIFI_AP_STATE)) {
 		struct sk_buff *pskb2 = NULL;
 		struct sta_info *psta = NULL;
-		struct sta_priv *pstapriv = &padapter->stapriv;
+		struct sta_priv *pstapriv = &adapter->stapriv;
 		struct rx_pkt_attrib *pattrib = &precv_frame->attrib;
 		int bmcast = IS_MCAST(pattrib->dst);
 
-		if (memcmp(pattrib->dst, myid(&padapter->eeprompriv),
+		if (memcmp(pattrib->dst, myid(&adapter->eeprompriv),
 			   ETH_ALEN)) {
 			if (bmcast) {
-				psta = rtw_get_bcmc_stainfo(padapter);
+				psta = rtw_get_bcmc_stainfo(adapter);
 				pskb2 = skb_clone(skb, GFP_ATOMIC);
 			} else {
 				psta = rtw_get_stainfo(pstapriv, pattrib->dst);
@@ -107,7 +107,7 @@ int rtw_recv_indicatepkt(struct adapter *padapter,
 			if (psta) {
 				struct net_device *pnetdev;
 
-				pnetdev = (struct net_device *)padapter->pnetdev;
+				pnetdev = (struct net_device *)adapter->pnetdev;
 				skb->dev = pnetdev;
 				skb_set_queue_mapping(skb, rtw_recv_select_queue(skb));
 
@@ -122,12 +122,12 @@ int rtw_recv_indicatepkt(struct adapter *padapter,
 	}
 
 	rcu_read_lock();
-	rcu_dereference(padapter->pnetdev->rx_handler_data);
+	rcu_dereference(adapter->pnetdev->rx_handler_data);
 	rcu_read_unlock();
 
 	skb->ip_summed = CHECKSUM_NONE;
-	skb->dev = padapter->pnetdev;
-	skb->protocol = eth_type_trans(skb, padapter->pnetdev);
+	skb->dev = adapter->pnetdev;
+	skb->protocol = eth_type_trans(skb, adapter->pnetdev);
 
 	netif_rx(skb);
 

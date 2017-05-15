@@ -19,7 +19,7 @@
 /* This routine deals with the Power Configuration CMDs parsing
  * for RTL8723/RTL8188E Series IC.
  */
-u8 rtl88eu_pwrseqcmdparsing(struct adapter *padapter, u8 cut_vers,
+u8 rtl88eu_pwrseqcmdparsing(struct adapter *adapter, u8 cut_vers,
 			    struct wl_pwr_cfg pwrseqcmd[])
 {
 	struct wl_pwr_cfg pwrcfgcmd = {0};
@@ -56,14 +56,14 @@ u8 rtl88eu_pwrseqcmdparsing(struct adapter *padapter, u8 cut_vers,
 				offset = GET_PWR_CFG_OFFSET(pwrcfgcmd);
 
 				/*  Read the value from system register */
-				value = usb_read8(padapter, offset);
+				value = usb_read8(adapter, offset);
 
 				value &= ~(GET_PWR_CFG_MASK(pwrcfgcmd));
 				value |= (GET_PWR_CFG_VALUE(pwrcfgcmd) &
 					  GET_PWR_CFG_MASK(pwrcfgcmd));
 
 				/*  Write the value back to system register */
-				usb_write8(padapter, offset, value);
+				usb_write8(adapter, offset, value);
 				break;
 			case PWR_CMD_POLLING:
 				RT_TRACE(_module_hal_init_c_, _drv_info_,
@@ -72,7 +72,7 @@ u8 rtl88eu_pwrseqcmdparsing(struct adapter *padapter, u8 cut_vers,
 				poll_bit = false;
 				offset = GET_PWR_CFG_OFFSET(pwrcfgcmd);
 				do {
-					value = usb_read8(padapter, offset);
+					value = usb_read8(adapter, offset);
 					value &= GET_PWR_CFG_MASK(pwrcfgcmd);
 
 					if (value == (GET_PWR_CFG_VALUE(pwrcfgcmd) &

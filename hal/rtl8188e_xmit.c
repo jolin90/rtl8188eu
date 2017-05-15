@@ -54,13 +54,13 @@ void handle_txrpt_ccx_88e(struct adapter *adapter, u8 *buf)
 	}
 }
 
-void _dbg_dump_tx_info(struct adapter *padapter, int frame_tag,
+void _dbg_dump_tx_info(struct adapter *adapter, int frame_tag,
 		       struct tx_desc *ptxdesc)
 {
 	u8 dmp_txpkt;
 	bool dump_txdesc = false;
 
-	rtw_hal_get_def_var(padapter, HAL_DEF_DBG_DUMP_TXPKT, &(dmp_txpkt));
+	rtw_hal_get_def_var(adapter, HAL_DEF_DBG_DUMP_TXPKT, &(dmp_txpkt));
 
 	if (dmp_txpkt == 1) {/* dump txdesc for data frame */
 		DBG_88E("dump tx_desc for data frame\n");

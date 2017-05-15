@@ -818,9 +818,9 @@ void odm_RefreshRateAdaptiveMask(struct odm_dm_struct *pDM_Odm)
 void odm_RefreshRateAdaptiveMaskCE(struct odm_dm_struct *pDM_Odm)
 {
 	u8 i;
-	struct adapter *pAdapter = pDM_Odm->Adapter;
+	struct adapter *adapter = pDM_Odm->Adapter;
 
-	if (pAdapter->bDriverStopped) {
+	if (adapter->bDriverStopped) {
 		ODM_RT_TRACE(pDM_Odm, ODM_COMP_RA_MASK, ODM_DBG_TRACE, ("<---- odm_RefreshRateAdaptiveMask(): driver is going to unload\n"));
 		return;
 	}
@@ -837,7 +837,7 @@ void odm_RefreshRateAdaptiveMaskCE(struct odm_dm_struct *pDM_Odm)
 				ODM_RT_TRACE(pDM_Odm, ODM_COMP_RA_MASK, ODM_DBG_LOUD,
 					     ("RSSI:%d, RSSI_LEVEL:%d\n",
 					     pstat->rssi_stat.UndecoratedSmoothedPWDB, pstat->rssi_level));
-				rtw_hal_update_ra_mask(pAdapter, i, pstat->rssi_level);
+				rtw_hal_update_ra_mask(adapter, i, pstat->rssi_level);
 			}
 		}
 	}
@@ -918,9 +918,9 @@ void odm_RSSIMonitorCheck(struct odm_dm_struct *pDM_Odm)
 	odm_RSSIMonitorCheckCE(pDM_Odm);
 }	/*  odm_RSSIMonitorCheck */
 
-static void FindMinimumRSSI(struct adapter *pAdapter)
+static void FindMinimumRSSI(struct adapter *adapter)
 {
-	struct dm_priv	*pdmpriv = &pAdapter->HalData->dmpriv;
+	struct dm_priv	*pdmpriv = &adapter->HalData->dmpriv;
 
 	/* 1 1.Unconditionally set RSSI */
 	pdmpriv->MinUndecoratedPWDBForDM = pdmpriv->EntryMinUndecoratedSmoothedPWDB;

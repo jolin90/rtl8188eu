@@ -18,10 +18,10 @@
 #include <drv_types.h>
 #include <rtl8188e_hal.h>
 
-static void process_rssi(struct adapter *padapter, struct recv_frame *prframe)
+static void process_rssi(struct adapter *adapter, struct recv_frame *prframe)
 {
 	struct rx_pkt_attrib *pattrib = &prframe->attrib;
-	struct signal_stat *signal_stat = &padapter->recvpriv.signal_strength_data;
+	struct signal_stat *signal_stat = &adapter->recvpriv.signal_strength_data;
 
 	if (signal_stat->update_req) {
 		signal_stat->total_num = 0;
@@ -34,17 +34,17 @@ static void process_rssi(struct adapter *padapter, struct recv_frame *prframe)
 	signal_stat->avg_val = signal_stat->total_val / signal_stat->total_num;
 } /*  Process_UI_RSSI_8192C */
 
-static void process_link_qual(struct adapter *padapter,
+static void process_link_qual(struct adapter *adapter,
 			      struct recv_frame *prframe)
 {
 	struct rx_pkt_attrib *pattrib;
 	struct signal_stat *signal_stat;
 
-	if (!prframe || !padapter)
+	if (!prframe || !adapter)
 		return;
 
 	pattrib = &prframe->attrib;
-	signal_stat = &padapter->recvpriv.signal_qual_data;
+	signal_stat = &adapter->recvpriv.signal_qual_data;
 
 	if (signal_stat->update_req) {
 		signal_stat->total_num = 0;
@@ -57,13 +57,13 @@ static void process_link_qual(struct adapter *padapter,
 	signal_stat->avg_val = signal_stat->total_val / signal_stat->total_num;
 }
 
-void rtl8188e_process_phy_info(struct adapter *padapter,
+void rtl8188e_process_phy_info(struct adapter *adapter,
 		               struct recv_frame *recv_frame)
 {
 	/*  Check RSSI */
-	process_rssi(padapter, recv_frame);
+	process_rssi(adapter, recv_frame);
 	/*  Check EVM */
-	process_link_qual(padapter,  recv_frame);
+	process_link_qual(adapter,  recv_frame);
 }
 
 void update_recvframe_attrib_88e(struct recv_frame *recv_frame,
@@ -137,7 +137,7 @@ void update_recvframe_attrib_88e(struct recv_frame *recv_frame,
 void update_recvframe_phyinfo_88e(struct recv_frame *recv_frame,
 				  struct phy_stat *pphy_status)
 {
-	struct adapter *padapter = recv_frame->adapter;
+	struct adapter *adapter = recv_frame->adapter;
 	struct rx_pkt_attrib *pattrib = &recv_frame->attrib;
 	struct odm_phy_status_info *pPHYInfo  = (struct odm_phy_status_info *)(&pattrib->phy_info);
 	u8 *wlanhdr;
@@ -155,45 +155,45 @@ void update_recvframe_phyinfo_88e(struct recv_frame *recv_frame,
 	pkt_info.bPacketMatchBSSID = ((!IsFrameTypeCtrl(wlanhdr)) &&
 		!pattrib->icv_err && !pattrib->crc_err &&
 		!memcmp(get_hdr_bssid(wlanhdr),
-		 get_bssid(&padapter->mlmepriv), ETH_ALEN));
+		 get_bssid(&adapter->mlmepriv), ETH_ALEN));
 
 	pkt_info.bPacketToSelf = pkt_info.bPacketMatchBSSID &&
 				 (!memcmp(get_da(wlanhdr),
-				  myid(&padapter->eeprompriv), ETH_ALEN));
+				  myid(&adapter->eeprompriv), ETH_ALEN));
 
 	pkt_info.bPacketBeacon = pkt_info.bPacketMatchBSSID &&
 				 (GetFrameSubType(wlanhdr) == WIFI_BEACON);
 
 	if (pkt_info.bPacketBeacon) {
-		if (check_fwstate(&padapter->mlmepriv, WIFI_STATION_STATE))
-			sa = padapter->mlmepriv.cur_network.network.MacAddress;
+		if (check_fwstate(&adapter->mlmepriv, WIFI_STATION_STATE))
+			sa = adapter->mlmepriv.cur_network.network.MacAddress;
 		/* to do Ad-hoc */
 	} else {
 		sa = get_sa(wlanhdr);
 	}
 
-	pstapriv = &padapter->stapriv;
+	pstapriv = &adapter->stapriv;
 	pkt_info.StationID = 0xFF;
 	psta = rtw_get_stainfo(pstapriv, sa);
 	if (psta)
 		pkt_info.StationID = psta->mac_id;
 	pkt_info.Rate = pattrib->mcs_rate;
 
-	ODM_PhyStatusQuery(&padapter->HalData->odmpriv, pPHYInfo,
+	ODM_PhyStatusQuery(&adapter->HalData->odmpriv, pPHYInfo,
 			   (u8 *)pphy_status, &(pkt_info));
 
 	recv_frame->psta = NULL;
 	if (pkt_info.bPacketMatchBSSID &&
-	    (check_fwstate(&padapter->mlmepriv, WIFI_AP_STATE))) {
+	    (check_fwstate(&adapter->mlmepriv, WIFI_AP_STATE))) {
 		if (psta) {
 			recv_frame->psta = psta;
-			rtl8188e_process_phy_info(padapter, recv_frame);
+			rtl8188e_process_phy_info(adapter, recv_frame);
 		}
 	} else if (pkt_info.bPacketToSelf || pkt_info.bPacketBeacon) {
-		if (check_fwstate(&padapter->mlmepriv, WIFI_ADHOC_STATE|WIFI_ADHOC_MASTER_STATE)) {
+		if (check_fwstate(&adapter->mlmepriv, WIFI_ADHOC_STATE|WIFI_ADHOC_MASTER_STATE)) {
 			if (psta)
 				recv_frame->psta = psta;
 		}
-		rtl8188e_process_phy_info(padapter, recv_frame);
+		rtl8188e_process_phy_info(adapter, recv_frame);
 	}
 }

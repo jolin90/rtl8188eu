@@ -34,7 +34,7 @@
 
 /* for Rx reordering buffer control */
 struct recv_reorder_ctrl {
-	struct adapter	*padapter;
+	struct adapter	*adapter;
 	u8 enable;
 	u16 indicate_seq;/* wstart_b, init_value=0xffff */
 	u16 wend_b;
@@ -249,7 +249,7 @@ u32 rtw_free_uc_swdec_pending_queue(struct adapter *adapter);
 
 void rtw_reordering_ctrl_timeout_handler(unsigned long data);
 
-struct recv_frame *recvframe_chk_defrag(struct adapter *padapter,
+struct recv_frame *recvframe_chk_defrag(struct adapter *adapter,
 					struct recv_frame *precv_frame);
 
 static inline s32 translate_percentage_to_dbm(u32 sig_stren_index)
@@ -268,6 +268,6 @@ struct sta_info;
 
 void _rtw_init_sta_recv_priv(struct sta_recv_priv *psta_recvpriv);
 
-void  mgt_dispatcher(struct adapter *padapter, struct recv_frame *precv_frame);
+void  mgt_dispatcher(struct adapter *adapter, struct recv_frame *precv_frame);
 
 #endif

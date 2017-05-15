@@ -151,9 +151,9 @@ MODULE_PARM_DESC(monitor_enable, "Enable monitor inferface (default: false)");
 
 static int netdev_close(struct net_device *pnetdev);
 
-static void loadparam(struct adapter *padapter, struct net_device *pnetdev)
+static void loadparam(struct adapter *adapter, struct net_device *pnetdev)
 {
-	struct registry_priv  *registry_par = &padapter->registrypriv;
+	struct registry_priv  *registry_par = &adapter->registrypriv;
 
 	GlobalDebugLevel = rtw_debug;
 
@@ -204,28 +204,28 @@ static void loadparam(struct adapter *padapter, struct net_device *pnetdev)
 
 static int rtw_net_set_mac_address(struct net_device *pnetdev, void *p)
 {
-	struct adapter *padapter = (struct adapter *)rtw_netdev_priv(pnetdev);
+	struct adapter *adapter = (struct adapter *)rtw_netdev_priv(pnetdev);
 	struct sockaddr *addr = p;
 
-	if (!padapter->bup)
-		memcpy(padapter->eeprompriv.mac_addr, addr->sa_data, ETH_ALEN);
+	if (!adapter->bup)
+		memcpy(adapter->eeprompriv.mac_addr, addr->sa_data, ETH_ALEN);
 
 	return 0;
 }
 
 static struct net_device_stats *rtw_net_get_stats(struct net_device *pnetdev)
 {
-	struct adapter *padapter = (struct adapter *)rtw_netdev_priv(pnetdev);
-	struct xmit_priv *pxmitpriv = &(padapter->xmitpriv);
-	struct recv_priv *precvpriv = &(padapter->recvpriv);
+	struct adapter *adapter = (struct adapter *)rtw_netdev_priv(pnetdev);
+	struct xmit_priv *pxmitpriv = &(adapter->xmitpriv);
+	struct recv_priv *precvpriv = &(adapter->recvpriv);
 
-	padapter->stats.tx_packets = pxmitpriv->tx_pkts;
-	padapter->stats.rx_packets = precvpriv->rx_pkts;
-	padapter->stats.tx_dropped = pxmitpriv->tx_drop;
-	padapter->stats.rx_dropped = precvpriv->rx_drop;
-	padapter->stats.tx_bytes = pxmitpriv->tx_bytes;
-	padapter->stats.rx_bytes = precvpriv->rx_bytes;
-	return &padapter->stats;
+	adapter->stats.tx_packets = pxmitpriv->tx_pkts;
+	adapter->stats.rx_packets = precvpriv->rx_pkts;
+	adapter->stats.tx_dropped = pxmitpriv->tx_drop;
+	adapter->stats.rx_dropped = precvpriv->rx_drop;
+	adapter->stats.tx_bytes = pxmitpriv->tx_bytes;
+	adapter->stats.rx_bytes = precvpriv->rx_bytes;
+	return &adapter->stats;
 }
 
 /*
@@ -271,8 +271,8 @@ static u16 rtw_select_queue(struct net_device *dev, struct sk_buff *skb
 #endif
 		)
 {
-	struct adapter	*padapter = rtw_netdev_priv(dev);
-	struct mlme_priv *pmlmepriv = &padapter->mlmepriv;
+	struct adapter	*adapter = rtw_netdev_priv(dev);
+	struct mlme_priv *pmlmepriv = &adapter->mlmepriv;
 
 	skb->priority = rtw_classify8021d(skb);
 
@@ -328,22 +328,22 @@ static const struct device_type wlan_type = {
 	.name = "wlan",
 };
 
-struct net_device *rtw_init_netdev(struct adapter *old_padapter)
+struct net_device *rtw_init_netdev(struct adapter *old_adapter)
 {
-	struct adapter *padapter;
+	struct adapter *adapter;
 	struct net_device *pnetdev = NULL;
 
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("+init_net_dev\n"));
 
-	if (old_padapter != NULL)
-		pnetdev = rtw_alloc_etherdev_with_old_priv((void *)old_padapter);
+	if (old_adapter != NULL)
+		pnetdev = rtw_alloc_etherdev_with_old_priv((void *)old_adapter);
 
 	if (!pnetdev)
 		return NULL;
 
 	pnetdev->dev.type = &wlan_type;
-	padapter = rtw_netdev_priv(pnetdev);
-	padapter->pnetdev = pnetdev;
+	adapter = rtw_netdev_priv(pnetdev);
+	adapter->pnetdev = pnetdev;
 	DBG_88E("register rtw_netdev_ops to netdev_ops\n");
 	pnetdev->netdev_ops = &rtw_netdev_ops;
 	pnetdev->watchdog_timeo = HZ*3; /* 3 second timeout */
@@ -352,45 +352,45 @@ struct net_device *rtw_init_netdev(struct adapter *old_padapter)
 	pnetdev->wireless_handlers = (struct iw_handler_def *)&rtw_handlers_def;
 #endif
 
-	loadparam(padapter, pnetdev);
+	loadparam(adapter, pnetdev);
 
 	return pnetdev;
 }
 
-static int rtw_start_drv_threads(struct adapter *padapter)
+static int rtw_start_drv_threads(struct adapter *adapter)
 {
 	int err = 0;
 
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("+rtw_start_drv_threads\n"));
 
-	padapter->cmdThread = kthread_run(rtw_cmd_thread, padapter,
+	adapter->cmdThread = kthread_run(rtw_cmd_thread, adapter,
 					  "RTW_CMD_THREAD");
-	if (IS_ERR(padapter->cmdThread))
-		err = PTR_ERR(padapter->cmdThread);
+	if (IS_ERR(adapter->cmdThread))
+		err = PTR_ERR(adapter->cmdThread);
 	else
 		/* wait for cmd_thread to run */
-		wait_for_completion_interruptible(&padapter->cmdpriv.terminate_cmdthread_comp);
+		wait_for_completion_interruptible(&adapter->cmdpriv.terminate_cmdthread_comp);
 
 	return err;
 }
 
-void rtw_stop_drv_threads(struct adapter *padapter)
+void rtw_stop_drv_threads(struct adapter *adapter)
 {
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("+rtw_stop_drv_threads\n"));
 
 	/* Below is to terminate rtw_cmd_thread & event_thread... */
-	complete(&padapter->cmdpriv.cmd_queue_comp);
-	if (padapter->cmdThread)
-		wait_for_completion_interruptible(&padapter->cmdpriv.terminate_cmdthread_comp);
+	complete(&adapter->cmdpriv.cmd_queue_comp);
+	if (adapter->cmdThread)
+		wait_for_completion_interruptible(&adapter->cmdpriv.terminate_cmdthread_comp);
 
 }
 
-static u8 rtw_init_default_value(struct adapter *padapter)
+static u8 rtw_init_default_value(struct adapter *adapter)
 {
-	struct registry_priv *pregistrypriv = &padapter->registrypriv;
-	struct xmit_priv	*pxmitpriv = &padapter->xmitpriv;
-	struct mlme_priv *pmlmepriv = &padapter->mlmepriv;
-	struct security_priv *psecuritypriv = &padapter->securitypriv;
+	struct registry_priv *pregistrypriv = &adapter->registrypriv;
+	struct xmit_priv	*pxmitpriv = &adapter->xmitpriv;
+	struct mlme_priv *pmlmepriv = &adapter->mlmepriv;
+	struct security_priv *psecuritypriv = &adapter->securitypriv;
 
 	/* xmit_priv */
 	pxmitpriv->vcs_setting = pregistrypriv->vrtl_carrier_sense;
@@ -418,104 +418,104 @@ static u8 rtw_init_default_value(struct adapter *padapter)
 	psecuritypriv->ndisencryptstatus = Ndis802_11WEPDisabled;
 
 	/* registry_priv */
-	rtw_init_registrypriv_dev_network(padapter);
-	rtw_update_registrypriv_dev_network(padapter);
+	rtw_init_registrypriv_dev_network(adapter);
+	rtw_update_registrypriv_dev_network(adapter);
 
 	/* hal_priv */
-	rtw_hal_def_value_init(padapter);
+	rtw_hal_def_value_init(adapter);
 
 	/* misc. */
-	padapter->bReadPortCancel = false;
-	padapter->bWritePortCancel = false;
+	adapter->bReadPortCancel = false;
+	adapter->bWritePortCancel = false;
 	return _SUCCESS;
 }
 
-u8 rtw_reset_drv_sw(struct adapter *padapter)
+u8 rtw_reset_drv_sw(struct adapter *adapter)
 {
-	struct mlme_priv *pmlmepriv = &padapter->mlmepriv;
-	struct pwrctrl_priv *pwrctrlpriv = &padapter->pwrctrlpriv;
+	struct mlme_priv *pmlmepriv = &adapter->mlmepriv;
+	struct pwrctrl_priv *pwrctrlpriv = &adapter->pwrctrlpriv;
 
 	/* hal_priv */
-	rtw_hal_def_value_init(padapter);
-	padapter->bReadPortCancel = false;
-	padapter->bWritePortCancel = false;
+	rtw_hal_def_value_init(adapter);
+	adapter->bReadPortCancel = false;
+	adapter->bWritePortCancel = false;
 	pmlmepriv->scan_interval = SCAN_INTERVAL;/*  30*2 sec = 60sec */
 
-	padapter->xmitpriv.tx_pkts = 0;
-	padapter->recvpriv.rx_pkts = 0;
+	adapter->xmitpriv.tx_pkts = 0;
+	adapter->recvpriv.rx_pkts = 0;
 
 	pmlmepriv->LinkDetectInfo.bBusyTraffic = false;
 
 	_clr_fwstate_(pmlmepriv, _FW_UNDER_SURVEY | _FW_UNDER_LINKING);
-	rtw_hal_sreset_init(padapter);
+	rtw_hal_sreset_init(adapter);
 	pwrctrlpriv->pwr_state_check_cnts = 0;
 
 	/* mlmeextpriv */
 	DBG_88E("SCAN_DISABLE\n");
-	padapter->mlmeextpriv.sitesurvey_res.state = SCAN_DISABLE;
+	adapter->mlmeextpriv.sitesurvey_res.state = SCAN_DISABLE;
 
-	rtw_set_signal_stat_timer(&padapter->recvpriv);
+	rtw_set_signal_stat_timer(&adapter->recvpriv);
 
 	return _SUCCESS;
 }
 
-u8 rtw_init_drv_sw(struct adapter *padapter)
+u8 rtw_init_drv_sw(struct adapter *adapter)
 {
 	u8	ret8 = _SUCCESS;
 
 
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("+rtw_init_drv_sw\n"));
 
-	if ((rtw_init_cmd_priv(&padapter->cmdpriv)) == _FAIL) {
+	if ((rtw_init_cmd_priv(&adapter->cmdpriv)) == _FAIL) {
 		RT_TRACE(_module_os_intfs_c_, _drv_err_, ("\n Can't init cmd_priv\n"));
 		ret8 = _FAIL;
 		goto exit;
 	}
 
-	padapter->cmdpriv.padapter = padapter;
+	adapter->cmdpriv.adapter = adapter;
 
-	if (rtw_init_mlme_priv(padapter) == _FAIL) {
+	if (rtw_init_mlme_priv(adapter) == _FAIL) {
 		RT_TRACE(_module_os_intfs_c_, _drv_err_, ("\n Can't init mlme_priv\n"));
 		ret8 = _FAIL;
 		goto exit;
 	}
 
-	if (init_mlme_ext_priv(padapter) == _FAIL) {
+	if (init_mlme_ext_priv(adapter) == _FAIL) {
 		RT_TRACE(_module_os_intfs_c_, _drv_err_, ("\n Can't init mlme_ext_priv\n"));
 		ret8 = _FAIL;
 		goto exit;
 	}
 
-	if (_rtw_init_xmit_priv(&padapter->xmitpriv, padapter) == _FAIL) {
+	if (_rtw_init_xmit_priv(&adapter->xmitpriv, adapter) == _FAIL) {
 		DBG_88E("Can't _rtw_init_xmit_priv\n");
 		ret8 = _FAIL;
 		goto exit;
 	}
 
-	if (_rtw_init_recv_priv(&padapter->recvpriv, padapter) == _FAIL) {
+	if (_rtw_init_recv_priv(&adapter->recvpriv, adapter) == _FAIL) {
 		DBG_88E("Can't _rtw_init_recv_priv\n");
 		ret8 = _FAIL;
 		goto exit;
 	}
 
-	if (_rtw_init_sta_priv(&padapter->stapriv) == _FAIL) {
+	if (_rtw_init_sta_priv(&adapter->stapriv) == _FAIL) {
 		DBG_88E("Can't _rtw_init_sta_priv\n");
 		ret8 = _FAIL;
 		goto exit;
 	}
 
-	padapter->stapriv.padapter = padapter;
+	adapter->stapriv.adapter = adapter;
 
-	rtw_init_bcmc_stainfo(padapter);
+	rtw_init_bcmc_stainfo(adapter);
 
-	rtw_init_pwrctrl_priv(padapter);
+	rtw_init_pwrctrl_priv(adapter);
 
-	ret8 = rtw_init_default_value(padapter);
+	ret8 = rtw_init_default_value(adapter);
 
-	rtw_hal_dm_init(padapter);
-	rtw_hal_sw_led_init(padapter);
+	rtw_hal_dm_init(adapter);
+	rtw_hal_sw_led_init(adapter);
 
-	rtw_hal_sreset_init(padapter);
+	rtw_hal_sreset_init(adapter);
 
 exit:
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("-rtw_init_drv_sw\n"));
@@ -524,47 +524,47 @@ exit:
 	return ret8;
 }
 
-void rtw_cancel_all_timer(struct adapter *padapter)
+void rtw_cancel_all_timer(struct adapter *adapter)
 {
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("+rtw_cancel_all_timer\n"));
 
-	del_timer_sync(&padapter->mlmepriv.assoc_timer);
+	del_timer_sync(&adapter->mlmepriv.assoc_timer);
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("rtw_cancel_all_timer:cancel association timer complete!\n"));
 
-	del_timer_sync(&padapter->mlmepriv.scan_to_timer);
+	del_timer_sync(&adapter->mlmepriv.scan_to_timer);
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("rtw_cancel_all_timer:cancel scan_to_timer!\n"));
 
-	del_timer_sync(&padapter->mlmepriv.dynamic_chk_timer);
+	del_timer_sync(&adapter->mlmepriv.dynamic_chk_timer);
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("rtw_cancel_all_timer:cancel dynamic_chk_timer!\n"));
 
 	/*  cancel sw led timer */
-	rtw_hal_sw_led_deinit(padapter);
+	rtw_hal_sw_led_deinit(adapter);
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("rtw_cancel_all_timer:cancel DeInitSwLeds!\n"));
 
-	del_timer_sync(&padapter->pwrctrlpriv.pwr_state_check_timer);
+	del_timer_sync(&adapter->pwrctrlpriv.pwr_state_check_timer);
 
-	del_timer_sync(&padapter->recvpriv.signal_stat_timer);
+	del_timer_sync(&adapter->recvpriv.signal_stat_timer);
 }
 
-u8 rtw_free_drv_sw(struct adapter *padapter)
+u8 rtw_free_drv_sw(struct adapter *adapter)
 {
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("==>rtw_free_drv_sw"));
 
-	free_mlme_ext_priv(&padapter->mlmeextpriv);
+	free_mlme_ext_priv(&adapter->mlmeextpriv);
 
-	rtw_free_mlme_priv(&padapter->mlmepriv);
-	_rtw_free_xmit_priv(&padapter->xmitpriv);
+	rtw_free_mlme_priv(&adapter->mlmepriv);
+	_rtw_free_xmit_priv(&adapter->xmitpriv);
 
 	/* will free bcmc_stainfo here */
-	_rtw_free_sta_priv(&padapter->stapriv);
+	_rtw_free_sta_priv(&adapter->stapriv);
 
-	_rtw_free_recv_priv(&padapter->recvpriv);
+	_rtw_free_recv_priv(&adapter->recvpriv);
 
-	rtw_hal_free_data(padapter);
+	rtw_hal_free_data(adapter);
 
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("<== rtw_free_drv_sw\n"));
 
-	mutex_destroy(&padapter->hw_init_mutex);
+	mutex_destroy(&adapter->hw_init_mutex);
 
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("-rtw_free_drv_sw\n"));
 
@@ -575,22 +575,22 @@ static int _netdev_open(struct net_device *pnetdev)
 {
 	uint status;
 	int err;
-	struct adapter *padapter = (struct adapter *)rtw_netdev_priv(pnetdev);
-	struct pwrctrl_priv *pwrctrlpriv = &padapter->pwrctrlpriv;
+	struct adapter *adapter = (struct adapter *)rtw_netdev_priv(pnetdev);
+	struct pwrctrl_priv *pwrctrlpriv = &adapter->pwrctrlpriv;
 
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("+88eu_drv - dev_open\n"));
-	DBG_88E("+88eu_drv - drv_open, bup =%d\n", padapter->bup);
+	DBG_88E("+88eu_drv - drv_open, bup =%d\n", adapter->bup);
 
 	if (pwrctrlpriv->ps_flag) {
-		padapter->net_closed = false;
+		adapter->net_closed = false;
 		goto netdev_open_normal_process;
 	}
 
-	if (!padapter->bup) {
-		padapter->bDriverStopped = false;
-		padapter->bSurpriseRemoved = false;
+	if (!adapter->bup) {
+		adapter->bDriverStopped = false;
+		adapter->bSurpriseRemoved = false;
 
-		status = rtw_hal_init(padapter);
+		status = rtw_hal_init(adapter);
 		if (status == _FAIL) {
 			RT_TRACE(_module_os_intfs_c_, _drv_err_, ("rtl88eu_hal_init(): Can't init h/w!\n"));
 			goto netdev_open_error;
@@ -598,29 +598,29 @@ static int _netdev_open(struct net_device *pnetdev)
 
 		pr_info("MAC Address = %pM\n", pnetdev->dev_addr);
 
-		err = rtw_start_drv_threads(padapter);
+		err = rtw_start_drv_threads(adapter);
 		if (err) {
 			pr_info("Initialize driver software resource Failed!\n");
 			goto netdev_open_error;
 		}
 
-		if (init_hw_mlme_ext(padapter) == _FAIL) {
+		if (init_hw_mlme_ext(adapter) == _FAIL) {
 			pr_info("can't init mlme_ext_priv\n");
 			goto netdev_open_error;
 		}
-		rtw_hal_inirp_init(padapter);
+		rtw_hal_inirp_init(adapter);
 
-		LedControl8188eu(padapter, LED_CTL_NO_LINK);
+		LedControl8188eu(adapter, LED_CTL_NO_LINK);
 
-		padapter->bup = true;
+		adapter->bup = true;
 	}
-	padapter->net_closed = false;
+	adapter->net_closed = false;
 
-	mod_timer(&padapter->mlmepriv.dynamic_chk_timer,
+	mod_timer(&adapter->mlmepriv.dynamic_chk_timer,
 		  jiffies + msecs_to_jiffies(2000));
 
-	padapter->pwrctrlpriv.bips_processing = false;
-	rtw_set_pwr_state_check_timer(&padapter->pwrctrlpriv);
+	adapter->pwrctrlpriv.bips_processing = false;
+	rtw_set_pwr_state_check_timer(&adapter->pwrctrlpriv);
 
 	if (!rtw_netif_queue_stopped(pnetdev))
 		netif_tx_start_all_queues(pnetdev);
@@ -629,121 +629,121 @@ static int _netdev_open(struct net_device *pnetdev)
 
 netdev_open_normal_process:
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("-88eu_drv - dev_open\n"));
-	DBG_88E("-88eu_drv - drv_open, bup =%d\n", padapter->bup);
+	DBG_88E("-88eu_drv - drv_open, bup =%d\n", adapter->bup);
 	return 0;
 
 netdev_open_error:
-	padapter->bup = false;
+	adapter->bup = false;
 	netif_carrier_off(pnetdev);
 	netif_tx_stop_all_queues(pnetdev);
 	RT_TRACE(_module_os_intfs_c_, _drv_err_, ("-88eu_drv - dev_open, fail!\n"));
-	DBG_88E("-88eu_drv - drv_open fail, bup =%d\n", padapter->bup);
+	DBG_88E("-88eu_drv - drv_open fail, bup =%d\n", adapter->bup);
 	return -1;
 }
 
 int netdev_open(struct net_device *pnetdev)
 {
 	int ret;
-	struct adapter *padapter = (struct adapter *)rtw_netdev_priv(pnetdev);
+	struct adapter *adapter = (struct adapter *)rtw_netdev_priv(pnetdev);
 
-	if (mutex_lock_interruptible(&padapter->hw_init_mutex))
+	if (mutex_lock_interruptible(&adapter->hw_init_mutex))
 		return -ERESTARTSYS;
 	ret = _netdev_open(pnetdev);
-	mutex_unlock(&padapter->hw_init_mutex);
+	mutex_unlock(&adapter->hw_init_mutex);
 	return ret;
 }
 
-int  ips_netdrv_open(struct adapter *padapter)
+int  ips_netdrv_open(struct adapter *adapter)
 {
 	int status = _SUCCESS;
 
-	padapter->net_closed = false;
+	adapter->net_closed = false;
 	DBG_88E("===> %s.........\n", __func__);
 
-	padapter->bDriverStopped = false;
-	padapter->bSurpriseRemoved = false;
+	adapter->bDriverStopped = false;
+	adapter->bSurpriseRemoved = false;
 
-	status = rtw_hal_init(padapter);
+	status = rtw_hal_init(adapter);
 	if (status == _FAIL) {
 		RT_TRACE(_module_os_intfs_c_, _drv_err_, (" Can't init h/w!\n"));
 		goto netdev_open_error;
 	}
 
-	rtw_hal_inirp_init(padapter);
+	rtw_hal_inirp_init(adapter);
 
-	rtw_set_pwr_state_check_timer(&padapter->pwrctrlpriv);
-	mod_timer(&padapter->mlmepriv.dynamic_chk_timer,
+	rtw_set_pwr_state_check_timer(&adapter->pwrctrlpriv);
+	mod_timer(&adapter->mlmepriv.dynamic_chk_timer,
 		  jiffies + msecs_to_jiffies(5000));
 
 	 return _SUCCESS;
 
 netdev_open_error:
-	DBG_88E("-drv_open failure, bup =%d\n", padapter->bup);
+	DBG_88E("-drv_open failure, bup =%d\n", adapter->bup);
 
 	return _FAIL;
 }
 
 
-int rtw_ips_pwr_up(struct adapter *padapter)
+int rtw_ips_pwr_up(struct adapter *adapter)
 {
 	int result;
 	unsigned long start_time = jiffies;
 
 	DBG_88E("===>  ..............\n");
-	rtw_reset_drv_sw(padapter);
+	rtw_reset_drv_sw(adapter);
 
-	result = ips_netdrv_open(padapter);
+	result = ips_netdrv_open(adapter);
 
-	LedControl8188eu(padapter, LED_CTL_NO_LINK);
+	LedControl8188eu(adapter, LED_CTL_NO_LINK);
 
 	DBG_88E("<===  .............. in %dms\n",
 		jiffies_to_msecs(jiffies - start_time));
 	return result;
 }
 
-void rtw_ips_pwr_down(struct adapter *padapter)
+void rtw_ips_pwr_down(struct adapter *adapter)
 {
 	unsigned long start_time = jiffies;
 
 	DBG_88E("===> rtw_ips_pwr_down...................\n");
 
-	padapter->net_closed = true;
+	adapter->net_closed = true;
 
-	LedControl8188eu(padapter, LED_CTL_POWER_OFF);
+	LedControl8188eu(adapter, LED_CTL_POWER_OFF);
 
-	rtw_ips_dev_unload(padapter);
+	rtw_ips_dev_unload(adapter);
 	DBG_88E("<=== rtw_ips_pwr_down..................... in %dms\n",
 		jiffies_to_msecs(jiffies - start_time));
 }
 
-void rtw_ips_dev_unload(struct adapter *padapter)
+void rtw_ips_dev_unload(struct adapter *adapter)
 {
 	DBG_88E("====> %s...\n", __func__);
 
-	rtw_hal_set_hwreg(padapter, HW_VAR_FIFO_CLEARN_UP, NULL);
+	rtw_hal_set_hwreg(adapter, HW_VAR_FIFO_CLEARN_UP, NULL);
 
-	usb_intf_stop(padapter);
+	usb_intf_stop(adapter);
 
 	/* s5. */
-	if (!padapter->bSurpriseRemoved)
-		rtw_hal_deinit(padapter);
+	if (!adapter->bSurpriseRemoved)
+		rtw_hal_deinit(adapter);
 }
 
 static int netdev_close(struct net_device *pnetdev)
 {
-	struct adapter *padapter = (struct adapter *)rtw_netdev_priv(pnetdev);
+	struct adapter *adapter = (struct adapter *)rtw_netdev_priv(pnetdev);
 
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("+88eu_drv - drv_close\n"));
 
-	if (padapter->pwrctrlpriv.bInternalAutoSuspend) {
-		if (padapter->pwrctrlpriv.rf_pwrstate == rf_off)
-			padapter->pwrctrlpriv.ps_flag = true;
+	if (adapter->pwrctrlpriv.bInternalAutoSuspend) {
+		if (adapter->pwrctrlpriv.rf_pwrstate == rf_off)
+			adapter->pwrctrlpriv.ps_flag = true;
 	}
-	padapter->net_closed = true;
+	adapter->net_closed = true;
 
-	if (padapter->pwrctrlpriv.rf_pwrstate == rf_on) {
+	if (adapter->pwrctrlpriv.rf_pwrstate == rf_on) {
 		DBG_88E("(2)88eu_drv - drv_close, bup =%d, hw_init_completed =%d\n",
-			padapter->bup, padapter->hw_init_completed);
+			adapter->bup, adapter->hw_init_completed);
 
 		/* s1. */
 		if (pnetdev) {
@@ -752,19 +752,19 @@ static int netdev_close(struct net_device *pnetdev)
 		}
 
 		/* s2. */
-		LeaveAllPowerSaveMode(padapter);
-		rtw_disassoc_cmd(padapter, 500, false);
+		LeaveAllPowerSaveMode(adapter);
+		rtw_disassoc_cmd(adapter, 500, false);
 		/* s2-2.  indicate disconnect to os */
-		rtw_indicate_disconnect(padapter);
+		rtw_indicate_disconnect(adapter);
 		/* s2-3. */
-		rtw_free_assoc_resources(padapter);
+		rtw_free_assoc_resources(adapter);
 		/* s2-4. */
-		rtw_free_network_queue(padapter, true);
+		rtw_free_network_queue(adapter, true);
 		/*  Close LED */
-		LedControl8188eu(padapter, LED_CTL_POWER_OFF);
+		LedControl8188eu(adapter, LED_CTL_POWER_OFF);
 	}
 
 	RT_TRACE(_module_os_intfs_c_, _drv_info_, ("-88eu_drv - drv_close\n"));
-	DBG_88E("-88eu_drv - drv_close, bup =%d\n", padapter->bup);
+	DBG_88E("-88eu_drv - drv_close, bup =%d\n", adapter->bup);
 	return 0;
 }
