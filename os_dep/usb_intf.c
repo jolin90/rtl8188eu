@@ -31,6 +31,7 @@
 #endif
 
 #include "rtl8188e_hal.h"
+#include "jolin_debug.h"
 
 #define USB_VENDER_ID_REALTEK		0x0bda
 
@@ -453,7 +454,7 @@ static void rtw_usb_if1_deinit(struct adapter *if1)
 	rtw_cancel_all_timer(if1);
 
 #ifdef CONFIG_WLAN_CFG80211
-	/*wlan_cfg80211_detach(if1->wdev);*/
+	wlan_cfg80211_detach(if1->wdev);
 #endif
 
 	rtw_dev_unload(if1);

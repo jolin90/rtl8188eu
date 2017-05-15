@@ -140,10 +140,16 @@ struct wlan_wdev_priv;
 
 struct wlan_wdev_priv
 {
-	struct wireless_dev *pwdev;
 	struct adapter *adapter;
+	struct wireless_dev *pwdev;
 	struct cfg80211_scan_request *scan_request;
 };
+
+struct wlan_wiphy_priv
+{
+	struct adapter *adapter;
+};
+
 #endif
 
 struct adapter {

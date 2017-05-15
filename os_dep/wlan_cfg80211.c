@@ -7,6 +7,8 @@
 #include "drv_types.h"
 #include "wlan_cfg80211.h"
 
+#include <jolin_debug.h>
+
 #define CHAN2G(_channel, _freq, _flags)		\
 {											\
 	.band			= IEEE80211_BAND_2GHZ,	\
@@ -348,7 +350,7 @@ static int wlan_setup_wiphy(struct wireless_dev *wdev, struct device *dev)
 	int err = 0;
 	struct wiphy *wiphy;
 
-	wiphy = wiphy_new(&wlan_cfg80211_ops, sizeof(struct adapter *));
+	wiphy = wiphy_new(&wlan_cfg80211_ops, sizeof(struct wlan_wiphy_priv));
 	if (unlikely(!wiphy)) {
 		pr_err("Couldn not allocate wiphy device\n");
 		err = -ENOMEM;
@@ -400,48 +402,63 @@ static int wlan_setup_wiphy(struct wireless_dev *wdev, struct device *dev)
 int wlan_cfg80211_attach(struct adapter *adapter, struct device *dev)
 {
 	int err = 0;
-	struct net_device *pnetdev = adapter->pnetdev;
+	struct net_device *pnetdev;
 	struct wireless_dev *wdev;
 	struct wlan_wdev_priv *pwdev_priv;
+	/*struct wlan_wiphy_priv *priv;*/
+	/*struct wiphy *wiphy;*/
 
-	pr_info("%s %d\n", __func__, __LINE__);
+	DBG_88E("\n");
 
-	wdev = kzalloc(sizeof(*wdev), GFP_KERNEL);
+	wdev = kzalloc(sizeof(struct wireless_dev), GFP_KERNEL);
 	if (unlikely(!wdev)) {
 		pr_err("Could not allocate wireless device\n");
 		return -ENOMEM;
 	}
 
-	pr_info("%s %d\n", __func__, __LINE__);
+#if 0
 	err = wlan_setup_wiphy(wdev, dev);
 	if (unlikely(err)) {
 		kfree(wdev);
 		return -ENOMEM;
 	}
 
-	*((struct adapter **)wiphy_priv(wdev->wiphy)) = adapter;
-	wdev->netdev = pnetdev;
-	wdev->iftype = NL80211_IFTYPE_STATION;
-	pnetdev->ieee80211_ptr = wdev;
-	adapter->wdev = wdev;
+	wiphy = wdev->wiphy;
+	priv = wiphy_priv(wiphy);
+	priv->adapter = adapter;
+#endif
 
 	pwdev_priv = &adapter->wdev_priv;
-	pwdev_priv->pwdev = wdev;
 	pwdev_priv->adapter = adapter;
+	pwdev_priv->pwdev = wdev;
 	pwdev_priv->scan_request = NULL;
 
-	pr_info("%s %d\n", __func__, __LINE__);
+	adapter->wdev = wdev;
+
+	wdev->netdev = pnetdev = adapter->pnetdev;
+	wdev->iftype = NL80211_IFTYPE_STATION;
+	/*pnetdev->ieee80211_ptr = wdev;*/
+
+	DBG_88E("\n");
+
 	return err;
 }
 
 void wlan_cfg80211_detach(struct wireless_dev *wdev)
 {
-	pr_info("%s %d\n", __func__, __LINE__);
+	struct wiphy *wiphy;
 
-	if (wdev->wiphy)
-		wiphy_free(wdev->wiphy);
+	DBG_88E("\n");
+
+	wiphy = wdev->wiphy;
+
+	if (wiphy) {
+		/*wiphy_unregister(wiphy); */
+		/*wiphy_free(wiphy); */
+	}
+
 	if (wdev)
 		kfree(wdev);
 
-	pr_info("%s %d\n", __func__, __LINE__);
+	DBG_88E("\n");
 }
