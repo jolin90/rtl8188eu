@@ -134,7 +134,7 @@ static inline struct device *dvobj_to_dev(struct dvobj_priv *dvobj)
 	return &dvobj->pusbintf->dev;
 };
 
-#ifdef WLAN_CFG80211
+#ifdef CONFIG_WLAN_CFG80211
 struct adapter;
 struct wlan_wdev_priv;
 
@@ -183,7 +183,7 @@ struct adapter {
 
 	struct mutex hw_init_mutex;
 
-#ifdef WLAN_CFG80211
+#ifdef CONFIG_WLAN_CFG80211
 	struct wireless_dev *wdev;
 	struct wlan_wdev_priv wdev_priv;
 #endif

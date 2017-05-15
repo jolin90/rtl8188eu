@@ -51,11 +51,11 @@
 		os_dep/usb_ops_linux.o	\
 		os_dep/xmit_linux.o
 
-CONFIG_WLAN_CFG80211 = n
+CONFIG_WLAN_CFG80211 = y
 
 ifeq ($(CONFIG_WLAN_CFG80211), y)
 r8188eu-y += os_dep/wlan_cfg80211.o
-ccflags-y += -DWLAN_CFG80211
+ccflags-y += -DCONFIG_WLAN_CFG80211
 endif
 
 export CONFIG_R8188EU = m

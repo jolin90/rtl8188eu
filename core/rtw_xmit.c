@@ -1336,9 +1336,9 @@ struct xmit_frame *rtw_alloc_xmitframe(struct xmit_priv *xmit_priv)
 		/* default value setting */
 		xmit_priv->free_xmitframe_cnt--;
 
-		RT_TRACE(_module_rtl871x_xmit_c_, _drv_info_,
-			 ("rtw_alloc_xmitframe():free_xmitframe_cnt=%d\n",
-			 xmit_priv->free_xmitframe_cnt));
+   /*     RT_TRACE(_module_rtl871x_xmit_c_, _drv_info_,*/
+			 /*("rtw_alloc_xmitframe():free_xmitframe_cnt=%d\n",*/
+			 /*xmit_priv->free_xmitframe_cnt));*/
 
 		pxframe->buf_addr = NULL;
 		pxframe->xmit_buf = NULL;
@@ -1383,7 +1383,7 @@ s32 rtw_free_xmitframe(struct xmit_priv *xmit_priv, struct xmit_frame *pxmitfram
 	list_add_tail(&pxmitframe->list, get_list_head(pfree_xmit_queue));
 
 	xmit_priv->free_xmitframe_cnt++;
-	RT_TRACE(_module_rtl871x_xmit_c_, _drv_debug_, ("rtw_free_xmitframe():free_xmitframe_cnt=%d\n", xmit_priv->free_xmitframe_cnt));
+	/*RT_TRACE(_module_rtl871x_xmit_c_, _drv_debug_, ("rtw_free_xmitframe():free_xmitframe_cnt=%d\n", xmit_priv->free_xmitframe_cnt));*/
 
 	spin_unlock_bh(&pfree_xmit_queue->lock);
 

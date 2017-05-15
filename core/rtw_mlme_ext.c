@@ -631,7 +631,7 @@ static int issue_probereq(struct adapter *adapter, struct ndis_802_11_ssid *pssi
 
 	/*RT_TRACE(_module_rtl871x_mlme_c_, _drv_notice_, ("+issue_probereq\n"));*/
 
-	DBG_88E("====>\n");
+	/*DBG_88E("====>\n");*/
 
 	if (pssid && pssid->SsidLength > 0)
 		DBG_88E("ssid is :%s\n", pssid->Ssid);
@@ -712,7 +712,7 @@ static int issue_probereq(struct adapter *adapter, struct ndis_802_11_ssid *pssi
 	}
 
 exit:
-	DBG_88E("<====\n");
+	/*DBG_88E("<====\n");*/
 	return ret;
 }
 
@@ -2662,7 +2662,7 @@ static unsigned int OnBeacon(struct adapter *adapter,
 	int ret = _SUCCESS;
 	struct wlan_bssid_ex *pnetwork = &(pmlmeinfo->network);
 
-	DBG_88E("==>\n");
+	/*DBG_88E("==>\n");*/
 
 	if (pmlmeext->sitesurvey_res.state == SCAN_PROCESS) {
 		report_survey_event(adapter, precv_frame);
@@ -2739,7 +2739,7 @@ static unsigned int OnBeacon(struct adapter *adapter,
 	}
 
 _END_ONBEACON_:
-	DBG_88E("<==\n");
+	/*DBG_88E("<==\n");*/
 	return _SUCCESS;
 }
 
