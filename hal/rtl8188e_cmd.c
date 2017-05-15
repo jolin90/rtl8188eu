@@ -450,9 +450,9 @@ static void ConstructProbeRsp(struct adapter *adapt, u8 *pframe, u32 *pLength, u
 /*  2009.10.15 by tynli. */
 static void SetFwRsvdPagePkt(struct adapter *adapt, bool bDLFinished)
 {
-	struct xmit_frame	*pmgntframe;
+	struct xmit_frame	*xmit_frame;
 	struct pkt_attrib	*pattrib;
-	struct xmit_priv *pxmitpriv;
+	struct xmit_priv *xmit_priv;
 	struct mlme_ext_priv *pmlmeext;
 	struct mlme_ext_info	*pmlmeinfo;
 	u32 BeaconLength = 0, ProbeRspLength = 0, PSPollLength;
@@ -471,7 +471,7 @@ static void SetFwRsvdPagePkt(struct adapter *adapt, bool bDLFinished)
 		return;
 	}
 
-	pxmitpriv = &adapt->xmitpriv;
+	xmit_priv = &adapt->xmitpriv;
 	pmlmeext = &adapt->mlmeextpriv;
 	pmlmeinfo = &pmlmeext->mlmext_info;
 	pnetwork = &(pmlmeinfo->network);
@@ -534,19 +534,19 @@ static void SetFwRsvdPagePkt(struct adapter *adapt, bool bDLFinished)
 	PageNum += PageNeed;
 
 	TotalPacketLen = BufIndex + QosNullLength;
-	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
-	if (!pmgntframe)
+	xmit_frame = alloc_mgtxmitframe(xmit_priv);
+	if (!xmit_frame)
 		goto exit;
 
 	/*  update attribute */
-	pattrib = &pmgntframe->attrib;
+	pattrib = &xmit_frame->attrib;
 	update_mgntframe_attrib(adapt, pattrib);
 	pattrib->qsel = 0x10;
 	pattrib->last_txcmdsz = TotalPacketLen - TXDESC_OFFSET;
 	pattrib->pktlen = pattrib->last_txcmdsz;
-	memcpy(pmgntframe->buf_addr, ReservedPagePacket, TotalPacketLen);
+	memcpy(xmit_frame->buf_addr, ReservedPagePacket, TotalPacketLen);
 
-	rtw_hal_mgnt_xmit(adapt, pmgntframe);
+	rtw_hal_mgnt_xmit(adapt, xmit_frame);
 
 	DBG_88E("%s: Set RSVD page location to Fw\n", __func__);
 	FillH2CCmd_88E(adapt, H2C_COM_RSVD_PAGE, sizeof(RsvdPageLoc), (u8 *)&RsvdPageLoc);

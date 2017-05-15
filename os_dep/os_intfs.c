@@ -216,14 +216,14 @@ static int rtw_net_set_mac_address(struct net_device *pnetdev, void *p)
 static struct net_device_stats *rtw_net_get_stats(struct net_device *pnetdev)
 {
 	struct adapter *adapter = (struct adapter *)rtw_netdev_priv(pnetdev);
-	struct xmit_priv *pxmitpriv = &(adapter->xmitpriv);
+	struct xmit_priv *xmit_priv = &(adapter->xmitpriv);
 	struct recv_priv *precvpriv = &(adapter->recvpriv);
 
-	adapter->stats.tx_packets = pxmitpriv->tx_pkts;
+	adapter->stats.tx_packets = xmit_priv->tx_pkts;
 	adapter->stats.rx_packets = precvpriv->rx_pkts;
-	adapter->stats.tx_dropped = pxmitpriv->tx_drop;
+	adapter->stats.tx_dropped = xmit_priv->tx_drop;
 	adapter->stats.rx_dropped = precvpriv->rx_drop;
-	adapter->stats.tx_bytes = pxmitpriv->tx_bytes;
+	adapter->stats.tx_bytes = xmit_priv->tx_bytes;
 	adapter->stats.rx_bytes = precvpriv->rx_bytes;
 	return &adapter->stats;
 }
@@ -388,15 +388,15 @@ void rtw_stop_drv_threads(struct adapter *adapter)
 static u8 rtw_init_default_value(struct adapter *adapter)
 {
 	struct registry_priv *pregistrypriv = &adapter->registrypriv;
-	struct xmit_priv	*pxmitpriv = &adapter->xmitpriv;
+	struct xmit_priv	*xmit_priv = &adapter->xmitpriv;
 	struct mlme_priv *pmlmepriv = &adapter->mlmepriv;
 	struct security_priv *psecuritypriv = &adapter->securitypriv;
 
 	/* xmit_priv */
-	pxmitpriv->vcs_setting = pregistrypriv->vrtl_carrier_sense;
-	pxmitpriv->vcs = pregistrypriv->vcs_type;
-	pxmitpriv->vcs_type = pregistrypriv->vcs_type;
-	pxmitpriv->frag_len = pregistrypriv->frag_thresh;
+	xmit_priv->vcs_setting = pregistrypriv->vrtl_carrier_sense;
+	xmit_priv->vcs = pregistrypriv->vcs_type;
+	xmit_priv->vcs_type = pregistrypriv->vcs_type;
+	xmit_priv->frag_len = pregistrypriv->frag_thresh;
 
 	/* mlme_priv */
 	pmlmepriv->scan_interval = SCAN_INTERVAL;/*  30*2 sec = 60sec */

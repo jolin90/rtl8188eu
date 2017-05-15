@@ -583,20 +583,20 @@ static void usb_write_port_complete(struct urb *purb, struct pt_regs *regs)
 {
 	struct xmit_buf *xmit_buf = (struct xmit_buf *)purb->context;
 	struct adapter	*adapter = xmit_buf->adapter;
-	struct xmit_priv	*pxmitpriv = &adapter->xmitpriv;
+	struct xmit_priv	*xmit_priv = &adapter->xmitpriv;
 
 	switch (xmit_buf->flags) {
 	case VO_QUEUE_INX:
-		pxmitpriv->voq_cnt--;
+		xmit_priv->voq_cnt--;
 		break;
 	case VI_QUEUE_INX:
-		pxmitpriv->viq_cnt--;
+		xmit_priv->viq_cnt--;
 		break;
 	case BE_QUEUE_INX:
-		pxmitpriv->beq_cnt--;
+		xmit_priv->beq_cnt--;
 		break;
 	case BK_QUEUE_INX:
-		pxmitpriv->bkq_cnt--;
+		xmit_priv->bkq_cnt--;
 		break;
 	case HIGH_QUEUE_INX:
 #ifdef CONFIG_88EU_AP_MODE
@@ -653,9 +653,9 @@ check_completion:
 			  purb->status ? RTW_SCTX_DONE_WRITE_PORT_ERR :
 			  RTW_SCTX_DONE_SUCCESS);
 
-	rtw_free_xmitbuf(pxmitpriv, xmit_buf);
+	rtw_free_xmitbuf(xmit_priv, xmit_buf);
 
-	tasklet_hi_schedule(&pxmitpriv->xmit_tasklet);
+	tasklet_hi_schedule(&xmit_priv->xmit_tasklet);
 }
 
 u32 usb_write_port(struct adapter *adapter, u32 addr, u32 cnt, struct xmit_buf *xmitbuf)
@@ -666,7 +666,7 @@ u32 usb_write_port(struct adapter *adapter, u32 addr, u32 cnt, struct xmit_buf *
 	u32 ret = _FAIL;
 	struct urb *purb = NULL;
 	struct dvobj_priv	*pdvobj = adapter_to_dvobj(adapter);
-	struct xmit_priv	*pxmitpriv = &adapter->xmitpriv;
+	struct xmit_priv	*xmit_priv = &adapter->xmitpriv;
 	struct xmit_frame *pxmitframe = (struct xmit_frame *)xmitbuf->priv_data;
 	struct usb_device *pusbd = pdvobj->pusbdev;
 
@@ -681,23 +681,23 @@ u32 usb_write_port(struct adapter *adapter, u32 addr, u32 cnt, struct xmit_buf *
 		goto exit;
 	}
 
-	spin_lock_irqsave(&pxmitpriv->lock, irqL);
+	spin_lock_irqsave(&xmit_priv->lock, irqL);
 
 	switch (addr) {
 	case VO_QUEUE_INX:
-		pxmitpriv->voq_cnt++;
+		xmit_priv->voq_cnt++;
 		xmitbuf->flags = VO_QUEUE_INX;
 		break;
 	case VI_QUEUE_INX:
-		pxmitpriv->viq_cnt++;
+		xmit_priv->viq_cnt++;
 		xmitbuf->flags = VI_QUEUE_INX;
 		break;
 	case BE_QUEUE_INX:
-		pxmitpriv->beq_cnt++;
+		xmit_priv->beq_cnt++;
 		xmitbuf->flags = BE_QUEUE_INX;
 		break;
 	case BK_QUEUE_INX:
-		pxmitpriv->bkq_cnt++;
+		xmit_priv->bkq_cnt++;
 		xmitbuf->flags = BK_QUEUE_INX;
 		break;
 	case HIGH_QUEUE_INX:
@@ -708,7 +708,7 @@ u32 usb_write_port(struct adapter *adapter, u32 addr, u32 cnt, struct xmit_buf *
 		break;
 	}
 
-	spin_unlock_irqrestore(&pxmitpriv->lock, irqL);
+	spin_unlock_irqrestore(&xmit_priv->lock, irqL);
 
 	purb	= xmitbuf->pxmit_urb[0];
 
@@ -745,7 +745,7 @@ u32 usb_write_port(struct adapter *adapter, u32 addr, u32 cnt, struct xmit_buf *
 
 exit:
 	if (ret != _SUCCESS)
-		rtw_free_xmitbuf(pxmitpriv, xmitbuf);
+		rtw_free_xmitbuf(xmit_priv, xmitbuf);
 	return ret;
 }
 
@@ -799,7 +799,7 @@ void rtl8188eu_xmit_tasklet(void *priv)
 {
 	int ret = false;
 	struct adapter *adapt = priv;
-	struct xmit_priv *pxmitpriv = &adapt->xmitpriv;
+	struct xmit_priv *xmit_priv = &adapt->xmitpriv;
 
 	if (check_fwstate(&adapt->mlmepriv, _FW_UNDER_SURVEY))
 		return;
@@ -812,7 +812,7 @@ void rtl8188eu_xmit_tasklet(void *priv)
 			break;
 		}
 
-		ret = rtl8188eu_xmitframe_complete(adapt, pxmitpriv);
+		ret = rtl8188eu_xmitframe_complete(adapt, xmit_priv);
 
 		if (!ret)
 			break;

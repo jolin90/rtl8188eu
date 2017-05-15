@@ -162,28 +162,28 @@ int rtw_ch_set_search_ch(struct rt_channel_info *ch_set, const u32 ch)
 	return i;
 }
 
-struct xmit_frame *alloc_mgtxmitframe(struct xmit_priv *pxmitpriv)
+struct xmit_frame *alloc_mgtxmitframe(struct xmit_priv *xmit_priv)
 {
-	struct xmit_frame			*pmgntframe;
+	struct xmit_frame			*xmit_frame;
 	struct xmit_buf				*xmit_buf;
 
-	pmgntframe = rtw_alloc_xmitframe(pxmitpriv);
-	if (pmgntframe == NULL) {
+	xmit_frame = rtw_alloc_xmitframe(xmit_priv);
+	if (xmit_frame == NULL) {
 		DBG_88E("%s, alloc xmitframe fail\n", __func__);
 		return NULL;
 	}
 
-	xmit_buf = rtw_alloc_xmitbuf_ext(pxmitpriv);
+	xmit_buf = rtw_alloc_xmitbuf_ext(xmit_priv);
 	if (xmit_buf == NULL) {
 		DBG_88E("%s, alloc xmitbuf fail\n", __func__);
-		rtw_free_xmitframe(pxmitpriv, pmgntframe);
+		rtw_free_xmitframe(xmit_priv, xmit_frame);
 		return NULL;
 	}
-	pmgntframe->frame_tag = MGNT_FRAMETAG;
-	pmgntframe->xmit_buf = xmit_buf;
-	pmgntframe->buf_addr = xmit_buf->pbuf;
-	xmit_buf->priv_data = pmgntframe;
-	return pmgntframe;
+	xmit_frame->frame_tag = MGNT_FRAMETAG;
+	xmit_frame->xmit_buf = xmit_buf;
+	xmit_frame->buf_addr = xmit_buf->pbuf;
+	xmit_buf->priv_data = xmit_frame;
+	return xmit_frame;
 }
 
 /****************************************************************************
@@ -234,20 +234,20 @@ void update_mgntframe_attrib(struct adapter *adapter, struct pkt_attrib *pattrib
 }
 
 static void dump_mgntframe(struct adapter *adapter,
-			   struct xmit_frame *pmgntframe)
+			   struct xmit_frame *xmit_frame)
 {
 	if (adapter->bSurpriseRemoved || adapter->bDriverStopped)
 		return;
 
-	rtw_hal_mgnt_xmit(adapter, pmgntframe);
+	rtw_hal_mgnt_xmit(adapter, xmit_frame);
 }
 
 static s32 dump_mgntframe_and_wait(struct adapter *adapter,
-				   struct xmit_frame *pmgntframe,
+				   struct xmit_frame *xmit_frame,
 				   int timeout_ms)
 {
 	s32 ret = _FAIL;
-	struct xmit_buf *xmit_buf = pmgntframe->xmit_buf;
+	struct xmit_buf *xmit_buf = xmit_frame->xmit_buf;
 	struct submit_ctx sctx;
 
 	if (adapter->bSurpriseRemoved || adapter->bDriverStopped)
@@ -256,7 +256,7 @@ static s32 dump_mgntframe_and_wait(struct adapter *adapter,
 	rtw_sctx_init(&sctx, timeout_ms);
 	xmit_buf->sctx = &sctx;
 
-	ret = rtw_hal_mgnt_xmit(adapter, pmgntframe);
+	ret = rtw_hal_mgnt_xmit(adapter, xmit_frame);
 
 	if (ret == _SUCCESS)
 		ret = rtw_sctx_wait(&sctx);
@@ -265,25 +265,25 @@ static s32 dump_mgntframe_and_wait(struct adapter *adapter,
 }
 
 static s32 dump_mgntframe_and_wait_ack(struct adapter *adapter,
-				       struct xmit_frame *pmgntframe)
+				       struct xmit_frame *xmit_frame)
 {
 	s32 ret = _FAIL;
 	u32 timeout_ms = 500;/*   500ms */
-	struct xmit_priv	*pxmitpriv = &adapter->xmitpriv;
+	struct xmit_priv	*xmit_priv = &adapter->xmitpriv;
 
 	if (adapter->bSurpriseRemoved || adapter->bDriverStopped)
 		return -1;
 
-	if (mutex_lock_interruptible(&pxmitpriv->ack_tx_mutex))
+	if (mutex_lock_interruptible(&xmit_priv->ack_tx_mutex))
 		return _FAIL;
-	pxmitpriv->ack_tx = true;
+	xmit_priv->ack_tx = true;
 
-	pmgntframe->ack_report = 1;
-	if (rtw_hal_mgnt_xmit(adapter, pmgntframe) == _SUCCESS)
-		ret = rtw_ack_tx_wait(pxmitpriv, timeout_ms);
+	xmit_frame->ack_report = 1;
+	if (rtw_hal_mgnt_xmit(adapter, xmit_frame) == _SUCCESS)
+		ret = rtw_ack_tx_wait(xmit_priv, timeout_ms);
 
-	pxmitpriv->ack_tx = false;
-	mutex_unlock(&pxmitpriv->ack_tx_mutex);
+	xmit_priv->ack_tx = false;
+	mutex_unlock(&xmit_priv->ack_tx_mutex);
 
 	return ret;
 }
@@ -323,21 +323,21 @@ static int update_hidden_ssid(u8 *ies, u32 ies_len, u8 hidden_ssid_mode)
 
 static void issue_beacon(struct adapter *adapter, int timeout_ms)
 {
-	struct xmit_frame	*pmgntframe;
+	struct xmit_frame	*xmit_frame;
 	struct pkt_attrib	*pattrib;
 	unsigned char	*pframe;
 	struct ieee80211_hdr *pwlanhdr;
 	__le16 *fctrl;
 	unsigned int	rate_len;
-	struct xmit_priv	*pxmitpriv = &(adapter->xmitpriv);
+	struct xmit_priv	*xmit_priv = &(adapter->xmitpriv);
 	struct mlme_priv *pmlmepriv = &(adapter->mlmepriv);
 	struct mlme_ext_priv	*pmlmeext = &(adapter->mlmeextpriv);
 	struct mlme_ext_info	*pmlmeinfo = &(pmlmeext->mlmext_info);
 	struct wlan_bssid_ex		*cur_network = &(pmlmeinfo->network);
 	u8	bc_addr[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
-	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
-	if (pmgntframe == NULL) {
+	xmit_frame = alloc_mgtxmitframe(xmit_priv);
+	if (xmit_frame == NULL) {
 		DBG_88E("%s, alloc mgnt frame fail\n", __func__);
 		return;
 	}
@@ -346,13 +346,13 @@ static void issue_beacon(struct adapter *adapter, int timeout_ms)
 #endif /* if defined (CONFIG_88EU_AP_MODE) */
 
 	/* update attribute */
-	pattrib = &pmgntframe->attrib;
+	pattrib = &xmit_frame->attrib;
 	update_mgntframe_attrib(adapter, pattrib);
 	pattrib->qsel = 0x10;
 
-	memset(pmgntframe->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
+	memset(xmit_frame->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
 
-	pframe = (u8 *)(pmgntframe->buf_addr) + TXDESC_OFFSET;
+	pframe = (u8 *)(xmit_frame->buf_addr) + TXDESC_OFFSET;
 	pwlanhdr = (struct ieee80211_hdr *)pframe;
 
 
@@ -384,7 +384,7 @@ static void issue_beacon(struct adapter *adapter, int timeout_ms)
 			);
 		pframe += (cur_network->IELength+len_diff);
 		pattrib->pktlen += (cur_network->IELength+len_diff);
-		wps_ie = rtw_get_wps_ie(pmgntframe->buf_addr+TXDESC_OFFSET+sizeof(struct ieee80211_hdr_3addr)+_BEACON_IE_OFFSET_,
+		wps_ie = rtw_get_wps_ie(xmit_frame->buf_addr+TXDESC_OFFSET+sizeof(struct ieee80211_hdr_3addr)+_BEACON_IE_OFFSET_,
 			pattrib->pktlen-sizeof(struct ieee80211_hdr_3addr)-_BEACON_IE_OFFSET_, NULL, &wps_ielen);
 		if (wps_ie && wps_ielen > 0)
 			rtw_get_wps_attr_content(wps_ie,  wps_ielen, WPS_ATTR_SELECTED_REGISTRAR, (u8 *)(&sr), NULL);
@@ -458,20 +458,20 @@ _issue_bcn:
 
 	/* DBG_88E("issue bcn_sz=%d\n", pattrib->last_txcmdsz); */
 	if (timeout_ms > 0)
-		dump_mgntframe_and_wait(adapter, pmgntframe, timeout_ms);
+		dump_mgntframe_and_wait(adapter, xmit_frame, timeout_ms);
 	else
-		dump_mgntframe(adapter, pmgntframe);
+		dump_mgntframe(adapter, xmit_frame);
 }
 
 static void issue_probersp(struct adapter *adapter, unsigned char *da)
 {
-	struct xmit_frame			*pmgntframe;
+	struct xmit_frame			*xmit_frame;
 	struct pkt_attrib			*pattrib;
 	unsigned char					*pframe;
 	struct ieee80211_hdr *pwlanhdr;
 	__le16 *fctrl;
 	unsigned char					*mac, *bssid;
-	struct xmit_priv	*pxmitpriv = &(adapter->xmitpriv);
+	struct xmit_priv	*xmit_priv = &(adapter->xmitpriv);
 #if defined(CONFIG_88EU_AP_MODE)
 	u8 *pwps_ie;
 	uint wps_ielen;
@@ -483,19 +483,19 @@ static void issue_probersp(struct adapter *adapter, unsigned char *da)
 	unsigned int	rate_len;
 
 	DBG_88E("====>\n");
-	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
-	if (pmgntframe == NULL) {
+	xmit_frame = alloc_mgtxmitframe(xmit_priv);
+	if (xmit_frame == NULL) {
 		DBG_88E("%s, alloc mgnt frame fail\n", __func__);
 		return;
 	}
 
 	/* update attribute */
-	pattrib = &pmgntframe->attrib;
+	pattrib = &xmit_frame->attrib;
 	update_mgntframe_attrib(adapter, pattrib);
 
-	memset(pmgntframe->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
+	memset(xmit_frame->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
 
-	pframe = (u8 *)(pmgntframe->buf_addr) + TXDESC_OFFSET;
+	pframe = (u8 *)(xmit_frame->buf_addr) + TXDESC_OFFSET;
 	pwlanhdr = (struct ieee80211_hdr *)pframe;
 
 	mac = myid(&(adapter->eeprompriv));
@@ -608,7 +608,7 @@ static void issue_probersp(struct adapter *adapter, unsigned char *da)
 
 	pattrib->last_txcmdsz = pattrib->pktlen;
 
-	dump_mgntframe(adapter, pmgntframe);
+	dump_mgntframe(adapter, xmit_frame);
 
 	DBG_88E("<====\n");
 }
@@ -616,14 +616,14 @@ static void issue_probersp(struct adapter *adapter, unsigned char *da)
 static int issue_probereq(struct adapter *adapter, struct ndis_802_11_ssid *pssid, u8 *da, bool wait_ack)
 {
 	int ret = _FAIL;
-	struct xmit_frame		*pmgntframe;
+	struct xmit_frame		*xmit_frame;
 	struct pkt_attrib		*pattrib;
 	unsigned char			*pframe;
 	struct ieee80211_hdr *pwlanhdr;
 	__le16 *fctrl;
 	unsigned char			*mac;
 	unsigned char			bssrate[NumRates];
-	struct xmit_priv		*pxmitpriv = &(adapter->xmitpriv);
+	struct xmit_priv		*xmit_priv = &(adapter->xmitpriv);
 	struct mlme_priv *pmlmepriv = &(adapter->mlmepriv);
 	struct mlme_ext_priv	*pmlmeext = &(adapter->mlmeextpriv);
 	int	bssrate_len = 0;
@@ -636,18 +636,18 @@ static int issue_probereq(struct adapter *adapter, struct ndis_802_11_ssid *pssi
 	if (pssid && pssid->SsidLength > 0)
 		DBG_88E("ssid is :%s\n", pssid->Ssid);
 
-	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
-	if (pmgntframe == NULL)
+	xmit_frame = alloc_mgtxmitframe(xmit_priv);
+	if (xmit_frame == NULL)
 		goto exit;
 
 	/* update attribute */
-	pattrib = &pmgntframe->attrib;
+	pattrib = &xmit_frame->attrib;
 	update_mgntframe_attrib(adapter, pattrib);
 
 
-	memset(pmgntframe->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
+	memset(xmit_frame->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
 
-	pframe = (u8 *)(pmgntframe->buf_addr) + TXDESC_OFFSET;
+	pframe = (u8 *)(xmit_frame->buf_addr) + TXDESC_OFFSET;
 	pwlanhdr = (struct ieee80211_hdr *)pframe;
 
 	mac = myid(&(adapter->eeprompriv));
@@ -705,9 +705,9 @@ static int issue_probereq(struct adapter *adapter, struct ndis_802_11_ssid *pssi
 		 /*("issuing probe_req, tx_len=%d\n", pattrib->last_txcmdsz));*/
 
 	if (wait_ack) {
-		ret = dump_mgntframe_and_wait_ack(adapter, pmgntframe);
+		ret = dump_mgntframe_and_wait_ack(adapter, xmit_frame);
 	} else {
-		dump_mgntframe(adapter, pmgntframe);
+		dump_mgntframe(adapter, xmit_frame);
 		ret = _SUCCESS;
 	}
 
@@ -765,7 +765,7 @@ exit:
 static void issue_auth(struct adapter *adapter, struct sta_info *psta,
 		       unsigned short status)
 {
-	struct xmit_frame *pmgntframe;
+	struct xmit_frame *xmit_frame;
 	struct pkt_attrib *pattrib;
 	unsigned char *pframe;
 	struct ieee80211_hdr *pwlanhdr;
@@ -776,24 +776,24 @@ static void issue_auth(struct adapter *adapter, struct sta_info *psta,
 	__le16 le_val16;
 #endif
 	int use_shared_key = 0;
-	struct xmit_priv *pxmitpriv = &(adapter->xmitpriv);
+	struct xmit_priv *xmit_priv = &(adapter->xmitpriv);
 	struct mlme_ext_priv	*pmlmeext = &(adapter->mlmeextpriv);
 	struct mlme_ext_info	*pmlmeinfo = &(pmlmeext->mlmext_info);
 	struct wlan_bssid_ex    *pnetwork = &(pmlmeinfo->network);
 
 	DBG_88E("====>\n");
 
-	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
-	if (pmgntframe == NULL)
+	xmit_frame = alloc_mgtxmitframe(xmit_priv);
+	if (xmit_frame == NULL)
 		return;
 
 	/* update attribute */
-	pattrib = &pmgntframe->attrib;
+	pattrib = &xmit_frame->attrib;
 	update_mgntframe_attrib(adapter, pattrib);
 
-	memset(pmgntframe->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
+	memset(xmit_frame->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
 
-	pframe = (u8 *)(pmgntframe->buf_addr) + TXDESC_OFFSET;
+	pframe = (u8 *)(xmit_frame->buf_addr) + TXDESC_OFFSET;
 	pwlanhdr = (struct ieee80211_hdr *)pframe;
 
 	fctrl = &pwlanhdr->frame_control;
@@ -906,9 +906,9 @@ static void issue_auth(struct adapter *adapter, struct sta_info *psta,
 
 	pattrib->last_txcmdsz = pattrib->pktlen;
 
-	rtw_wep_encrypt(adapter, (u8 *)pmgntframe);
+	rtw_wep_encrypt(adapter, (u8 *)xmit_frame);
 	DBG_88E("%s\n", __func__);
-	dump_mgntframe(adapter, pmgntframe);
+	dump_mgntframe(adapter, xmit_frame);
 
 	DBG_88E("<====\n");
 }
@@ -918,13 +918,13 @@ static void issue_auth(struct adapter *adapter, struct sta_info *psta,
 static void issue_asocrsp(struct adapter *adapter, unsigned short status,
 			  struct sta_info *pstat, int pkt_type)
 {
-	struct xmit_frame	*pmgntframe;
+	struct xmit_frame	*xmit_frame;
 	struct ieee80211_hdr *pwlanhdr;
 	struct pkt_attrib *pattrib;
 	unsigned char	*pbuf, *pframe;
 	unsigned short val;
 	__le16 *fctrl;
-	struct xmit_priv *pxmitpriv = &(adapter->xmitpriv);
+	struct xmit_priv *xmit_priv = &(adapter->xmitpriv);
 	struct mlme_priv *pmlmepriv = &(adapter->mlmepriv);
 	struct mlme_ext_priv *pmlmeext = &adapter->mlmeextpriv;
 	struct mlme_ext_info	*pmlmeinfo = &(pmlmeext->mlmext_info);
@@ -934,18 +934,18 @@ static void issue_asocrsp(struct adapter *adapter, unsigned short status,
 
 	DBG_88E("%s\n", __func__);
 
-	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
-	if (pmgntframe == NULL)
+	xmit_frame = alloc_mgtxmitframe(xmit_priv);
+	if (xmit_frame == NULL)
 		return;
 
 	/* update attribute */
-	pattrib = &pmgntframe->attrib;
+	pattrib = &xmit_frame->attrib;
 	update_mgntframe_attrib(adapter, pattrib);
 
 
-	memset(pmgntframe->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
+	memset(xmit_frame->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
 
-	pframe = (u8 *)(pmgntframe->buf_addr) + TXDESC_OFFSET;
+	pframe = (u8 *)(xmit_frame->buf_addr) + TXDESC_OFFSET;
 	pwlanhdr = (struct ieee80211_hdr *)pframe;
 
 	fctrl = &pwlanhdr->frame_control;
@@ -1038,14 +1038,14 @@ static void issue_asocrsp(struct adapter *adapter, unsigned short status,
 	}
 
 	pattrib->last_txcmdsz = pattrib->pktlen;
-	dump_mgntframe(adapter, pmgntframe);
+	dump_mgntframe(adapter, xmit_frame);
 }
 #endif /* CONFIG_88EU_AP_MODE */
 
 static void issue_assocreq(struct adapter *adapter)
 {
 	int ret = _FAIL;
-	struct xmit_frame	*pmgntframe;
+	struct xmit_frame	*xmit_frame;
 	struct pkt_attrib	*pattrib;
 	unsigned char		*pframe, *p;
 	struct ieee80211_hdr *pwlanhdr;
@@ -1054,7 +1054,7 @@ static void issue_assocreq(struct adapter *adapter)
 	unsigned char	rf_type, bssrate[NumRates], sta_bssrate[NumRates];
 	struct ndis_802_11_var_ie *pIE;
 	struct registry_priv	*pregpriv = &adapter->registrypriv;
-	struct xmit_priv		*pxmitpriv = &(adapter->xmitpriv);
+	struct xmit_priv		*xmit_priv = &(adapter->xmitpriv);
 	struct mlme_priv *pmlmepriv = &(adapter->mlmepriv);
 	struct mlme_ext_priv	*pmlmeext = &(adapter->mlmeextpriv);
 	struct mlme_ext_info	*pmlmeinfo = &(pmlmeext->mlmext_info);
@@ -1062,16 +1062,16 @@ static void issue_assocreq(struct adapter *adapter)
 	struct wlan_bssid_ex    *pnetwork = &(pmlmeinfo->network);
 
 	DBG_88E("====>\n");
-	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
-	if (pmgntframe == NULL)
+	xmit_frame = alloc_mgtxmitframe(xmit_priv);
+	if (xmit_frame == NULL)
 		goto exit;
 
 	/* update attribute */
-	pattrib = &pmgntframe->attrib;
+	pattrib = &xmit_frame->attrib;
 	update_mgntframe_attrib(adapter, pattrib);
 
-	memset(pmgntframe->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
-	pframe = (u8 *)(pmgntframe->buf_addr) + TXDESC_OFFSET;
+	memset(xmit_frame->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
+	pframe = (u8 *)(xmit_frame->buf_addr) + TXDESC_OFFSET;
 	pwlanhdr = (struct ieee80211_hdr *)pframe;
 
 	fctrl = &pwlanhdr->frame_control;
@@ -1142,8 +1142,8 @@ static void issue_assocreq(struct adapter *adapter)
 	DBG_88E("bssrate_len=%d\n", bssrate_len);
 
 	if (bssrate_len == 0) {
-		rtw_free_xmitbuf(pxmitpriv, pmgntframe->xmit_buf);
-		rtw_free_xmitframe(pxmitpriv, pmgntframe);
+		rtw_free_xmitbuf(xmit_priv, xmit_frame->xmit_buf);
+		rtw_free_xmitframe(xmit_priv, xmit_frame);
 		goto exit; /* don't connect to AP if no joint supported rate */
 	}
 
@@ -1226,7 +1226,7 @@ static void issue_assocreq(struct adapter *adapter)
 		pframe = rtw_set_ie(pframe, _VENDOR_SPECIFIC_IE_, 6, REALTEK_96B_IE, &(pattrib->pktlen));
 
 	pattrib->last_txcmdsz = pattrib->pktlen;
-	dump_mgntframe(adapter, pmgntframe);
+	dump_mgntframe(adapter, xmit_frame);
 
 	ret = _SUCCESS;
 
@@ -1243,12 +1243,12 @@ exit:
 static int _issue_nulldata(struct adapter *adapter, unsigned char *da, unsigned int power_mode, int wait_ack)
 {
 	int ret = _FAIL;
-	struct xmit_frame			*pmgntframe;
+	struct xmit_frame			*xmit_frame;
 	struct pkt_attrib			*pattrib;
 	unsigned char					*pframe;
 	struct ieee80211_hdr *pwlanhdr;
 	__le16 *fctrl;
-	struct xmit_priv	*pxmitpriv;
+	struct xmit_priv	*xmit_priv;
 	struct mlme_ext_priv	*pmlmeext;
 	struct mlme_ext_info	*pmlmeinfo;
 	struct wlan_bssid_ex    *pnetwork;
@@ -1256,23 +1256,23 @@ static int _issue_nulldata(struct adapter *adapter, unsigned char *da, unsigned 
 	if (!adapter)
 		goto exit;
 
-	pxmitpriv = &(adapter->xmitpriv);
+	xmit_priv = &(adapter->xmitpriv);
 	pmlmeext = &(adapter->mlmeextpriv);
 	pmlmeinfo = &(pmlmeext->mlmext_info);
 	pnetwork = &(pmlmeinfo->network);
 
-	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
-	if (pmgntframe == NULL)
+	xmit_frame = alloc_mgtxmitframe(xmit_priv);
+	if (xmit_frame == NULL)
 		goto exit;
 
 	/* update attribute */
-	pattrib = &pmgntframe->attrib;
+	pattrib = &xmit_frame->attrib;
 	update_mgntframe_attrib(adapter, pattrib);
 	pattrib->retry_ctrl = false;
 
-	memset(pmgntframe->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
+	memset(xmit_frame->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
 
-	pframe = (u8 *)(pmgntframe->buf_addr) + TXDESC_OFFSET;
+	pframe = (u8 *)(xmit_frame->buf_addr) + TXDESC_OFFSET;
 	pwlanhdr = (struct ieee80211_hdr *)pframe;
 
 	fctrl = &pwlanhdr->frame_control;
@@ -1300,9 +1300,9 @@ static int _issue_nulldata(struct adapter *adapter, unsigned char *da, unsigned 
 	pattrib->last_txcmdsz = pattrib->pktlen;
 
 	if (wait_ack) {
-		ret = dump_mgntframe_and_wait_ack(adapter, pmgntframe);
+		ret = dump_mgntframe_and_wait_ack(adapter, xmit_frame);
 	} else {
-		dump_mgntframe(adapter, pmgntframe);
+		dump_mgntframe(adapter, xmit_frame);
 		ret = _SUCCESS;
 	}
 
@@ -1367,25 +1367,25 @@ exit:
 static int _issue_qos_nulldata(struct adapter *adapter, unsigned char *da, u16 tid, int wait_ack)
 {
 	int ret = _FAIL;
-	struct xmit_frame			*pmgntframe;
+	struct xmit_frame			*xmit_frame;
 	struct pkt_attrib			*pattrib;
 	unsigned char					*pframe;
 	struct ieee80211_hdr *pwlanhdr;
 	__le16 *fctrl;
 	unsigned short *qc;
-	struct xmit_priv			*pxmitpriv = &(adapter->xmitpriv);
+	struct xmit_priv			*xmit_priv = &(adapter->xmitpriv);
 	struct mlme_ext_priv	*pmlmeext = &(adapter->mlmeextpriv);
 	struct mlme_ext_info	*pmlmeinfo = &(pmlmeext->mlmext_info);
 	struct wlan_bssid_ex    *pnetwork = &(pmlmeinfo->network);
 
 	DBG_88E("%s\n", __func__);
 
-	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
-	if (pmgntframe == NULL)
+	xmit_frame = alloc_mgtxmitframe(xmit_priv);
+	if (xmit_frame == NULL)
 		goto exit;
 
 	/* update attribute */
-	pattrib = &pmgntframe->attrib;
+	pattrib = &xmit_frame->attrib;
 	update_mgntframe_attrib(adapter, pattrib);
 
 	pattrib->hdrlen += 2;
@@ -1394,9 +1394,9 @@ static int _issue_qos_nulldata(struct adapter *adapter, unsigned char *da, u16 t
 	pattrib->ack_policy = 0;
 	pattrib->mdata = 0;
 
-	memset(pmgntframe->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
+	memset(xmit_frame->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
 
-	pframe = (u8 *)(pmgntframe->buf_addr) + TXDESC_OFFSET;
+	pframe = (u8 *)(xmit_frame->buf_addr) + TXDESC_OFFSET;
 	pwlanhdr = (struct ieee80211_hdr *)pframe;
 
 	fctrl = &pwlanhdr->frame_control;
@@ -1432,9 +1432,9 @@ static int _issue_qos_nulldata(struct adapter *adapter, unsigned char *da, u16 t
 	pattrib->last_txcmdsz = pattrib->pktlen;
 
 	if (wait_ack) {
-		ret = dump_mgntframe_and_wait_ack(adapter, pmgntframe);
+		ret = dump_mgntframe_and_wait_ack(adapter, xmit_frame);
 	} else {
-		dump_mgntframe(adapter, pmgntframe);
+		dump_mgntframe(adapter, xmit_frame);
 		ret = _SUCCESS;
 	}
 
@@ -1496,30 +1496,30 @@ exit:
 
 static int _issue_deauth(struct adapter *adapter, unsigned char *da, unsigned short reason, u8 wait_ack)
 {
-	struct xmit_frame			*pmgntframe;
+	struct xmit_frame			*xmit_frame;
 	struct pkt_attrib			*pattrib;
 	unsigned char					*pframe;
 	struct ieee80211_hdr *pwlanhdr;
 	__le16 *fctrl;
-	struct xmit_priv			*pxmitpriv = &(adapter->xmitpriv);
+	struct xmit_priv			*xmit_priv = &(adapter->xmitpriv);
 	struct mlme_ext_priv	*pmlmeext = &(adapter->mlmeextpriv);
 	struct mlme_ext_info	*pmlmeinfo = &(pmlmeext->mlmext_info);
 	struct wlan_bssid_ex    *pnetwork = &(pmlmeinfo->network);
 	int ret = _FAIL;
 	__le16 le_tmp;
 
-	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
-	if (pmgntframe == NULL)
+	xmit_frame = alloc_mgtxmitframe(xmit_priv);
+	if (xmit_frame == NULL)
 		goto exit;
 
 	/* update attribute */
-	pattrib = &pmgntframe->attrib;
+	pattrib = &xmit_frame->attrib;
 	update_mgntframe_attrib(adapter, pattrib);
 	pattrib->retry_ctrl = false;
 
-	memset(pmgntframe->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
+	memset(xmit_frame->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
 
-	pframe = (u8 *)(pmgntframe->buf_addr) + TXDESC_OFFSET;
+	pframe = (u8 *)(xmit_frame->buf_addr) + TXDESC_OFFSET;
 	pwlanhdr = (struct ieee80211_hdr *)pframe;
 
 	fctrl = &pwlanhdr->frame_control;
@@ -1544,9 +1544,9 @@ static int _issue_deauth(struct adapter *adapter, unsigned char *da, unsigned sh
 
 
 	if (wait_ack) {
-		ret = dump_mgntframe_and_wait_ack(adapter, pmgntframe);
+		ret = dump_mgntframe_and_wait_ack(adapter, xmit_frame);
 	} else {
-		dump_mgntframe(adapter, pmgntframe);
+		dump_mgntframe(adapter, xmit_frame);
 		ret = _SUCCESS;
 	}
 
@@ -1616,12 +1616,12 @@ static void issue_action_BA(struct adapter *adapter, unsigned char *raddr,
 	__le16	le_tmp;
 	u16 BA_starting_seqctrl = 0;
 	enum ht_cap_ampdu_factor max_rx_ampdu_factor;
-	struct xmit_frame *pmgntframe;
+	struct xmit_frame *xmit_frame;
 	struct pkt_attrib *pattrib;
 	u8 *pframe;
 	struct ieee80211_hdr *pwlanhdr;
 	__le16 *fctrl;
-	struct xmit_priv *pxmitpriv = &(adapter->xmitpriv);
+	struct xmit_priv *xmit_priv = &(adapter->xmitpriv);
 	struct mlme_ext_priv *pmlmeext = &(adapter->mlmeextpriv);
 	struct mlme_ext_info *pmlmeinfo = &(pmlmeext->mlmext_info);
 	struct sta_info *psta;
@@ -1631,17 +1631,17 @@ static void issue_action_BA(struct adapter *adapter, unsigned char *raddr,
 
 	DBG_88E("category=%d, action=%d, status=%d\n", category, action, status);
 
-	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
-	if (pmgntframe == NULL)
+	xmit_frame = alloc_mgtxmitframe(xmit_priv);
+	if (xmit_frame == NULL)
 		return;
 
 	/* update attribute */
-	pattrib = &pmgntframe->attrib;
+	pattrib = &xmit_frame->attrib;
 	update_mgntframe_attrib(adapter, pattrib);
 
-	memset(pmgntframe->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
+	memset(xmit_frame->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
 
-	pframe = (u8 *)(pmgntframe->buf_addr) + TXDESC_OFFSET;
+	pframe = (u8 *)(xmit_frame->buf_addr) + TXDESC_OFFSET;
 	pwlanhdr = (struct ieee80211_hdr *)pframe;
 
 	fctrl = &pwlanhdr->frame_control;
@@ -1755,20 +1755,20 @@ static void issue_action_BA(struct adapter *adapter, unsigned char *raddr,
 
 	pattrib->last_txcmdsz = pattrib->pktlen;
 
-	dump_mgntframe(adapter, pmgntframe);
+	dump_mgntframe(adapter, xmit_frame);
 }
 
 static void issue_action_BSSCoexistPacket(struct adapter *adapter)
 {
 	struct list_head *plist, *phead;
 	unsigned char category, action;
-	struct xmit_frame			*pmgntframe;
+	struct xmit_frame			*xmit_frame;
 	struct pkt_attrib			*pattrib;
 	unsigned char				*pframe;
 	struct ieee80211_hdr *pwlanhdr;
 	__le16 *fctrl;
 	struct	wlan_network	*pnetwork = NULL;
-	struct xmit_priv			*pxmitpriv = &(adapter->xmitpriv);
+	struct xmit_priv			*xmit_priv = &(adapter->xmitpriv);
 	struct mlme_priv *pmlmepriv = &adapter->mlmepriv;
 	struct mlme_ext_priv	*pmlmeext = &(adapter->mlmeextpriv);
 	struct mlme_ext_info	*pmlmeinfo = &(pmlmeext->mlmext_info);
@@ -1788,17 +1788,17 @@ static void issue_action_BSSCoexistPacket(struct adapter *adapter)
 	category = RTW_WLAN_CATEGORY_PUBLIC;
 	action = ACT_PUBLIC_BSSCOEXIST;
 
-	pmgntframe = alloc_mgtxmitframe(pxmitpriv);
-	if (pmgntframe == NULL)
+	xmit_frame = alloc_mgtxmitframe(xmit_priv);
+	if (xmit_frame == NULL)
 		return;
 
 	/* update attribute */
-	pattrib = &pmgntframe->attrib;
+	pattrib = &xmit_frame->attrib;
 	update_mgntframe_attrib(adapter, pattrib);
 
-	memset(pmgntframe->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
+	memset(xmit_frame->buf_addr, 0, WLANHDR_OFFSET + TXDESC_OFFSET);
 
-	pframe = (u8 *)(pmgntframe->buf_addr) + TXDESC_OFFSET;
+	pframe = (u8 *)(xmit_frame->buf_addr) + TXDESC_OFFSET;
 	pwlanhdr = (struct ieee80211_hdr *)pframe;
 
 	fctrl = &pwlanhdr->frame_control;
@@ -1889,7 +1889,7 @@ static void issue_action_BSSCoexistPacket(struct adapter *adapter)
 
 	pattrib->last_txcmdsz = pattrib->pktlen;
 
-	dump_mgntframe(adapter, pmgntframe);
+	dump_mgntframe(adapter, xmit_frame);
 }
 
 unsigned int send_delba(struct adapter *adapter, u8 initiator, u8 *addr)
@@ -4747,7 +4747,7 @@ void linked_status_chk(struct adapter *adapter)
 {
 	u32	i;
 	struct sta_info		*psta;
-	struct xmit_priv		*pxmitpriv = &(adapter->xmitpriv);
+	struct xmit_priv		*xmit_priv = &(adapter->xmitpriv);
 	struct mlme_ext_priv	*pmlmeext = &adapter->mlmeextpriv;
 	struct mlme_ext_info	*pmlmeinfo = &(pmlmeext->mlmext_info);
 	struct sta_priv		*pstapriv = &adapter->stapriv;
@@ -4766,7 +4766,7 @@ void linked_status_chk(struct adapter *adapter)
 			if (!chk_ap_is_alive(adapter, psta))
 				rx_chk = _FAIL;
 
-			if (pxmitpriv->last_tx_pkts == pxmitpriv->tx_pkts)
+			if (xmit_priv->last_tx_pkts == xmit_priv->tx_pkts)
 				tx_chk = _FAIL;
 
 			if (pmlmeext->active_keep_alive_check && (rx_chk == _FAIL || tx_chk == _FAIL)) {
@@ -4829,7 +4829,7 @@ void linked_status_chk(struct adapter *adapter)
 			if (tx_chk == _FAIL) {
 				pmlmeinfo->link_count &= 0xf;
 			} else {
-				pxmitpriv->last_tx_pkts = pxmitpriv->tx_pkts;
+				xmit_priv->last_tx_pkts = xmit_priv->tx_pkts;
 				pmlmeinfo->link_count = 0;
 			}
 		} /* end of if ((psta = rtw_get_stainfo(pstapriv, passoc_res->network.MacAddress)) != NULL) */

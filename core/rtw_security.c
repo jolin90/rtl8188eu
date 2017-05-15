@@ -155,7 +155,7 @@ void rtw_wep_encrypt(struct adapter *adapter, u8 *pxmitframe)
 	u8   hw_hdr_offset = 0;
 	struct	pkt_attrib	 *pattrib = &((struct xmit_frame *)pxmitframe)->attrib;
 	struct	security_priv	*psecuritypriv = &adapter->securitypriv;
-	struct	xmit_priv		*pxmitpriv = &adapter->xmitpriv;
+	struct	xmit_priv		*xmit_priv = &adapter->xmitpriv;
 
 
 	if (((struct xmit_frame *)pxmitframe)->buf_addr == NULL)
@@ -185,13 +185,13 @@ void rtw_wep_encrypt(struct adapter *adapter, u8 *pxmitframe)
 				arcfour_encrypt(&mycontext, payload, payload, length);
 				arcfour_encrypt(&mycontext, payload+length, crc, 4);
 			} else {
-				length = pxmitpriv->frag_len-pattrib->hdrlen-pattrib->iv_len-pattrib->icv_len;
+				length = xmit_priv->frag_len-pattrib->hdrlen-pattrib->iv_len-pattrib->icv_len;
 				*((__le32 *)crc) = getcrc32(payload, length);
 				arcfour_init(&mycontext, wepkey, 3+keylength);
 				arcfour_encrypt(&mycontext, payload, payload, length);
 				arcfour_encrypt(&mycontext, payload+length, crc, 4);
 
-				pframe += pxmitpriv->frag_len;
+				pframe += xmit_priv->frag_len;
 				pframe = (u8 *)round_up((size_t)(pframe), 4);
 			}
 		}
@@ -580,7 +580,7 @@ u32	rtw_tkip_encrypt(struct adapter *adapter, u8 *pxmitframe)
 	struct	sta_info		*stainfo;
 	struct	pkt_attrib	 *pattrib = &((struct xmit_frame *)pxmitframe)->attrib;
 	struct	security_priv	*psecuritypriv = &adapter->securitypriv;
-	struct	xmit_priv		*pxmitpriv = &adapter->xmitpriv;
+	struct	xmit_priv		*xmit_priv = &adapter->xmitpriv;
 	u32	res = _SUCCESS;
 
 	if (((struct xmit_frame *)pxmitframe)->buf_addr == NULL)
@@ -626,13 +626,13 @@ u32	rtw_tkip_encrypt(struct adapter *adapter, u8 *pxmitframe)
 					arcfour_encrypt(&mycontext, payload, payload, length);
 					arcfour_encrypt(&mycontext, payload+length, crc, 4);
 				} else {
-					length = pxmitpriv->frag_len-pattrib->hdrlen-pattrib->iv_len-pattrib->icv_len;
+					length = xmit_priv->frag_len-pattrib->hdrlen-pattrib->iv_len-pattrib->icv_len;
 					*((__le32 *)crc) = getcrc32(payload, length);/* modified by Amy*/
 					arcfour_init(&mycontext, rc4key, 16);
 					arcfour_encrypt(&mycontext, payload, payload, length);
 					arcfour_encrypt(&mycontext, payload+length, crc, 4);
 
-					pframe += pxmitpriv->frag_len;
+					pframe += xmit_priv->frag_len;
 					pframe = (u8 *)round_up((size_t)(pframe), 4);
 				}
 			}
@@ -1219,7 +1219,7 @@ u32	rtw_aes_encrypt(struct adapter *adapter, u8 *pxmitframe)
 	struct	sta_info		*stainfo;
 	struct	pkt_attrib	 *pattrib = &((struct xmit_frame *)pxmitframe)->attrib;
 	struct	security_priv	*psecuritypriv = &adapter->securitypriv;
-	struct	xmit_priv		*pxmitpriv = &adapter->xmitpriv;
+	struct	xmit_priv		*xmit_priv = &adapter->xmitpriv;
 
 /*	uint	offset = 0; */
 	u32 res = _SUCCESS;
@@ -1252,10 +1252,10 @@ u32	rtw_aes_encrypt(struct adapter *adapter, u8 *pxmitframe)
 
 					aes_cipher(prwskey, pattrib->hdrlen, pframe, length);
 				} else{
-					length = pxmitpriv->frag_len-pattrib->hdrlen-pattrib->iv_len-pattrib->icv_len;
+					length = xmit_priv->frag_len-pattrib->hdrlen-pattrib->iv_len-pattrib->icv_len;
 
 					aes_cipher(prwskey, pattrib->hdrlen, pframe, length);
-					pframe += pxmitpriv->frag_len;
+					pframe += xmit_priv->frag_len;
 					pframe = (u8 *)round_up((size_t)(pframe), 8);
 				}
 			}

@@ -541,7 +541,7 @@ void WMMOnAssocRsp(struct adapter *adapter)
 	u32	edca[4], inx[4];
 	struct mlme_ext_priv	*pmlmeext = &adapter->mlmeextpriv;
 	struct mlme_ext_info	*pmlmeinfo = &(pmlmeext->mlmext_info);
-	struct xmit_priv		*pxmitpriv = &adapter->xmitpriv;
+	struct xmit_priv		*xmit_priv = &adapter->xmitpriv;
 	struct registry_priv	*pregpriv = &adapter->registrypriv;
 
 	if (pmlmeinfo->WMM_enable == 0) {
@@ -626,8 +626,8 @@ void WMMOnAssocRsp(struct adapter *adapter)
 	}
 
 	for (i = 0; i < 4; i++) {
-		pxmitpriv->wmm_para_seq[i] = inx[i];
-		DBG_88E("wmm_para_seq(%d): %d\n", i, pxmitpriv->wmm_para_seq[i]);
+		xmit_priv->wmm_para_seq[i] = inx[i];
+		DBG_88E("wmm_para_seq(%d): %d\n", i, xmit_priv->wmm_para_seq[i]);
 	}
 }
 

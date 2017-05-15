@@ -454,7 +454,7 @@ int init_hw_mlme_ext(struct adapter *adapter);
 void free_mlme_ext_priv(struct mlme_ext_priv *pmlmeext);
 void init_mlme_ext_timer(struct adapter *adapter);
 void init_addba_retry_timer(struct adapter *adapt, struct sta_info *sta);
-struct xmit_frame *alloc_mgtxmitframe(struct xmit_priv *pxmitpriv);
+struct xmit_frame *alloc_mgtxmitframe(struct xmit_priv *xmit_priv);
 
 unsigned char networktype_to_raid(unsigned char network_type);
 u8 judge_network_type(struct adapter *adapter, unsigned char *rate, int len);

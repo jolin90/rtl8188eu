@@ -194,7 +194,7 @@ void usb_intf_stop(struct adapter *adapter);
 
 s32	rtw_hal_xmit(struct adapter *adapter, struct xmit_frame *pxmitframe);
 s32	rtw_hal_mgnt_xmit(struct adapter *adapter,
-			  struct xmit_frame *pmgntframe);
+			  struct xmit_frame *xmit_frame);
 
 s32	rtw_hal_init_xmit_priv(struct adapter *adapter);
 

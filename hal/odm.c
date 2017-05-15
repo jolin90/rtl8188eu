@@ -1084,7 +1084,7 @@ void odm_EdcaTurboCheckCE(struct odm_dm_struct *pDM_Odm)
 	u64	cur_tx_bytes = 0;
 	u64	cur_rx_bytes = 0;
 	u8	bbtchange = false;
-	struct xmit_priv		*pxmitpriv = &(Adapter->xmitpriv);
+	struct xmit_priv		*xmit_priv = &(Adapter->xmitpriv);
 	struct recv_priv		*precvpriv = &(Adapter->recvpriv);
 	struct registry_priv	*pregpriv = &Adapter->registrypriv;
 	struct mlme_ext_priv	*pmlmeext = &(Adapter->mlmeextpriv);
@@ -1098,7 +1098,7 @@ void odm_EdcaTurboCheckCE(struct odm_dm_struct *pDM_Odm)
 
 	/*  Check if the status needs to be changed. */
 	if ((bbtchange) || (!precvpriv->bIsAnyNonBEPkts)) {
-		cur_tx_bytes = pxmitpriv->tx_bytes - pxmitpriv->last_tx_bytes;
+		cur_tx_bytes = xmit_priv->tx_bytes - xmit_priv->last_tx_bytes;
 		cur_rx_bytes = precvpriv->rx_bytes - precvpriv->last_rx_bytes;
 
 		/* traffic, TX or RX */
@@ -1146,6 +1146,6 @@ void odm_EdcaTurboCheckCE(struct odm_dm_struct *pDM_Odm)
 dm_CheckEdcaTurbo_EXIT:
 	/*  Set variables for next time. */
 	precvpriv->bIsAnyNonBEPkts = false;
-	pxmitpriv->last_tx_bytes = pxmitpriv->tx_bytes;
+	xmit_priv->last_tx_bytes = xmit_priv->tx_bytes;
 	precvpriv->last_rx_bytes = precvpriv->rx_bytes;
 }

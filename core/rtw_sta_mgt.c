@@ -264,7 +264,7 @@ u32	rtw_free_stainfo(struct adapter *adapter, struct sta_info *psta)
 	struct __queue *pfree_sta_queue;
 	struct recv_reorder_ctrl *preorder_ctrl;
 	struct	sta_xmit_priv	*pstaxmitpriv;
-	struct	xmit_priv	*pxmitpriv = &adapter->xmitpriv;
+	struct	xmit_priv	*xmit_priv = &adapter->xmitpriv;
 	struct	sta_priv *pstapriv = &adapter->stapriv;
 
 
@@ -275,28 +275,28 @@ u32	rtw_free_stainfo(struct adapter *adapter, struct sta_info *psta)
 
 	pstaxmitpriv = &psta->sta_xmitpriv;
 
-	spin_lock_bh(&pxmitpriv->lock);
+	spin_lock_bh(&xmit_priv->lock);
 
-	rtw_free_xmitframe_queue(pxmitpriv, &psta->sleep_q);
+	rtw_free_xmitframe_queue(xmit_priv, &psta->sleep_q);
 	psta->sleepq_len = 0;
 
-	rtw_free_xmitframe_queue(pxmitpriv, &pstaxmitpriv->vo_q.sta_pending);
+	rtw_free_xmitframe_queue(xmit_priv, &pstaxmitpriv->vo_q.sta_pending);
 
 	list_del_init(&(pstaxmitpriv->vo_q.tx_pending));
 
-	rtw_free_xmitframe_queue(pxmitpriv, &pstaxmitpriv->vi_q.sta_pending);
+	rtw_free_xmitframe_queue(xmit_priv, &pstaxmitpriv->vi_q.sta_pending);
 
 	list_del_init(&(pstaxmitpriv->vi_q.tx_pending));
 
-	rtw_free_xmitframe_queue(pxmitpriv, &pstaxmitpriv->bk_q.sta_pending);
+	rtw_free_xmitframe_queue(xmit_priv, &pstaxmitpriv->bk_q.sta_pending);
 
 	list_del_init(&(pstaxmitpriv->bk_q.tx_pending));
 
-	rtw_free_xmitframe_queue(pxmitpriv, &pstaxmitpriv->be_q.sta_pending);
+	rtw_free_xmitframe_queue(xmit_priv, &pstaxmitpriv->be_q.sta_pending);
 
 	list_del_init(&(pstaxmitpriv->be_q.tx_pending));
 
-	spin_unlock_bh(&pxmitpriv->lock);
+	spin_unlock_bh(&xmit_priv->lock);
 
 	list_del_init(&psta->hash_list);
 	RT_TRACE(_module_rtl871x_sta_mgt_c_, _drv_err_,
