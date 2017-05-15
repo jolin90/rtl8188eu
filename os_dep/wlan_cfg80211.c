@@ -424,7 +424,7 @@ int wlan_cfg80211_attach(struct adapter *adapter, struct device *dev)
 
 	wdev->netdev = pnetdev = adapter->pnetdev;
 	wdev->iftype = NL80211_IFTYPE_STATION;
-	/*pnetdev->ieee80211_ptr = wdev;*/
+	pnetdev->ieee80211_ptr = wdev;
 
 	DBG_88E("\n");
 
@@ -440,13 +440,15 @@ void wlan_cfg80211_detach(struct wireless_dev *wdev)
 	wiphy = wdev->wiphy;
 
 	if (wiphy) {
-		/*wiphy_unregister(wiphy);*/
-		/*wiphy_free(wiphy);*/
-		/*wiphy = NULL;*/
+		wiphy_unregister(wiphy);
+		wiphy_free(wiphy);
+		wiphy = NULL;
 	}
 
-	if (wdev)
+	if (wdev) {
 		kfree(wdev);
+		wdev = NULL;
+	}
 
 	DBG_88E("\n");
 }
