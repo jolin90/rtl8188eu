@@ -345,17 +345,18 @@ static struct cfg80211_ops wlan_cfg80211_ops = {
 	.leave_mesh = wlan_cfg80211_leave_mesh,
 };
 
-static int wlan_setup_wiphy(struct wireless_dev *wdev, struct device *dev)
+struct wiphy *wlan_create_wiphy(struct device *dev, struct adapter *adapter)
 {
-	int err = 0;
 	struct wiphy *wiphy;
+	struct wlan_wiphy_priv *priv;
 
-	wiphy = wiphy_new(&wlan_cfg80211_ops, sizeof(struct wlan_wiphy_priv));
-	if (unlikely(!wiphy)) {
-		pr_err("Couldn not allocate wiphy device\n");
-		err = -ENOMEM;
-		return err;
-	}
+	wiphy = wiphy_new(&wlan_cfg80211_ops, sizeof(*priv));
+	if (!wiphy)
+		return NULL;
+
+	priv = wiphy_priv(wiphy);
+	priv->adapter = adapter;
+	set_wiphy_dev(wiphy, dev);
 
 	wiphy->max_scan_ie_len = WL_SCAN_IE_LEN_MAX;
 	/* Report how many SSIDs Driver can support per Scan request */
@@ -385,18 +386,10 @@ static int wlan_setup_wiphy(struct wireless_dev *wdev, struct device *dev)
 
 	wiphy->flags &= ~WIPHY_FLAG_PS_ON_BY_DEFAULT;
 
-	/* Now we can register wiphy with cfg80211 module */
-	err = wiphy_register(wiphy);
-	if (unlikely(err < 0)) {
-		pr_err("Couldn not register wiphy device (%d)\n", err);
-		wiphy_free(wiphy);
-		err = -ENOMEM;
-		return err;
-	}
+	if (wiphy_register(wiphy) < 0)
+		return NULL;
 
-	set_wiphy_dev(wiphy, dev);
-	wdev->wiphy = wiphy;
-	return err;
+	return wiphy;
 }
 
 int wlan_cfg80211_attach(struct adapter *adapter, struct device *dev)
@@ -405,8 +398,7 @@ int wlan_cfg80211_attach(struct adapter *adapter, struct device *dev)
 	struct net_device *pnetdev;
 	struct wireless_dev *wdev;
 	struct wlan_wdev_priv *pwdev_priv;
-	/*struct wlan_wiphy_priv *priv;*/
-	/*struct wiphy *wiphy;*/
+	struct wiphy *wiphy;
 
 	DBG_88E("\n");
 
@@ -416,17 +408,12 @@ int wlan_cfg80211_attach(struct adapter *adapter, struct device *dev)
 		return -ENOMEM;
 	}
 
-#if 0
-	err = wlan_setup_wiphy(wdev, dev);
-	if (unlikely(err)) {
-		kfree(wdev);
+	wiphy = wlan_create_wiphy(dev, adapter);
+	if (unlikely(!wiphy)) {
+		pr_err("Could not create wiphy\n");
 		return -ENOMEM;
 	}
-
-	wiphy = wdev->wiphy;
-	priv = wiphy_priv(wiphy);
-	priv->adapter = adapter;
-#endif
+	wdev->wiphy = wiphy;
 
 	pwdev_priv = &adapter->wdev_priv;
 	pwdev_priv->adapter = adapter;
@@ -453,8 +440,9 @@ void wlan_cfg80211_detach(struct wireless_dev *wdev)
 	wiphy = wdev->wiphy;
 
 	if (wiphy) {
-		/*wiphy_unregister(wiphy); */
-		/*wiphy_free(wiphy); */
+		/*wiphy_unregister(wiphy);*/
+		/*wiphy_free(wiphy);*/
+		/*wiphy = NULL;*/
 	}
 
 	if (wdev)
