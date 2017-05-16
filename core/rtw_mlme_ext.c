@@ -3700,7 +3700,7 @@ static unsigned int OnAction_back(struct adapter *adapter,
 	struct sta_priv *pstapriv = &adapter->stapriv;
 	/* check RA matches or not */
 	if (memcmp(myid(&(adapter->eeprompriv)), GetAddr1Ptr(pframe),
-		   ETH_ALEN))/* for if1, sta/ap mode */
+		   ETH_ALEN))/* for adapter, sta/ap mode */
 		return _SUCCESS;
 
 	DBG_88E("%s\n", __func__);

@@ -107,7 +107,7 @@ struct registry_priv {
 #define MAX_CONTINUAL_URB_ERR		4
 
 struct dvobj_priv {
-	struct adapter *if1;
+	struct adapter *adapter;
 	/* For 92D, DMDP have 2 interface. */
 	u8	InterfaceNumber;
 	u8	NumInterfaces;

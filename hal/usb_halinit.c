@@ -1195,8 +1195,8 @@ static void hw_var_set_opmode(struct adapter *Adapter, u8 variable, u8 *val)
 		/* BIT3 - If set 0, hw will clr bcnq when tx becon ok/fail or port 0 */
 		usb_write8(Adapter, REG_MBID_NUM, usb_read8(Adapter, REG_MBID_NUM) | BIT(3) | BIT(4));
 
-		/* enable BCN0 Function for if1 */
-		/* don't enable update TSF0 for if1 (due to TSF update when beacon/probe rsp are received) */
+		/* enable BCN0 Function for adapter */
+		/* don't enable update TSF0 for adapter (due to TSF update when beacon/probe rsp are received) */
 		usb_write8(Adapter, REG_BCN_CTRL, (DIS_TSF_UDT0_NORMAL_CHIP|EN_BCN_FUNCTION | BIT(1)));
 
 		/* dis BCN1 ATIM  WND if if2 is station */

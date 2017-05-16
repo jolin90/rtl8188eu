@@ -204,7 +204,7 @@ static void rtw_dev_unload(struct adapter *adapter)
 static int rtw_suspend(struct usb_interface *pusb_intf, pm_message_t message)
 {
 	struct dvobj_priv *dvobj = usb_get_intfdata(pusb_intf);
-	struct adapter *adapter = dvobj->if1;
+	struct adapter *adapter = dvobj->adapter;
 	struct net_device *pnetdev = adapter->pnetdev;
 	struct mlme_priv *pmlmepriv = &adapter->mlmepriv;
 	struct pwrctrl_priv *pwrpriv = &adapter->pwrctrlpriv;
@@ -314,7 +314,7 @@ exit:
 static int rtw_resume(struct usb_interface *pusb_intf)
 {
 	struct dvobj_priv *dvobj = usb_get_intfdata(pusb_intf);
-	struct adapter *adapter = dvobj->if1;
+	struct adapter *adapter = dvobj->adapter;
 
 	return rtw_resume_process(adapter);
 }
@@ -339,7 +339,7 @@ static struct adapter *rtw_usb_if1_init(struct dvobj_priv *dvobj,
 	if (adapter == NULL)
 		goto exit;
 	adapter->dvobj = dvobj;
-	dvobj->if1 = adapter;
+	dvobj->adapter = adapter;
 
 	adapter->bDriverStopped = true;
 	mutex_init(&adapter->hw_init_mutex);
@@ -435,38 +435,38 @@ exit:
 	return adapter;
 }
 
-static void rtw_usb_if1_deinit(struct adapter *if1)
+static void rtw_usb_if1_deinit(struct adapter *adapter)
 {
-	struct net_device *pnetdev = if1->pnetdev;
-	struct mlme_priv *pmlmepriv = &if1->mlmepriv;
+	struct net_device *pnetdev = adapter->pnetdev;
+	struct mlme_priv *pmlmepriv = &adapter->mlmepriv;
 
 	if (check_fwstate(pmlmepriv, _FW_LINKED))
-		rtw_disassoc_cmd(if1, 0, false);
+		rtw_disassoc_cmd(adapter, 0, false);
 
 #ifdef CONFIG_88EU_AP_MODE
-	free_mlme_ap_info(if1);
+	free_mlme_ap_info(adapter);
 #endif
 
 	if (pnetdev)
 		unregister_netdev(pnetdev); /* will call netdev_close() */
 
-	rtl88eu_mon_deinit(if1->pmondev);
-	rtw_cancel_all_timer(if1);
+	rtl88eu_mon_deinit(adapter->pmondev);
+	rtw_cancel_all_timer(adapter);
 
 #ifdef CONFIG_WLAN_CFG80211
-	wlan_cfg80211_detach(if1->wdev);
+	wlan_cfg80211_detach(adapter->wdev);
 #endif
 
-	rtw_dev_unload(if1);
+	rtw_dev_unload(adapter);
 	pr_debug("+r871xu_dev_remove, hw_init_completed=%d\n",
-		if1->hw_init_completed);
-	rtw_free_drv_sw(if1);
+		adapter->hw_init_completed);
+	rtw_free_drv_sw(adapter);
 	rtw_free_netdev(pnetdev);
 }
 
 static int rtw_drv_init(struct usb_interface *pusb_intf, const struct usb_device_id *pdid)
 {
-	struct adapter *if1 = NULL;
+	struct adapter *adapter = NULL;
 	struct dvobj_priv *dvobj;
 
 	/* Initialize dvobj_priv */
@@ -477,8 +477,8 @@ static int rtw_drv_init(struct usb_interface *pusb_intf, const struct usb_device
 		goto exit;
 	}
 
-	if1 = rtw_usb_if1_init(dvobj, pusb_intf, pdid);
-	if (!if1) {
+	adapter = rtw_usb_if1_init(dvobj, pusb_intf, pdid);
+	if (!adapter) {
 		pr_debug("rtw_init_primarystruct adapter Failed!\n");
 		goto free_dvobj;
 	}
@@ -498,7 +498,7 @@ exit:
 static void rtw_dev_remove(struct usb_interface *pusb_intf)
 {
 	struct dvobj_priv *dvobj = usb_get_intfdata(pusb_intf);
-	struct adapter *adapter = dvobj->if1;
+	struct adapter *adapter = dvobj->adapter;
 
 	pr_debug("+rtw_dev_remove\n");
 	RT_TRACE(_module_hci_intfs_c_, _drv_err_, ("+dev_remove()\n"));
