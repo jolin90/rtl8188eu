@@ -3645,7 +3645,7 @@ static unsigned int on_action_spct(struct adapter *adapter,
 	u8 category;
 	u8 action;
 
-	DBG_88E(FUNC_NDEV_FMT"\n", FUNC_NDEV_ARG(adapter->pnetdev));
+	DBG_88E(FUNC_NDEV_FMT"\n", FUNC_NDEV_ARG(adapter->net_device));
 
 	psta = rtw_get_stainfo(pstapriv, GetAddr2Ptr(pframe));
 
@@ -5587,7 +5587,7 @@ u8 set_ch_hdl(struct adapter *adapter, u8 *pbuf)
 	set_ch_parm = (struct set_ch_parm *)pbuf;
 
 	DBG_88E(FUNC_NDEV_FMT" ch:%u, bw:%u, ch_offset:%u\n",
-		FUNC_NDEV_ARG(adapter->pnetdev),
+		FUNC_NDEV_ARG(adapter->net_device),
 		set_ch_parm->ch, set_ch_parm->bw, set_ch_parm->ch_offset);
 
 	pmlmeext->cur_channel = set_ch_parm->ch;

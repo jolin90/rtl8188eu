@@ -35,7 +35,7 @@ struct sta_xmit_priv;
 struct xmit_frame;
 struct xmit_buf;
 
-int rtw_xmit_entry(struct sk_buff *pkt, struct  net_device *pnetdev);
+int rtw_xmit_entry(struct sk_buff *pkt, struct  net_device *net_device);
 
 void rtw_os_xmit_schedule(struct adapter *adapter);
 

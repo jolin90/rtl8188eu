@@ -11,7 +11,7 @@ TODO:
 - switch to use MAC80211
 - figure out what to do with this code in rtw_recv_indicatepkt():
 	rcu_read_lock();
-	rcu_dereference(adapter->pnetdev->rx_handler_data);
+	rcu_dereference(adapter->net_device->rx_handler_data);
 	rcu_read_unlock();
   Perhaps delete it, perhaps assign to some local variable.
 

@@ -395,7 +395,7 @@ struct wiphy *wlan_create_wiphy(struct adapter *adapter, struct device *dev)
 int wlan_cfg80211_attach(struct adapter *adapter, struct device *dev)
 {
 	int err = 0;
-	struct net_device *pnetdev;
+	struct net_device *net_device;
 	struct wireless_dev *wdev;
 	struct wlan_wdev_priv *pwdev_priv;
 	struct wiphy *wiphy;
@@ -422,9 +422,9 @@ int wlan_cfg80211_attach(struct adapter *adapter, struct device *dev)
 
 	adapter->wdev = wdev;
 
-	wdev->netdev = pnetdev = adapter->pnetdev;
+	wdev->netdev = net_device = adapter->net_device;
 	wdev->iftype = NL80211_IFTYPE_STATION;
-	/*pnetdev->ieee80211_ptr = wdev;*/
+	/*net_device->ieee80211_ptr = wdev;*/
 
 	DBG_88E("\n");
 

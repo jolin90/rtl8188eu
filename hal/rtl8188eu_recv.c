@@ -65,7 +65,7 @@ int	rtw_hal_init_recv_priv(struct adapter *adapter)
 		skb_queue_head_init(&precvpriv->free_recv_skb_queue);
 
 		for (i = 0; i < NR_PREALLOC_RECV_SKB; i++) {
-			pskb = __netdev_alloc_skb(adapter->pnetdev,
+			pskb = __netdev_alloc_skb(adapter->net_device,
 					MAX_RECVBUF_SZ, GFP_KERNEL);
 			if (pskb) {
 				kmemleak_not_leak(pskb);

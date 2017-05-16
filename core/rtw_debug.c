@@ -41,7 +41,7 @@ int proc_set_write_reg(struct file *file, const char __user *buffer,
 		unsigned long count, void *data)
 {
 	struct net_device *dev = data;
-	struct adapter *adapter = (struct adapter *)rtw_netdev_priv(dev);
+	struct adapter *adapter = (struct adapter *)netdev_priv(dev);
 	char tmp[32];
 	u32 addr, val, len;
 
@@ -83,7 +83,7 @@ int proc_get_read_reg(char *page, char **start,
 			  int *eof, void *data)
 {
 	struct net_device *dev = data;
-	struct adapter *adapter = (struct adapter *)rtw_netdev_priv(dev);
+	struct adapter *adapter = (struct adapter *)netdev_priv(dev);
 
 	int len = 0;
 
@@ -143,7 +143,7 @@ int proc_get_adapter_state(char *page, char **start,
 			  int *eof, void *data)
 {
 	struct net_device *dev = data;
-	struct adapter *adapter = (struct adapter *)rtw_netdev_priv(dev);
+	struct adapter *adapter = (struct adapter *)netdev_priv(dev);
 	int len = 0;
 
 	len += snprintf(page + len, count - len, "bSurpriseRemoved=%d, bDriverStopped=%d\n",
@@ -158,7 +158,7 @@ int proc_get_best_channel(char *page, char **start,
 			  int *eof, void *data)
 {
 	struct net_device *dev = data;
-	struct adapter *adapter = (struct adapter *)rtw_netdev_priv(dev);
+	struct adapter *adapter = (struct adapter *)netdev_priv(dev);
 	struct mlme_ext_priv *pmlmeext = &adapter->mlmeextpriv;
 	int len = 0;
 	u32 i, best_channel_24G = 1, best_channel_5G = 36, index_24G = 0, index_5G = 0;

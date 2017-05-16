@@ -84,7 +84,7 @@ int rtw_android_cmdstr_to_num(char *cmdstr)
 static int rtw_android_get_rssi(struct net_device *net, char *command,
 				int total_len)
 {
-	struct adapter *adapter = (struct adapter *)rtw_netdev_priv(net);
+	struct adapter *adapter = (struct adapter *)netdev_priv(net);
 	struct	mlme_priv	*pmlmepriv = &(adapter->mlmepriv);
 	struct	wlan_network	*pcur_network = &pmlmepriv->cur_network;
 	int bytes_written = 0;
@@ -101,7 +101,7 @@ static int rtw_android_get_rssi(struct net_device *net, char *command,
 static int rtw_android_get_link_speed(struct net_device *net, char *command,
 				      int total_len)
 {
-	struct adapter *adapter = (struct adapter *)rtw_netdev_priv(net);
+	struct adapter *adapter = (struct adapter *)netdev_priv(net);
 	u16 link_speed;
 
 	link_speed = rtw_get_cur_max_rate(adapter) / 10;
@@ -119,7 +119,7 @@ static int rtw_android_get_macaddr(struct net_device *net, char *command,
 static int android_set_cntry(struct net_device *net, char *command,
 			     int total_len)
 {
-	struct adapter *adapter = (struct adapter *)rtw_netdev_priv(net);
+	struct adapter *adapter = (struct adapter *)netdev_priv(net);
 	char *country_code = command + strlen(android_wifi_cmd_str[ANDROID_WIFI_CMD_COUNTRY]) + 1;
 	int ret;
 

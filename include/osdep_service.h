@@ -66,12 +66,12 @@ static inline struct list_head *get_list_head(struct __queue *queue)
 	return &(queue->queue);
 }
 
-static inline int rtw_netif_queue_stopped(struct net_device *pnetdev)
+static inline int rtw_netif_queue_stopped(struct net_device *net_device)
 {
-	return  netif_tx_queue_stopped(netdev_get_tx_queue(pnetdev, 0)) &&
-		netif_tx_queue_stopped(netdev_get_tx_queue(pnetdev, 1)) &&
-		netif_tx_queue_stopped(netdev_get_tx_queue(pnetdev, 2)) &&
-		netif_tx_queue_stopped(netdev_get_tx_queue(pnetdev, 3));
+	return  netif_tx_queue_stopped(netdev_get_tx_queue(net_device, 0)) &&
+		netif_tx_queue_stopped(netdev_get_tx_queue(net_device, 1)) &&
+		netif_tx_queue_stopped(netdev_get_tx_queue(net_device, 2)) &&
+		netif_tx_queue_stopped(netdev_get_tx_queue(net_device, 3));
 }
 
 u8 *_rtw_malloc(u32 sz);
@@ -80,20 +80,14 @@ u8 *_rtw_malloc(u32 sz);
 void *rtw_malloc2d(int h, int w, int size);
 
 void _rtw_init_queue(struct __queue *pqueue);
-
-struct rtw_netdev_priv_indicator {
-	void *priv;
-};
 struct net_device *rtw_alloc_etherdev_with_old_priv(void *old_priv);
 
-#define rtw_netdev_priv(netdev)					\
-	(((struct rtw_netdev_priv_indicator *)netdev_priv(netdev))->priv)
 void rtw_free_netdev(struct net_device *netdev);
 
 #define FUNC_NDEV_FMT "%s(%s)"
 #define FUNC_NDEV_ARG(ndev) __func__, ndev->name
 #define FUNC_ADPT_FMT "%s(%s)"
-#define FUNC_ADPT_ARG(adapter) __func__, adapter->pnetdev->name
+#define FUNC_ADPT_ARG(adapter) __func__, adapter->net_device->name
 
 u64 rtw_modular64(u64 x, u64 y);
 

@@ -35,7 +35,7 @@ void rtw_init_mlme_timer(struct adapter *adapter)
 void rtw_os_indicate_connect(struct adapter *adapter)
 {
 	rtw_indicate_wx_assoc_event(adapter);
-	netif_carrier_on(adapter->pnetdev);
+	netif_carrier_on(adapter->net_device);
 }
 
 void rtw_os_indicate_scan_done(struct adapter *adapter, bool aborted)
@@ -87,7 +87,7 @@ void rtw_reset_securitypriv(struct adapter *adapter)
 
 void rtw_os_indicate_disconnect(struct adapter *adapter)
 {
-	netif_carrier_off(adapter->pnetdev); /*  Do it first for tx broadcast pkt after disconnection issue! */
+	netif_carrier_off(adapter->net_device); /*  Do it first for tx broadcast pkt after disconnection issue! */
 	rtw_indicate_wx_disassoc_event(adapter);
 	 rtw_reset_securitypriv(adapter);
 }
@@ -118,7 +118,7 @@ void rtw_report_sec_ie(struct adapter *adapter, u8 authmode, u8 *sec_ie)
 		memset(&wrqu, 0, sizeof(wrqu));
 		wrqu.data.length = p-buff;
 		wrqu.data.length = min_t(__u16, wrqu.data.length, IW_CUSTOM_MAX);
-		wireless_send_event(adapter->pnetdev, IWEVCUSTOM, &wrqu, buff);
+		wireless_send_event(adapter->net_device, IWEVCUSTOM, &wrqu, buff);
 		kfree(buff);
 	}
 }
@@ -162,7 +162,7 @@ void rtw_indicate_sta_assoc_event(struct adapter *adapter, struct sta_info *psta
 
 	DBG_88E("+rtw_indicate_sta_assoc_event\n");
 
-	wireless_send_event(adapter->pnetdev, IWEVREGISTERED, &wrqu, NULL);
+	wireless_send_event(adapter->net_device, IWEVREGISTERED, &wrqu, NULL);
 }
 
 void rtw_indicate_sta_disassoc_event(struct adapter *adapter, struct sta_info *psta)
@@ -186,7 +186,7 @@ void rtw_indicate_sta_disassoc_event(struct adapter *adapter, struct sta_info *p
 
 	DBG_88E("+rtw_indicate_sta_disassoc_event\n");
 
-	wireless_send_event(adapter->pnetdev, IWEVEXPIRED, &wrqu, NULL);
+	wireless_send_event(adapter->net_device, IWEVEXPIRED, &wrqu, NULL);
 }
 
 #endif

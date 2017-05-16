@@ -31,11 +31,11 @@ void rtw_cancel_all_timer(struct adapter *adapter);
 
 int rtw_ioctl(struct net_device *dev, struct ifreq *rq, int cmd);
 
-int rtw_init_netdev_name(struct net_device *pnetdev, const char *ifname);
-struct net_device *rtw_init_netdev(struct adapter *adapter);
+int rtw_init_netdev_name(struct net_device *net_device, const char *ifname);
+struct net_device *rtw_init_netdev(struct net_device *net_device);
 u16 rtw_recv_select_queue(struct sk_buff *skb);
 
-int netdev_open(struct net_device *pnetdev);
+int netdev_open(struct net_device *net_device);
 int ips_netdrv_open(struct adapter *adapter);
 void rtw_ips_dev_unload(struct adapter *adapter);
 int rtw_ips_pwr_up(struct adapter *adapter);

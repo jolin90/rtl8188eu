@@ -1604,8 +1604,8 @@ static int amsdu_to_msdu(struct adapter *adapter, struct recv_frame *recv_frame)
 
 		/* Indicate the packets to upper layer */
 		/*  Insert NAT2.5 RX here! */
-		sub_skb->protocol = eth_type_trans(sub_skb, adapter->pnetdev);
-		sub_skb->dev = adapter->pnetdev;
+		sub_skb->protocol = eth_type_trans(sub_skb, adapter->net_device);
+		sub_skb->dev = adapter->net_device;
 
 		sub_skb->ip_summed = CHECKSUM_NONE;
 

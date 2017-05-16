@@ -99,12 +99,12 @@ void rtw_os_pkt_complete(struct adapter *adapter, struct sk_buff *pkt)
 
 	queue = skb_get_queue_mapping(pkt);
 	if (adapter->registrypriv.wifi_spec) {
-		if (__netif_subqueue_stopped(adapter->pnetdev, queue) &&
+		if (__netif_subqueue_stopped(adapter->net_device, queue) &&
 		    (xmit_priv->hwxmits[queue].accnt < WMM_XMIT_THRESHOLD))
-			netif_wake_subqueue(adapter->pnetdev, queue);
+			netif_wake_subqueue(adapter->net_device, queue);
 	} else {
-		if (__netif_subqueue_stopped(adapter->pnetdev, queue))
-			netif_wake_subqueue(adapter->pnetdev, queue);
+		if (__netif_subqueue_stopped(adapter->net_device, queue))
+			netif_wake_subqueue(adapter->net_device, queue);
 	}
 
 	dev_kfree_skb_any(pkt);
@@ -143,11 +143,11 @@ static void rtw_check_xmit_resource(struct adapter *adapter, struct sk_buff *pkt
 	if (adapter->registrypriv.wifi_spec) {
 		/* No free space for Tx, tx_worker is too slow */
 		if (xmit_priv->hwxmits[queue].accnt > WMM_XMIT_THRESHOLD)
-			netif_stop_subqueue(adapter->pnetdev, queue);
+			netif_stop_subqueue(adapter->net_device, queue);
 	} else {
 		if (xmit_priv->free_xmitframe_cnt <= 4) {
-			if (!netif_tx_queue_stopped(netdev_get_tx_queue(adapter->pnetdev, queue)))
-				netif_stop_subqueue(adapter->pnetdev, queue);
+			if (!netif_tx_queue_stopped(netdev_get_tx_queue(adapter->net_device, queue)))
+				netif_stop_subqueue(adapter->net_device, queue);
 		}
 	}
 }
@@ -202,9 +202,9 @@ static int rtw_mlcst2unicst(struct adapter *adapter, struct sk_buff *skb)
 }
 
 
-int rtw_xmit_entry(struct sk_buff *pkt, struct  net_device *pnetdev)
+int rtw_xmit_entry(struct sk_buff *pkt, struct  net_device *net_device)
 {
-	struct adapter *adapter = (struct adapter *)rtw_netdev_priv(pnetdev);
+	struct adapter *adapter = (struct adapter *)netdev_priv(net_device);
 	struct xmit_priv *xmit_priv = &adapter->xmitpriv;
 	struct mlme_priv	*pmlmepriv = &adapter->mlmepriv;
 	s32 res = 0;

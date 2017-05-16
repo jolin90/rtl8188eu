@@ -120,9 +120,9 @@ static int recvbuf2recvframe(struct adapter *adapt, struct sk_buff *pskb)
 			alloc_sz += 14;
 		}
 
-		pkt_copy = netdev_alloc_skb(adapt->pnetdev, alloc_sz);
+		pkt_copy = netdev_alloc_skb(adapt->net_device, alloc_sz);
 		if (pkt_copy) {
-			pkt_copy->dev = adapt->pnetdev;
+			pkt_copy->dev = adapt->net_device;
 			recv_frame->pkt = pkt_copy;
 			skb_reserve(pkt_copy, 8 - ((size_t)(pkt_copy->data) & 7));/* force pkt_copy->data at 8-byte alignment address */
 			skb_reserve(pkt_copy, shift_sz);/* force ip_hdr at 8-byte alignment address according to shift_sz. */
@@ -458,7 +458,7 @@ u32 usb_read_port(struct adapter *adapter, u32 addr, struct recv_buf *precvbuf)
 
 	/* re-assign for linux based on skb */
 	if ((!precvbuf->reuse) || (precvbuf->pskb == NULL)) {
-		precvbuf->pskb = netdev_alloc_skb(adapter->pnetdev, MAX_RECVBUF_SZ);
+		precvbuf->pskb = netdev_alloc_skb(adapter->net_device, MAX_RECVBUF_SZ);
 		if (precvbuf->pskb == NULL) {
 			RT_TRACE(_module_hci_ops_os_c_, _drv_err_, ("init_recvbuf(): alloc_skb fail!\n"));
 			DBG_88E("#### usb_read_port() alloc_skb fail!#####\n");

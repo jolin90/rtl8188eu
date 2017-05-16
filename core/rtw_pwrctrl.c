@@ -27,7 +27,7 @@
 static int rtw_hw_suspend(struct adapter *adapter)
 {
 	struct pwrctrl_priv *pwrpriv = &adapter->pwrctrlpriv;
-	struct net_device *pnetdev = adapter->pnetdev;
+	struct net_device *net_device = adapter->net_device;
 
 
 	if ((!adapter->bup) || (adapter->bDriverStopped) ||
@@ -45,9 +45,9 @@ static int rtw_hw_suspend(struct adapter *adapter)
 	mutex_lock(&pwrpriv->mutex_lock);
 	pwrpriv->bips_processing = true;
 	/* s1. */
-	if (pnetdev) {
-		netif_carrier_off(pnetdev);
-		netif_tx_stop_all_queues(pnetdev);
+	if (net_device) {
+		netif_carrier_off(net_device);
+		netif_tx_stop_all_queues(net_device);
 	}
 
 	/* s2. */
@@ -89,7 +89,7 @@ error_exit:
 static int rtw_hw_resume(struct adapter *adapter)
 {
 	struct pwrctrl_priv *pwrpriv = &adapter->pwrctrlpriv;
-	struct net_device *pnetdev = adapter->pnetdev;
+	struct net_device *net_device = adapter->net_device;
 
 
 	/* system resume */
@@ -98,18 +98,18 @@ static int rtw_hw_resume(struct adapter *adapter)
 	pwrpriv->bips_processing = true;
 	rtw_reset_drv_sw(adapter);
 
-	if (ips_netdrv_open((struct adapter *)rtw_netdev_priv(pnetdev)) != _SUCCESS) {
+	if (ips_netdrv_open((struct adapter *)netdev_priv(net_device)) != _SUCCESS) {
 		mutex_unlock(&pwrpriv->mutex_lock);
 		goto error_exit;
 	}
 
-	netif_device_attach(pnetdev);
-	netif_carrier_on(pnetdev);
+	netif_device_attach(net_device);
+	netif_carrier_on(net_device);
 
-	if (!netif_queue_stopped(pnetdev))
-		netif_start_queue(pnetdev);
+	if (!netif_queue_stopped(net_device))
+		netif_start_queue(net_device);
 	else
-		netif_wake_queue(pnetdev);
+		netif_wake_queue(net_device);
 
 	pwrpriv->bkeepfwalive = false;
 	pwrpriv->brfoffbyhw = false;

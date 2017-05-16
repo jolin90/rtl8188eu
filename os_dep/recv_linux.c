@@ -65,7 +65,7 @@ void rtw_handle_tkip_mic_err(struct adapter *adapter, u8 bgroup)
 	memcpy(ev.src_addr.sa_data, &pmlmepriv->assoc_bssid[0], ETH_ALEN);
 	memset(&wrqu, 0x00, sizeof(wrqu));
 	wrqu.data.length = sizeof(ev);
-	wireless_send_event(adapter->pnetdev, IWEVMICHAELMICFAILURE,
+	wireless_send_event(adapter->net_device, IWEVMICHAELMICFAILURE,
 			    &wrqu, (char *)&ev);
 }
 
@@ -105,13 +105,13 @@ int rtw_recv_indicatepkt(struct adapter *adapter,
 			}
 
 			if (psta) {
-				struct net_device *pnetdev;
+				struct net_device *net_device;
 
-				pnetdev = (struct net_device *)adapter->pnetdev;
-				skb->dev = pnetdev;
+				net_device = (struct net_device *)adapter->net_device;
+				skb->dev = net_device;
 				skb_set_queue_mapping(skb, rtw_recv_select_queue(skb));
 
-				rtw_xmit_entry(skb, pnetdev);
+				rtw_xmit_entry(skb, net_device);
 
 				if (bmcast)
 					skb = pskb2;
@@ -122,12 +122,12 @@ int rtw_recv_indicatepkt(struct adapter *adapter,
 	}
 
 	rcu_read_lock();
-	rcu_dereference(adapter->pnetdev->rx_handler_data);
+	rcu_dereference(adapter->net_device->rx_handler_data);
 	rcu_read_unlock();
 
 	skb->ip_summed = CHECKSUM_NONE;
-	skb->dev = adapter->pnetdev;
-	skb->protocol = eth_type_trans(skb, adapter->pnetdev);
+	skb->dev = adapter->net_device;
+	skb->protocol = eth_type_trans(skb, adapter->net_device);
 
 	netif_rx(skb);
 

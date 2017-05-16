@@ -174,7 +174,7 @@ struct adapter {
 	u8	hw_init_completed;
 
 	void *cmdThread;
-	struct  net_device *pnetdev;
+	struct  net_device *net_device;
 	struct  net_device *pmondev;
 
 	int bup;
