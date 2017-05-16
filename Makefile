@@ -53,7 +53,7 @@ $(MODULE_NAME)-y :=				\
 		os_dep/usb_ops_linux.o	\
 		os_dep/xmit_linux.o
 
-CONFIG_WLAN_CFG80211 = y
+CONFIG_WLAN_CFG80211 = n
 
 ifeq ($(CONFIG_WLAN_CFG80211), y)
 $(MODULE_NAME)-y += os_dep/wlan_cfg80211.o

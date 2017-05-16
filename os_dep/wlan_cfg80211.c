@@ -345,7 +345,7 @@ static struct cfg80211_ops wlan_cfg80211_ops = {
 	.leave_mesh = wlan_cfg80211_leave_mesh,
 };
 
-struct wiphy *wlan_create_wiphy(struct device *dev, struct adapter *adapter)
+struct wiphy *wlan_create_wiphy(struct adapter *adapter, struct device *dev)
 {
 	struct wiphy *wiphy;
 	struct wlan_wiphy_priv *priv;
@@ -408,7 +408,7 @@ int wlan_cfg80211_attach(struct adapter *adapter, struct device *dev)
 		return -ENOMEM;
 	}
 
-	wiphy = wlan_create_wiphy(dev, adapter);
+	wiphy = wlan_create_wiphy(adapter, dev);
 	if (unlikely(!wiphy)) {
 		pr_err("Could not create wiphy\n");
 		return -ENOMEM;
@@ -424,7 +424,7 @@ int wlan_cfg80211_attach(struct adapter *adapter, struct device *dev)
 
 	wdev->netdev = pnetdev = adapter->pnetdev;
 	wdev->iftype = NL80211_IFTYPE_STATION;
-	pnetdev->ieee80211_ptr = wdev;
+	/*pnetdev->ieee80211_ptr = wdev;*/
 
 	DBG_88E("\n");
 
