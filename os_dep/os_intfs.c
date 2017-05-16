@@ -596,16 +596,16 @@ static int _netdev_open(struct net_device *pnetdev)
 			goto netdev_open_error;
 		}
 
-		pr_info("MAC Address = %pM\n", pnetdev->dev_addr);
+		DBG_88E("MAC Address = %pM\n", pnetdev->dev_addr);
 
 		err = rtw_start_drv_threads(adapter);
 		if (err) {
-			pr_info("Initialize driver software resource Failed!\n");
+			DBG_88E("Initialize driver software resource Failed!\n");
 			goto netdev_open_error;
 		}
 
 		if (init_hw_mlme_ext(adapter) == _FAIL) {
-			pr_info("can't init mlme_ext_priv\n");
+			DBG_88E("can't init mlme_ext_priv\n");
 			goto netdev_open_error;
 		}
 		rtw_hal_inirp_init(adapter);
