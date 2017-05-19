@@ -340,6 +340,8 @@ struct net_device *rtw_init_netdev(struct net_device *net_device)
 	if (!net_device)
 		return NULL;
 
+	DBG_88E("net_device;%p\n", net_device);
+
 	adapter = netdev_priv(net_device);
 	adapter->bDriverStopped = true;
 	mutex_init(&adapter->hw_init_mutex);

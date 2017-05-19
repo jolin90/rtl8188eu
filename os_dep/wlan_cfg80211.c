@@ -411,11 +411,11 @@ struct wiphy *wlan_create_wiphy(struct adapter *adapter, struct device *dev)
 int wlan_cfg80211_attach(struct adapter *adapter, struct device *dev)
 {
 	int err = 0;
+	struct net_device *net_device = adapter->net_device;
 	struct wiphy *wiphy;
 	struct wireless_dev *wdev;
-	struct net_device *net_device;
 
-	DBG_88E("\n");
+	DBG_88E("net_device;%p\n", net_device);
 
 	wiphy = wlan_create_wiphy(adapter, dev);
 	if (unlikely(!wiphy)) {
@@ -432,7 +432,7 @@ int wlan_cfg80211_attach(struct adapter *adapter, struct device *dev)
 
 	adapter->wdev = wdev;
 	wdev->wiphy = wiphy;
-	wdev->netdev = net_device = adapter->net_device;
+	wdev->netdev = net_device;
 	wdev->iftype = NL80211_IFTYPE_STATION;
 	net_device->ieee80211_ptr = wdev;
 

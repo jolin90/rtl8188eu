@@ -346,7 +346,8 @@ static struct adapter *rtw_usb_if1_init(struct dvobj_priv *dvobj,
 
 #ifdef CONFIG_WLAN_CFG80211
 	/* Attach and link in the cfg80211 */
-	wlan_cfg80211_attach(adapter, dvobj_to_dev(dvobj));
+	if (wlan_cfg80211_attach(adapter, dvobj_to_dev(dvobj)))
+		goto free_hal_data;
 #endif
 
 	if (adapter->registrypriv.monitor_enable) {
@@ -419,6 +420,7 @@ free_hal_data:
 	if (status != _SUCCESS) {
 		if (net_device)
 			free_netdev(net_device);
+		adapter = NULL;
 	}
 	return adapter;
 }

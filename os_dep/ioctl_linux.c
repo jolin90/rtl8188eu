@@ -3103,6 +3103,7 @@ static struct iw_statistics *rtw_get_wireless_stats(struct net_device *dev)
 	int tmp_qual = 0;
 	int tmp_noise = 0;
 
+	DBG_88E("\n");
 	if (!check_fwstate(&adapter->mlmepriv, _FW_LINKED)) {
 		piwstats->qual.qual = 0;
 		piwstats->qual.level = 0;
@@ -3117,6 +3118,7 @@ static struct iw_statistics *rtw_get_wireless_stats(struct net_device *dev)
 		piwstats->qual.noise = tmp_noise;
 	}
 	piwstats->qual.updated = IW_QUAL_ALL_UPDATED;/* IW_QUAL_DBM; */
+	DBG_88E("\n");
 	return &adapter->iwstats;
 }
 
