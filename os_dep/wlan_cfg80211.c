@@ -135,39 +135,39 @@ static const u32 wlan_cipher_suites[] = {
 
 #if 0
 static int wlan_cfg80211_add_key(struct wiphy *wiphy, struct net_device *dev,
-								 u8 key_index, bool pairwise,
-								 const u8 * mac_addr, struct key_params *params)
+		u8 key_index, bool pairwise,
+		const u8 * mac_addr, struct key_params *params)
 {
 	int ret = 0;
 	return ret;
 }
 
 static int wlan_cfg80211_del_key(struct wiphy *wiphy, struct net_device *netdev,
-								 u8 key_index, bool pairwise,
-								 const u8 * mac_addr)
+		u8 key_index, bool pairwise,
+		const u8 * mac_addr)
 {
 	int ret = 0;
 	return ret;
 }
 
 static int wlan_cfg80211_set_default_key(struct wiphy *wiphy,
-										 struct net_device *dev,
-										 u8 key_index, bool unicast,
-										 bool multicast)
+		struct net_device *dev,
+		u8 key_index, bool unicast,
+		bool multicast)
 {
 	int ret = 0;
 	return ret;
 }
 
 static int wlan_cfg80211_auth(struct wiphy *wiphy, struct net_device *dev,
-							  struct cfg80211_auth_request *req)
+		struct cfg80211_auth_request *req)
 {
 	int ret = 0;
 	return ret;
 }
 
 static int wlan_cfg80211_assoc(struct wiphy *wiphy, struct net_device *dev,
-							   struct cfg80211_assoc_request *req)
+		struct cfg80211_assoc_request *req)
 {
 	int ret = 0;
 	return ret;
@@ -175,11 +175,11 @@ static int wlan_cfg80211_assoc(struct wiphy *wiphy, struct net_device *dev,
 
 static int wlan_cfg80211_deauth
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(3, 0, 86))
- (struct wiphy *wiphy, struct net_device *dev,
-  struct cfg80211_deauth_request *req, void *cookie)
+(struct wiphy *wiphy, struct net_device *dev,
+ struct cfg80211_deauth_request *req, void *cookie)
 #else
- (struct wiphy *wiphy, struct net_device *dev,
-  struct cfg80211_deauth_request *req)
+(struct wiphy *wiphy, struct net_device *dev,
+ struct cfg80211_deauth_request *req)
 #endif
 {
 	int ret = 0;
@@ -188,11 +188,11 @@ static int wlan_cfg80211_deauth
 
 static int wlan_cfg80211_disassoc
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(3, 0, 86))
- (struct wiphy *wiphy, struct net_device *dev,
-  struct cfg80211_disassoc_request *req, void *cookie)
+(struct wiphy *wiphy, struct net_device *dev,
+ struct cfg80211_disassoc_request *req, void *cookie)
 #else
- (struct wiphy *wiphy, struct net_device *dev,
-  struct cfg80211_disassoc_request *req)
+(struct wiphy *wiphy, struct net_device *dev,
+ struct cfg80211_disassoc_request *req)
 #endif
 {
 	int ret = 0;
@@ -200,21 +200,21 @@ static int wlan_cfg80211_disassoc
 }
 
 static int wlan_cfg80211_connect(struct wiphy *wiphy, struct net_device *dev,
-								 struct cfg80211_connect_params *sme)
+		struct cfg80211_connect_params *sme)
 {
 	int ret = 0;
 	return ret;
 }
 
 static int wlan_cfg80211_disconnect(struct wiphy *wiphy, struct net_device *dev,
-									u16 reason_code)
+		u16 reason_code)
 {
 	int ret = 0;
 	return ret;
 }
 
 static int wlan_cfg80211_join_ibss(struct wiphy *wiphy, struct net_device *dev,
-								   struct cfg80211_ibss_params *params)
+		struct cfg80211_ibss_params *params)
 {
 	int ret = 0;
 	return ret;
@@ -230,18 +230,18 @@ static int wlan_cfg80211_leave_ibss(struct wiphy *wiphy, struct net_device *dev)
 
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(3, 0, 86))
 static struct net_device *wlan_cfg80211_add_virtual_intf(struct wiphy *wiphy,
-														 char *name,
-														 enum nl80211_iftype
-														 type, u32 * flags,
-														 struct vif_params
-														 *params)
+		char *name,
+		enum nl80211_iftype
+		type, u32 * flags,
+		struct vif_params
+		*params)
 #else
 static struct wireless_dev *wlan_cfg80211_add_virtual_intf(struct wiphy *wiphy,
-														   const char *name,
-														   enum nl80211_iftype
-														   type, u32 * flags,
-														   struct vif_params
-														   *params)
+		const char *name,
+		enum nl80211_iftype
+		type, u32 * flags,
+		struct vif_params
+		*params)
 #endif
 {
 	return NULL;
@@ -249,9 +249,9 @@ static struct wireless_dev *wlan_cfg80211_add_virtual_intf(struct wiphy *wiphy,
 
 static int wlan_cfg80211_del_virtual_intf
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(3, 0, 86))
- (struct wiphy *wiphy, struct net_device *dev)
+(struct wiphy *wiphy, struct net_device *dev)
 #else
- (struct wiphy *wiphy, struct wireless_dev *wdev)
+(struct wiphy *wiphy, struct wireless_dev *wdev)
 #endif
 {
 	int ret = 0;
@@ -259,29 +259,29 @@ static int wlan_cfg80211_del_virtual_intf
 }
 
 static int wlan_cfg80211_add_station(struct wiphy *wiphy,
-									 struct net_device *dev, u8 * mac,
-									 struct station_parameters *params)
+		struct net_device *dev, u8 * mac,
+		struct station_parameters *params)
 {
 	int ret = 0;
 	return ret;
 }
 
 static int wlan_cfg80211_del_station(struct wiphy *wiphy,
-									 struct net_device *dev, u8 * mac)
+		struct net_device *dev, u8 * mac)
 {
 	int ret = 0;
 	return ret;
 }
 
 static int wlan_cfg80211_add_mpath(struct wiphy *wiphy, struct net_device *dev,
-								   u8 * dst, u8 * next_hop)
+		u8 * dst, u8 * next_hop)
 {
 	int ret = 0;
 	return ret;
 }
 
 static int wlan_cfg80211_del_mpath(struct wiphy *wiphy, struct net_device *dev,
-								   u8 * dst)
+		u8 * dst)
 {
 	int ret = 0;
 	return ret;
@@ -289,8 +289,8 @@ static int wlan_cfg80211_del_mpath(struct wiphy *wiphy, struct net_device *dev,
 }
 
 static int wlan_cfg80211_join_mesh(struct wiphy *wiphy, struct net_device *dev,
-								   const struct mesh_config *conf,
-								   const struct mesh_setup *setup)
+		const struct mesh_config *conf,
+		const struct mesh_setup *setup)
 {
 
 	int ret = 0;
@@ -305,9 +305,9 @@ static int wlan_cfg80211_leave_mesh(struct wiphy *wiphy, struct net_device *dev)
 
 static int wlan_cfg80211_scan(struct wiphy *wiphy,
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 6, 0))
-							  struct net_device *dev,
+		struct net_device *dev,
 #endif
-							  struct cfg80211_scan_request *request)
+		struct cfg80211_scan_request *request)
 {
 	int ret = 0;
 	return ret;
