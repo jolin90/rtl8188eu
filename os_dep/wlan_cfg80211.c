@@ -133,6 +133,7 @@ static const u32 wlan_cipher_suites[] = {
 #endif
 };
 
+#if 0
 static int wlan_cfg80211_add_key(struct wiphy *wiphy, struct net_device *dev,
 								 u8 key_index, bool pairwise,
 								 const u8 * mac_addr, struct key_params *params)
@@ -312,7 +313,10 @@ static int wlan_cfg80211_scan(struct wiphy *wiphy,
 	return ret;
 }
 
+#endif
+
 static struct cfg80211_ops wlan_cfg80211_ops = {
+#if 0
 	.add_virtual_intf = wlan_cfg80211_add_virtual_intf,
 	.del_virtual_intf = wlan_cfg80211_del_virtual_intf,
 	/*.change_virtual_intf = wlan_cfg80211_change_virtual_intf, */
@@ -343,7 +347,15 @@ static struct cfg80211_ops wlan_cfg80211_ops = {
 	/*.flush_pmksa = wlan_cfg80211_flush_pmksa, */
 	.join_mesh = wlan_cfg80211_join_mesh,
 	.leave_mesh = wlan_cfg80211_leave_mesh,
+#endif
 };
+
+static void wlan_free_wiphy(struct wiphy *wiphy)
+{
+	wiphy_unregister(wiphy);
+	wiphy_free(wiphy);
+	wiphy = NULL;
+}
 
 struct wiphy *wlan_create_wiphy(struct adapter *adapter, struct device *dev)
 {
@@ -351,8 +363,10 @@ struct wiphy *wlan_create_wiphy(struct adapter *adapter, struct device *dev)
 	struct wlan_wiphy_priv *priv;
 
 	wiphy = wiphy_new(&wlan_cfg80211_ops, sizeof(*priv));
-	if (!wiphy)
+	if (!wiphy) {
+		DBG_88E("Couldn't allocate wiphy device\n");
 		return NULL;
+	}
 
 	priv = wiphy_priv(wiphy);
 	priv->adapter = adapter;
@@ -386,8 +400,10 @@ struct wiphy *wlan_create_wiphy(struct adapter *adapter, struct device *dev)
 
 	wiphy->flags &= ~WIPHY_FLAG_PS_ON_BY_DEFAULT;
 
-	if (wiphy_register(wiphy) < 0)
+	if (wiphy_register(wiphy) < 0) {
+		wiphy_free(wiphy);
 		return NULL;
+	}
 
 	return wiphy;
 }
@@ -395,36 +411,30 @@ struct wiphy *wlan_create_wiphy(struct adapter *adapter, struct device *dev)
 int wlan_cfg80211_attach(struct adapter *adapter, struct device *dev)
 {
 	int err = 0;
-	struct net_device *net_device;
-	struct wireless_dev *wdev;
-	struct wlan_wdev_priv *pwdev_priv;
 	struct wiphy *wiphy;
+	struct wireless_dev *wdev;
+	struct net_device *net_device;
 
 	DBG_88E("\n");
-
-	wdev = kzalloc(sizeof(struct wireless_dev), GFP_KERNEL);
-	if (unlikely(!wdev)) {
-		pr_err("Could not allocate wireless device\n");
-		return -ENOMEM;
-	}
 
 	wiphy = wlan_create_wiphy(adapter, dev);
 	if (unlikely(!wiphy)) {
 		pr_err("Could not create wiphy\n");
 		return -ENOMEM;
 	}
-	wdev->wiphy = wiphy;
 
-	pwdev_priv = &adapter->wdev_priv;
-	pwdev_priv->adapter = adapter;
-	pwdev_priv->pwdev = wdev;
-	pwdev_priv->scan_request = NULL;
+	wdev = kzalloc(sizeof(struct wireless_dev), GFP_KERNEL);
+	if (unlikely(!wdev)) {
+		pr_err("Could not allocate wireless device\n");
+		wlan_free_wiphy(wiphy);
+		return -ENOMEM;
+	}
 
 	adapter->wdev = wdev;
-
+	wdev->wiphy = wiphy;
 	wdev->netdev = net_device = adapter->net_device;
 	wdev->iftype = NL80211_IFTYPE_STATION;
-	/*net_device->ieee80211_ptr = wdev;*/
+	net_device->ieee80211_ptr = wdev;
 
 	DBG_88E("\n");
 
@@ -439,11 +449,8 @@ void wlan_cfg80211_detach(struct wireless_dev *wdev)
 
 	wiphy = wdev->wiphy;
 
-	if (wiphy) {
-		wiphy_unregister(wiphy);
-		wiphy_free(wiphy);
-		wiphy = NULL;
-	}
+	if (wiphy)
+		wlan_free_wiphy(wiphy);
 
 	if (wdev) {
 		kfree(wdev);

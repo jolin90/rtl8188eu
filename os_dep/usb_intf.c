@@ -438,12 +438,12 @@ static void rtw_usb_if1_deinit(struct adapter *adapter)
 	if (net_device)
 		unregister_netdev(net_device); /* will call netdev_close() */
 
-	rtl88eu_mon_deinit(adapter->pmondev);
-	rtw_cancel_all_timer(adapter);
-
 #ifdef CONFIG_WLAN_CFG80211
 	wlan_cfg80211_detach(adapter->wdev);
 #endif
+
+	rtl88eu_mon_deinit(adapter->pmondev);
+	rtw_cancel_all_timer(adapter);
 
 	rtw_dev_unload(adapter);
 	DBG_88E("+r871xu_dev_remove, hw_init_completed=%d\n",

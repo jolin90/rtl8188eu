@@ -136,18 +136,18 @@ static inline struct device *dvobj_to_dev(struct dvobj_priv *dvobj)
 
 #ifdef CONFIG_WLAN_CFG80211
 struct adapter;
-struct wlan_wdev_priv;
-
-struct wlan_wdev_priv
-{
-	struct adapter *adapter;
-	struct wireless_dev *pwdev;
-	struct cfg80211_scan_request *scan_request;
-};
 
 struct wlan_wiphy_priv
 {
 	struct adapter *adapter;
+	struct cfg80211_scan_request *scan_request;
+
+#if 0
+	struct ieee80211_supported_band band;
+	struct ieee80211_channel channels[ARRAY_SIZE(prism2_channels)];
+	struct ieee80211_rate rates[ARRAY_SIZE(prism2_rates)];
+#endif
+
 };
 
 #endif
@@ -191,7 +191,6 @@ struct adapter {
 
 #ifdef CONFIG_WLAN_CFG80211
 	struct wireless_dev *wdev;
-	struct wlan_wdev_priv wdev_priv;
 #endif
 };
 
