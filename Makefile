@@ -53,7 +53,7 @@ $(MODULE_NAME)-y :=				\
 		os_dep/usb_ops_linux.o	\
 		os_dep/xmit_linux.o
 
-CONFIG_WLAN_CFG80211 = y
+#CONFIG_WLAN_CFG80211 = y
 
 ifeq ($(CONFIG_WLAN_CFG80211), y)
 $(MODULE_NAME)-y += os_dep/wlan_cfg80211.o
@@ -66,18 +66,6 @@ obj-$(CONFIG_R8188EU)	:= $(MODULE_NAME).o
 ccflags-y += -I$(srctree)/$(src)/include
 ccflags-y += -D__CHECK_ENDIAN__
 ccflags-y += -I$(src)/include
-
-#for debug
-ccflags-y += -DOS_DEP_IOCTL_LINUX
-ccflags-y += -DOS_DEP_OS_INTFS
-ccflags-y += -DHAL_RTL8188E_CMD
-#ccflags-y += -DCORE_RTW_MLME_EXT
-#ccflags-y += -DCORE_RTW_MLME
-#ccflags-y += -DCORE_RTW_CMD
-#ccflags-y += -DCORE_RTW_EFUSE
-#ccflags-y += -DCORE_RTW_IOCTL_SET
-#ccflags-y += -DCORE_RTW_PWRCTRL
-
 
 KSRC ?= "/lib/modules/$(shell uname -r)/build"
 #CROSS_COMPILE := /opt/FriendlyARM/toolschain/4.5.1/bin/arm-linux-

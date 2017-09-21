@@ -121,15 +121,15 @@ int rtw_recv_indicatepkt(struct adapter *adapter,
 		}
 	}
 
-	rcu_read_lock();
-	rcu_dereference(adapter->net_device->rx_handler_data);
-	rcu_read_unlock();
+	/*rcu_read_lock();*/
+	/*rcu_dereference(adapter->net_device->rx_handler_data);*/
+	/*rcu_read_unlock();*/
 
 	skb->ip_summed = CHECKSUM_NONE;
 	skb->dev = adapter->net_device;
 	skb->protocol = eth_type_trans(skb, adapter->net_device);
 
-	netif_rx(skb);
+	netif_rx_ni(skb);
 
 _recv_indicatepkt_end:
 
@@ -139,7 +139,7 @@ _recv_indicatepkt_end:
 	rtw_free_recvframe(precv_frame, pfree_recv_queue);
 
 	RT_TRACE(_module_recv_osdep_c_, _drv_info_,
-		 ("\n rtw_recv_indicatepkt :after netif_rx!!!!\n"));
+		 ("\n rtw_recv_indicatepkt :after netif_rx_ni!!!!\n"));
 
 
 	return _SUCCESS;

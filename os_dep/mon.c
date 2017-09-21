@@ -97,7 +97,7 @@ static void mon_recv_decrypted(struct net_device *dev, const u8 *data,
 
 	skb->ip_summed = CHECKSUM_UNNECESSARY;
 	skb->protocol = eth_type_trans(skb, dev);
-	netif_rx(skb);
+	netif_rx_ni(skb);
 }
 
 static void mon_recv_encrypted(struct net_device *dev, const u8 *data,

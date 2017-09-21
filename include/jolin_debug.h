@@ -1,10 +1,6 @@
 #ifndef _JOLIN_DEBUG_H_
 #define _JOLIN_DEBUG_H_
 
-#ifndef _IEEE80211_C
-#ifndef _RTW_WLAN_UTIL_C_
-#ifndef _RTW_RECV_C_
-
 #undef DBG_88E
 #undef RT_TRACE
 
@@ -21,9 +17,33 @@
 		printk fmt;                          \
 	} while (0)
 
+#if defined _IEEE80211_C        || \
+	defined _RTW_WLAN_UTIL_C_   || \
+	defined _RTW_RECV_C_        || \
+	defined _RTW_XMIT_C_        || \
+	defined _RTW_CMD_C_         || \
+	defined _RTW_MLME_EXT_C_    || \
+	defined _RTL8188E_CMD_C_    || \
+	defined _RTW_IOCTL_SET_C_   || \
+	defined _RTL8188E_PHYCFG_C_ || \
+	defined _OS_INTFS_C_        || \
+	defined _HCI_HAL_INIT_C_    || \
+	defined _RTW_EFUSE_C_       || \
+	defined _IEEE80211_C        || \
+	defined _OS_INTFS_C_        || \
+	defined _RTW_MLME_C_        || \
+	defined _IOCTL_LINUX_C_     || \
+	defined _RTW_STA_MGT_C_     || \
+	defined _RTW_PWRCTRL_C_     || \
+	defined _RTW_SECURITY_C_
+
+#undef DBG_88E
+#undef RT_TRACE
+#define DBG_88E(fmt, args...)
+#define RT_TRACE(_comp, _level, fmt)
 #endif
-#endif
-#endif
+
+
 
 static inline void dump_wlancmds_function(u16 cmdcode, bool start)
 {

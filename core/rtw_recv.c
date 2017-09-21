@@ -1609,7 +1609,7 @@ static int amsdu_to_msdu(struct adapter *adapter, struct recv_frame *recv_frame)
 
 		sub_skb->ip_summed = CHECKSUM_NONE;
 
-		netif_rx(sub_skb);
+		netif_rx_ni(sub_skb);
 	}
 
 exit:
